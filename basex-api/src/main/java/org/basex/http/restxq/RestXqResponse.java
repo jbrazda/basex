@@ -24,10 +24,10 @@ import org.basex.util.http.*;
 /**
  * This class creates a new HTTP response.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
-public final class RestXqResponse extends WebResponse {
+final class RestXqResponse extends WebResponse {
   /** HTTP connection. */
   private final HTTPConnection conn;
 
@@ -42,7 +42,7 @@ public final class RestXqResponse extends WebResponse {
    * Constructor.
    * @param conn HTTP connection
    */
-  public RestXqResponse(final HTTPConnection conn) {
+  RestXqResponse(final HTTPConnection conn) {
     super(conn.context);
     this.conn = conn;
   }
@@ -81,12 +81,12 @@ public final class RestXqResponse extends WebResponse {
       boolean head = true;
 
       // handle special cases
-      if(item != null && item.type == NodeType.ELM) {
+      if(item != null && item.type == NodeType.ELEMENT) {
         final ANode node = (ANode) item;
         if(REST_FORWARD.matches(node)) {
           // server-side forwarding
           final ANode ch = node.childIter().next();
-          if(ch == null || ch.type != NodeType.TXT) throw func.error(NO_VALUE_X, node.name());
+          if(ch == null || ch.type != NodeType.TEXT) throw func.error(NO_VALUE_X, node.name());
           forward = string(ch.string()).trim();
           item = iter.next();
         } else if(REST_RESPONSE.matches(node)) {

@@ -18,7 +18,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class FileWriteTextLines extends FileFn {
@@ -49,7 +49,7 @@ public class FileWriteTextLines extends FileFn {
     try(PrintOutput out = PrintOutput.get(new FileOutputStream(path.toFile(), append))) {
       final Iter iter = exprs[1].iter(qc);
       for(Item item; (item = iter.next()) != null;) {
-        if(!item.type.isStringOrUntyped()) throw typeError(item, AtomType.STR, info);
+        if(!item.type.isStringOrUntyped()) throw typeError(item, AtomType.STRING, info);
 
         final byte[] s = item.string(info);
         out.write(cs == null ? s : string(s).getBytes(cs));

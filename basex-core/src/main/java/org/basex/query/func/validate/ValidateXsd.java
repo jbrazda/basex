@@ -8,18 +8,20 @@ import java.util.Map.*;
 import javax.xml.transform.stream.*;
 import javax.xml.validation.*;
 
+import org.basex.build.xml.*;
 import org.basex.io.*;
 import org.basex.query.*;
 import org.basex.query.value.*;
 import org.basex.query.value.item.*;
 import org.basex.util.*;
 import org.basex.util.options.*;
+import org.w3c.dom.ls.*;
 import org.xml.sax.*;
 
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class ValidateXsd extends ValidateFn {
@@ -74,6 +76,9 @@ public class ValidateXsd extends ValidateFn {
           (SchemaFactory) Reflect.get(Reflect.find(IMPL[OFFSET]));
         // Saxon: use version 1.1
         if(SAXON) sf.setProperty(SAXON_VERSION_URI, IMPL[OFFSET + 2]);
+
+        final LSResourceResolver ls = CatalogWrapper.getLSResourceResolver(qc.context.options);
+        if(ls != null) sf.setResourceResolver(ls);
 
         // assign parser features
         for(final Entry<String, String> entry : options.entrySet()) {

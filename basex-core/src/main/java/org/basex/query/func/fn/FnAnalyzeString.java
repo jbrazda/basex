@@ -13,18 +13,18 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnAnalyzeString extends RegEx {
   /** QName. */
-  private static final QNm Q_ANALYZE = new QNm(FN_PREFIX, "analyze-string-result", FN_URI);
+  private static final QNm Q_ANALYZE = new QNm("analyze-string-result", FN_URI);
   /** QName. */
-  private static final QNm Q_MATCH = new QNm(FN_PREFIX, "match", FN_URI);
+  private static final QNm Q_MATCH = new QNm("match", FN_URI);
   /** QName. */
-  private static final QNm Q_NONMATCH = new QNm(FN_PREFIX, "non-match", FN_URI);
+  private static final QNm Q_NONMATCH = new QNm("non-match", FN_URI);
   /** QName. */
-  private static final QNm Q_MGROUP = new QNm(FN_PREFIX, "group", FN_URI);
+  private static final QNm Q_MGROUP = new QNm("group", FN_URI);
   /** Attribute for the analyze-string-result function. */
   private static final String NR = "nr";
 
@@ -57,7 +57,7 @@ public final class FnAnalyzeString extends RegEx {
   private static int[] match(final Matcher matcher, final String string, final FElem parent,
       final int group) {
 
-    final FElem nd = new FElem(group == 0 ? Q_MATCH : Q_MGROUP);
+    final FElem nd = new FElem(group == 0 ? Q_MATCH : Q_MGROUP).declareNS();
     if(group > 0) nd.add(NR, token(group));
 
     final int start = matcher.start(group), end = matcher.end(group), gc = matcher.groupCount();
@@ -83,6 +83,6 @@ public final class FnAnalyzeString extends RegEx {
    * @param par root node
    */
   private static void nonmatch(final String text, final FElem par) {
-    par.add(new FElem(Q_NONMATCH).add(text));
+    par.add(new FElem(Q_NONMATCH).declareNS().add(text));
   }
 }

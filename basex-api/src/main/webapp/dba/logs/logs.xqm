@@ -1,7 +1,7 @@
 (:~
  : Logging page.
  :
- : @author Christian Grün, BaseX Team 2005-20, BSD License
+ : @author Christian Grün, BaseX Team 2005-21, BSD License
  :)
 module namespace dba = 'dba/logs';
 
@@ -152,6 +152,7 @@ declare
   %rest:query-param('page', '{$page}', '1')
   %rest:query-param('time', '{$time}')
   %output:method('html')
+  %output:html-version('5.0')
   %output:indent('no')
   %rest:single
 function dba:log(

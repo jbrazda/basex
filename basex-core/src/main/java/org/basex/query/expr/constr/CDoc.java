@@ -14,7 +14,7 @@ import org.basex.util.hash.*;
 /**
  * Document fragment.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class CDoc extends CNode {
@@ -27,7 +27,7 @@ public final class CDoc extends CNode {
    */
   public CDoc(final StaticContext sc, final InputInfo info, final boolean computed,
       final Expr expr) {
-    super(sc, info, SeqType.DOC_O, computed, expr);
+    super(sc, info, SeqType.DOCUMENT_NODE_O, computed, expr);
   }
 
   @Override

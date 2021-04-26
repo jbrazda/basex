@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Mixed XQuery tests.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class MixedTest extends SandboxTest {
@@ -261,5 +261,20 @@ public final class MixedTest extends SandboxTest {
     query("(xs:anyURI('b'), 'a', 'a')[. = 'c'] instance of xs:string?", true);
     query("(xs:anyURI('b'), 'a', 'a')[. = 'c'] instance of xs:string+", false);
     query("(xs:anyURI('b'), 'a', 'a')[. = 'c'] instance of xs:string*", true);
+  }
+
+  /** JSON documents, node ids. */
+  public void gh1983() {
+    query("tail(json:parse('{}')/*/ancestor-or-self::node()) instance of element()", true);
+    query("tail(csv:parse('')/*/ancestor-or-self::node()) instance of element()", true);
+  }
+
+  /** fn:json-to-xml, namespaces. */
+  @Test public void gh1997() {
+    execute(new Close());
+    query("db:create('" + NAME + "', analyze-string('a', 'a')/*, '" + NAME + "')");
+    query("db:open('" + NAME + "')/* => namespace-uri()", "http://www.w3.org/2005/xpath-functions");
+    query("db:create('" + NAME + "', json-to-xml('[1]')/*/*, '" + NAME + "')");
+    query("db:open('" + NAME + "')/* => namespace-uri()", "http://www.w3.org/2005/xpath-functions");
   }
 }

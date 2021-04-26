@@ -18,7 +18,7 @@ import org.basex.util.hash.*;
 /**
  * Partial function application.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class PartFunc extends Arr {
@@ -38,7 +38,7 @@ public final class PartFunc extends Arr {
   public PartFunc(final StaticContext sc, final InputInfo info, final Expr expr, final Expr[] args,
       final int[] holes) {
 
-    super(info, SeqType.FUNC_O, ExprList.concat(args, expr));
+    super(info, SeqType.FUNCTION_O, ExprList.concat(args, expr));
     this.sc = sc;
     this.holes = holes;
   }
@@ -57,7 +57,7 @@ public final class PartFunc extends Arr {
 
     final Expr body = body();
     final FuncType ft = body.funcType();
-    if(ft != null && ft != SeqType.FUNC) {
+    if(ft != null && ft != SeqType.FUNCTION) {
       final int nargs = exprs.length + holes.length - 1;
       if(ft.argTypes.length != nargs)
         throw INVARITY_X_X_X.get(info, arguments(nargs), ft.argTypes.length, body);
@@ -80,24 +80,24 @@ public final class PartFunc extends Arr {
     final FuncType ft = func.funcType();
     final Expr[] args = new Expr[nargs];
     final VarScope vs = new VarScope(sc);
-    final Var[] vars = new Var[hl];
+    final Var[] params = new Var[hl];
     int a = -1;
     for(int h = 0; h < hl; h++) {
       while(++a < holes[h]) args[a] = exprs[a - h].value(qc);
-      vars[h] = vs.addNew(func.paramName(holes[h]), null, false, qc, info);
-      args[a] = new VarRef(info, vars[h]);
+      params[h] = vs.addNew(func.paramName(holes[h]), null, false, qc, info);
+      args[a] = new VarRef(info, params[h]);
       final SeqType at = ft.argTypes[a];
-      if(at != null) vars[h].refineType(at, null);
+      if(at != null) params[h].refineType(at, null);
     }
     final int al = args.length;
     while(++a < al) args[a] = exprs[a - hl].value(qc);
 
     final AnnList anns = func.annotations();
     final boolean updating = anns.contains(Annotation.UPDATING);
-    final DynFuncCall ex = new DynFuncCall(info, sc, updating, false, func, args);
+    final DynFuncCall expr = new DynFuncCall(info, sc, updating, false, func, args);
 
-    final FuncType type = FuncType.get(anns, ft.declType, vars);
-    return new FuncItem(sc, anns, null, vars, type, ex, qc.focus, vs.stackSize(), info);
+    final FuncType type = FuncType.get(anns, ft.declType, params);
+    return new FuncItem(sc, anns, null, params, type, expr, qc.focus.copy(), vs.stackSize(), info);
   }
 
   @Override

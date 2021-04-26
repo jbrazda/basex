@@ -17,7 +17,7 @@ import org.basex.util.hash.*;
 /**
  * Update primitive for the {@link Function#_DB_STORE} function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DBStore extends DBUpdate {
@@ -37,9 +37,7 @@ public final class DBStore extends DBUpdate {
   }
 
   @Override
-  public void merge(final Update update) {
-    final DBStore put = (DBStore) update;
-    for(final byte[] path : put.map) map.put(path, put.map.get(path));
+  public void prepare() {
   }
 
   @Override
@@ -58,10 +56,13 @@ public final class DBStore extends DBUpdate {
   }
 
   @Override
-  public int size() {
-    return map.size();
+  public void merge(final Update update) {
+    final DBStore put = (DBStore) update;
+    for(final byte[] path : put.map) map.put(path, put.map.get(path));
   }
 
   @Override
-  public void prepare() { }
+  public int size() {
+    return map.size();
+  }
 }

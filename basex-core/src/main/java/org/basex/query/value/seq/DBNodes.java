@@ -16,7 +16,7 @@ import org.basex.util.list.*;
  * They are used in the GUI and in the {@link Context} class to reference currently opened,
  * marked, and copied database nodes.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DBNodes extends DBNodeSeq {
@@ -41,7 +41,7 @@ public final class DBNodes extends DBNodeSeq {
    * @param pres pre values
    */
   public DBNodes(final Data data, final boolean all, final int... pres) {
-    super(pres, data, all ? NodeType.DOC : NodeType.NOD, all);
+    super(pres, data, all ? NodeType.DOCUMENT_NODE : NodeType.NODE, all);
   }
 
   /**

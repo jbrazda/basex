@@ -16,12 +16,12 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class FnParseJson extends Parse {
   /** Function taking and returning a string. */
-  private static final FuncType STRFUNC = FuncType.get(SeqType.STR_O, SeqType.STR_O);
+  private static final FuncType STRFUNC = FuncType.get(SeqType.STRING_O, SeqType.STRING_O);
 
   @Override
   public Item item(final QueryContext qc, final InputInfo ii) throws QueryException {
@@ -59,12 +59,13 @@ public class FnParseJson extends Parse {
       final JsonConverter conv = JsonConverter.get(opts);
       if(!esc && fallback != null) conv.fallback(string -> {
         try {
-          return Token.string(fallback.invokeItem(qc, info, Str.get(string)).string(info));
+          final Item item = fallback.invoke(qc, info, Str.get(string)).item(qc, info);
+          return Token.string(item.string(info));
         } catch(final QueryException ex) {
           throw new QueryRTException(ex);
         }
       });
-      return conv.convert(json, "");
+      return conv.convert(Token.string(json), "");
     } catch(final QueryRTException ex) {
       throw ex.getCause();
     } catch(final QueryIOException ex) {

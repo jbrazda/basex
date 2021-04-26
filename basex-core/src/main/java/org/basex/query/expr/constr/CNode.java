@@ -13,7 +13,7 @@ import org.basex.util.*;
 /**
  * Node constructor.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class CNode extends Arr {
@@ -84,7 +84,7 @@ public abstract class CNode extends Arr {
 
   @Override
   public final String description() {
-    return Token.string(((NodeType) seqType().type).name) + " constructor";
+    return Strings.concat(((NodeType) seqType().type).qname().local(), " constructor");
   }
 
   /**

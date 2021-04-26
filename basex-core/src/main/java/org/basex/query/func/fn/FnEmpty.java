@@ -1,5 +1,7 @@
 package org.basex.query.func.fn;
 
+import static org.basex.query.func.Function.*;
+
 import org.basex.query.*;
 import org.basex.query.expr.*;
 import org.basex.query.func.*;
@@ -12,7 +14,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class FnEmpty extends StandardFunc {
@@ -47,7 +49,7 @@ public class FnEmpty extends StandardFunc {
    * @throws QueryException query exception
    */
   final Expr opt(final boolean empty, final CompileContext cc) throws QueryException {
-    final Expr expr = exprs[0];
+    Expr expr = exprs[0];
     final SeqType st = expr.seqType();
 
     // ignore non-deterministic expressions (e.g.: empty(error()))
@@ -55,12 +57,22 @@ public class FnEmpty extends StandardFunc {
       if(st.zero()) return Bln.get(empty);
       if(st.oneOrMore()) return Bln.get(!empty);
     }
-
     // rewrite list to union expression
     if(expr instanceof List && expr.seqType().type instanceof NodeType) {
-      exprs[0] = new Union(info, expr.args()).optimize(cc);
+      expr = new Union(info, expr.args()).optimize(cc);
     }
-    return this;
+    // rewrite filter
+    if(expr instanceof Filter) {
+      final Filter filter = (Filter) expr;
+      expr = filter.flattenEbv(filter.root, false, cc);
+      if(expr != filter) return cc.function(empty ? NOT : BOOLEAN, info, expr);
+    }
+    // simplify replicate
+    if(_UTIL_REPLICATE.is(expr)) expr = expr.arg(0);
+    // simplify argument
+    expr = FnCount.simplify(expr, cc);
+
+    return expr != exprs[0] ? cc.function(empty ? EMPTY : EXISTS, info, expr) : this;
   }
 
   @Override

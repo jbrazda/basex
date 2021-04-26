@@ -9,10 +9,10 @@ import org.basex.util.*;
 /**
  * A CSV parser generating parse events similar to a SAX XML parser.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
-final class CsvParser {
+public final class CsvParser {
   /** Input stream. */
   private final TextInput input;
   /** Converter. */
@@ -37,7 +37,7 @@ final class CsvParser {
    * @param opts options
    * @param conv converter
    */
-  private CsvParser(final TextInput input, final CsvParserOptions opts, final CsvConverter conv) {
+  public CsvParser(final TextInput input, final CsvParserOptions opts, final CsvConverter conv) {
     this.input = input;
     this.conv = conv;
     header = opts.get(CsvOptions.HEADER);
@@ -47,23 +47,10 @@ final class CsvParser {
   }
 
   /**
-   * Parses the input string, directs the parse events to the given handler and returns
-   * the resulting value.
-   * @param input input string
-   * @param opts options
-   * @param conv converter
-   * @throws IOException I/O exception
-   */
-  static void parse(final TextInput input, final CsvParserOptions opts, final CsvConverter conv)
-      throws IOException {
-    new CsvParser(input, opts, conv).parse();
-  }
-
-  /**
    * Parses a CSV expression.
    * @throws IOException query I/O exception
    */
-  private void parse() throws IOException {
+  public void parse() throws IOException {
     final TokenBuilder entry = new TokenBuilder();
     boolean quoted = false;
     data = !header;

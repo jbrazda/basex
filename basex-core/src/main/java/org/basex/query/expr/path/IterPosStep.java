@@ -9,13 +9,12 @@ import org.basex.query.value.node.*;
 import org.basex.query.value.seq.*;
 import org.basex.query.var.*;
 import org.basex.util.*;
-import org.basex.util.ft.*;
 import org.basex.util.hash.*;
 
 /**
  * Iterative step expression with one or more simple numeric predicates.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class IterPosStep extends Step {
@@ -71,7 +70,6 @@ public final class IterPosStep extends Step {
         final Value cv = qf.value;
         qf.value = node;
         try {
-          double s = qc.scoring ? 0 : -1;
           final int pl = exprs.length;
           for(int p = 0; p < pl; p++) {
             final Expr pred = exprs[p];
@@ -79,7 +77,6 @@ public final class IterPosStep extends Step {
             if(pos == null) {
               final Item tst = pred.test(qc, info);
               if(tst == null) return false;
-              if(s != -1) s += tst.score();
             } else {
               final long ps = ++cPos[p];
               final int t = pos.test(ps, qc);
@@ -87,7 +84,6 @@ public final class IterPosStep extends Step {
               if(t == 2) skip = true;
             }
           }
-          if(s > 0) node.score(Scoring.avg(s, exprs.length));
         } finally {
           qf.value = cv;
         }

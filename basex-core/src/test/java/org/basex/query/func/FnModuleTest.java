@@ -7,30 +7,41 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.basex.query.ast.*;
 import org.basex.query.expr.*;
 import org.basex.query.expr.constr.*;
+import org.basex.query.expr.path.*;
 import org.basex.query.value.item.*;
 import org.basex.query.value.seq.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * XQuery functions: AST tests.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class FnModuleTest extends QueryPlanTest {
   /** Text file. */
   private static final String TEXT = "src/test/resources/input.xml";
 
+  /** Resets optimizations. */
+  @AfterEach public void init() {
+    inline(false);
+    unroll(false);
+  }
+
   /** Test method. */
   @Test public void abs() {
     final Function func = ABS;
 
     check(func.args(" ()"), "", empty());
-    check("for $i in 1 to 2 return " + func.args(" $i"), "1\n2", type(func, "xs:integer"));
-    check("for $i in (1, 2.0) return " + func.args(" $i"), "1\n2", type(func, "xs:decimal"));
+    check("for $i in (1 to 2)[. != 0] return " + func.args(" $i"),
+        "1\n2", type(func, "xs:integer"));
+    check("for $i in (1, 2.0)[. != 0] return " + func.args(" $i"),
+        "1\n2", type(func, "xs:decimal"));
     check(func.args(" <a>1</a>"), 1, type(func, "xs:double"));
 
-    check("for $i in ([], []) return " + func.args(" $i"), "", type(func, "xs:numeric?"));
+    check("for $i in ([], [1])[. != 0] return " + func.args(" $i"),
+        1, type(func, "xs:numeric?"));
     check("for $i in (1, <a>2</a>) return " + func.args(" $i"), "1\n2", type(func, "xs:numeric?"));
 
     // pre-evaluate empty sequence
@@ -70,6 +81,7 @@ public final class FnModuleTest extends QueryPlanTest {
     error(func.args(" string-length#1", " [ ('a', 'b') ]"), INVPROMOTE_X_X_X);
 
     // no pre-evaluation (higher-order arguments), but type adjustment
+    inline(true);
     check(func.args(" true#0", " []"), true, type(func, "xs:boolean"));
     check(func.args(" count#1", " [1]"), 1, type(func, "xs:integer"));
     check(func.args(" abs#1", " [1]"), 1, type(func, "xs:integer"));
@@ -220,6 +232,8 @@ public final class FnModuleTest extends QueryPlanTest {
     // errors: defer error if not requested; adjust declared sequence type of {@link TypeCheck}
     query("head((1, " + func.args() + "))", 1);
     query("head((1, function() { error() }()))", 1);
+
+    inline(true);
     query("declare function local:e() { error() }; head((1, local:e()))", 1);
     query("declare function local:e() as empty-sequence() { error() }; head((1, local:e()))", 1);
     query("declare %basex:inline(0) function local:f() { error() }; head((1, local:f()))", 1);
@@ -237,6 +251,7 @@ public final class FnModuleTest extends QueryPlanTest {
     check(func.args(" ('a', <a/>)", " function($_ as xs:string) as xs:boolean? { $_ = 'a' }"), "a",
         exists(IterFilter.class));
 
+    inline(true);
     check(func.args(" (<a/>, <b/>)", " boolean#1"), "<a/>\n<b/>", root(List.class));
     check(func.args(" <a/>", " boolean#1"), "<a/>", root(CElem.class));
   }
@@ -257,27 +272,6 @@ public final class FnModuleTest extends QueryPlanTest {
 
     check(func.args(" ()", " ()", " function($a, $b) { $b }"), "", empty());
 
-    // should be unrolled and evaluated at compile time
-    final int limit = StandardFunc.UNROLL_LIMIT;
-    check(func.args(" 2 to " + limit, 1, " function($a, $b) { $a + $b }"), 15,
-        empty(func),
-        exists(Int.class));
-    // should be unrolled but not evaluated at compile time
-    check(func.args(" 2 to " + limit, 1, " function($a, $b) { $b[random:double()] }"), "",
-        empty(func),
-        exists(_RANDOM_DOUBLE));
-    // should not be unrolled
-    check(func.args(" 1 to " + (limit + 1), 0, " function($a, $b) { $a + $b }"), 21,
-        exists(func));
-
-    // type inference
-    check(func.args(" (1, 2)[. = 1]", " ()", " function($r, $a) { $r, $a }"), 1,
-        type(func, "xs:integer*"));
-    check(func.args(" (1, 2)[. = 0]", 1, " function($r, $a) { $r, $a }"), 1,
-        type(func, "xs:integer+"));
-    check(func.args(" (1, 2)[. = 1]", "a", " function($r, $a) { $r, $a }"), "a\n1",
-        type(func, "xs:anyAtomicType+"));
-
     check(func.args(" <a>1</a>", " xs:byte(1)", " function($n, $_) {" +
         " if($n instance of xs:byte ) then xs:short  (1) else" +
         " if($n instance of xs:short) then xs:int    (1) else" +
@@ -287,8 +281,31 @@ public final class FnModuleTest extends QueryPlanTest {
         "}"), 1,
         type(func, "xs:decimal"));
 
+    // type inference
+    inline(true);
+    check(func.args(" (1, 2)[. = 1]", " ()", " function($r, $a) { $r, $a }"), 1,
+        type(func, "xs:integer*"));
+    check(func.args(" (1, 2)[. = 0]", 1, " function($r, $a) { $r, $a }"), 1,
+        type(func, "xs:integer+"));
+    check(func.args(" (1, 2)[. = 1]", "a", " function($r, $a) { $r, $a }"), "a\n1",
+        type(func, "xs:anyAtomicType+"));
+
     check(func.args(" (1, 2)[. = 0]", 1, " function($r as xs:integer, $a) { $r + $r }"), 1,
         type(func, "xs:integer"));
+
+    // should not be unrolled
+    check(func.args(" 1 to 6", 0, " function($a, $b) { $a + $b }"), 21,
+        exists(func));
+
+    // should be unrolled and evaluated at compile time
+    unroll(true);
+    check(func.args(" 2 to 5", 1, " function($a, $b) { $a + $b }"), 15,
+        empty(func),
+        exists(Int.class));
+    // should be unrolled but not evaluated at compile time
+    check(func.args(" 2 to 5", 1, " function($a, $b) { $b[random:double()] }"), "",
+        empty(func),
+        exists(_RANDOM_DOUBLE));
   }
 
   /** Test method. */
@@ -297,18 +314,19 @@ public final class FnModuleTest extends QueryPlanTest {
 
     check(func.args(" ()", " ()", " function($a, $b) { $a }"), "", empty());
 
+    // should not be unrolled
+    check(func.args(" 0 to 5", 10, " function($a, $b) { $a + $b }"), 25,
+        exists(func));
+
     // should be unrolled and evaluated at compile time
-    final int limit = StandardFunc.UNROLL_LIMIT;
-    check(func.args(" 1 to " + (limit - 1), 10, " function($a, $b) { $a + $b }"), 20,
+    unroll(true);
+    check(func.args(" 1 to 4", 10, " function($a, $b) { $a + $b }"), 20,
         empty(func),
         exists(Int.class));
     // should be unrolled but not evaluated at compile time
-    check(func.args(" 1 to " + (limit - 1), 10, " function($a, $b) { $b[random:double()] }"), "",
+    check(func.args(" 1 to 4", 10, " function($a, $b) { $b[random:double()] }"), "",
         empty(func),
         exists(_RANDOM_DOUBLE));
-    // should not be unrolled
-    check(func.args(" 0 to " + limit, 10, " function($a, $b) { $a + $b }"), 25,
-        exists(func));
   }
 
   /** Test method. */
@@ -319,23 +337,22 @@ public final class FnModuleTest extends QueryPlanTest {
     query("sort(" + func.args(" (1 to 2)[. > 0]", " string#1") + ')', "1\n2");
     check(func.args(" ()", " boolean#1"), "", empty());
 
+    inline(true);
     // pre-compute result size
     query("count(" + func.args(" 1 to 10000000000", " string#1") + ')', 10000000000L);
-    check("count(" + func.args(" 1 to 20", " function($a) { $a, $a }") + ')', 40, root(Int.class));
+    check("count(" + func.args(" 1 to 20", " function($a) { $a, $a }") + ')',
+        40, root(Int.class));
 
-    // should be unrolled and evaluated at compile time
+    // rewritten to FLWOR expression
     check(func.args(" 0 to 8", " function($x) { $x + 1 }"),
         "1\n2\n3\n4\n5\n6\n7\n8\n9",
         empty(func),
-        exists(RangeSeq.class));
-    // should be unrolled but not evaluated at compile time
+        root(RangeSeq.class), exists(RangeSeq.class));
     check(func.args(" 1 to 9", " function($x) { $x[random:double()] }"), "",
         empty(func),
-        exists(_RANDOM_DOUBLE));
-
-    // should be rewritten to maps
-    check(func.args(" 0 to 10", " function($x) { $x + 1 }"),
-        "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11",
+        exists(DualMap.class), exists(_RANDOM_DOUBLE));
+    check(func.args(" 0 to 10", " function($x) { $x idiv 2 }"),
+        "0\n0\n1\n1\n2\n2\n3\n3\n4\n4\n5",
         root(DualMap.class));
     check(func.args(" (1 to 2)[. = 2]", " function($a) { $a * $a }"), 4,
         type(DualMap.class, "xs:integer*"));
@@ -528,22 +545,20 @@ public final class FnModuleTest extends QueryPlanTest {
     check(func.args(1), false, empty(func));
     check(func.args(" ()"), true,  empty(func));
 
-    // function is replaced with fn:exists
-    check(func.args(" empty((1, 2)[. = 1])"), true, exists(EXISTS));
-    // function is replaced with fn:empty
-    check(func.args(" exists((1, 2)[. = 1])"), false, exists(EMPTY));
+    check(func.args(" empty((1, 2)[. = 1])"), true, root(Bln.class));
+    check(func.args(" exists((1, 2)[. = 1])"), false, root(Bln.class));
     check(func.args(" <a/>/self::a"), false, exists(EMPTY));
     // function is replaced with fn:boolean
     check(func.args(func.args(" ((1, 2)[. = 1])")), true, exists(BOOLEAN));
 
     // function is replaced with fn:boolean
-    check("for $i in (1, 2) return " + func.args(" $i = $i + 1"),
+    check("for $i in (1, 2)[. != 0] return " + func.args(" $i = $i + 1"),
         "true\ntrue", exists("*[@op != '=']"));
-    check("for $i in (1, 2) return " + func.args(" $i eq $i + 1"),
+    check("for $i in (1, 2)[. != 0] return " + func.args(" $i eq $i + 1"),
         "true\ntrue", exists("*[@op != 'eq']"));
-    check("for $i in (1, 2) return " + func.args(" [$i] eq $i + 1"),
+    check("for $i in (1, 2)[. != 0] return " + func.args(" [$i] eq $i + 1"),
         "true\ntrue", exists("*[@op != 'eq']"));
-    check("for $i in (1, 2) return " + func.args(" $i = ($i, <_>{ $i }</_>)"),
+    check("for $i in (1, 2)[. != 0] return " + func.args(" $i = ($i, <_>{ $i }</_>)"),
         "false\nfalse", exists(func));
   }
 
@@ -557,11 +572,11 @@ public final class FnModuleTest extends QueryPlanTest {
     query(func.args("X"), "NaN");
     query(func.args(" <a>1</a>"), 1);
 
-    check("for $d in (1e0, 2e-1) return " + func.args(" $d"), "1\n0.2", empty(func));
-    check("for $d in (1, 2.34) return " + func.args(" $d"), "1\n2.34", exists(func));
-    check("for $d in (1e0, 2e-1) return $d[" + func.args() + ']', 1, empty(func));
-    check("for $d in (1e0, 2e-1) return $d[" + func.args() + " = 1]", 1, empty(func));
-    check("for $d in (1, 2.34) return $d[" + func.args() + ']', 1, exists(func));
+    check("for $d in (1e0, 2e-1)[. != 0] return " + func.args(" $d"), "1\n0.2", empty(func));
+    check("for $d in (1, 2.34)[. != 0] return " + func.args(" $d"), "1\n2.34", exists(func));
+    check("for $d in (1e0, 2e-1)[. != 0] return $d[" + func.args() + ']', 1, empty(func));
+    check("for $d in (1e0, 2e-1)[. != 0] return $d[" + func.args() + " = 1]", 1, empty(func));
+    check("for $d in (1, 2.34)[. != 0] return $d[" + func.args() + ']', 1, exists(func));
 
     error(func.args(), NOCTX_X);
     error(func.args(" true#0"), FIATOM_X);
@@ -836,7 +851,8 @@ public final class FnModuleTest extends QueryPlanTest {
     check("for $s in (<a/>, <b/>) return " + func.args(" $s"), "\n", exists(func));
     check("for $s in ('a', 'b') return $s[" + func.args() + ']', "a\nb", empty(func));
     check("for $s in ('a', 'b') return $s[" + func.args() + " = 'a']", "a", empty(func));
-    check("for $s in (<a/>, <b/>) return $s[" + func.args() + ']', "", exists(func));
+    check("for $s in (<a/>, <b/>) return $s[" + func.args() + ']', "",
+        empty(func), exists(SingleIterPath.class));
 
     error(func.args(), NOCTX_X);
     error(func.args(" true#0"), FISTRING_X);
@@ -1027,12 +1043,18 @@ public final class FnModuleTest extends QueryPlanTest {
     query(func.args(" (-3, -1, 1, 3)"), 0);
     query(func.args(" (1, 1.1, 1e0)"), 3.1);
 
-    check("for $i in 1 to 2 return " + func.args(" $i"), "1\n2", type(SUM, "xs:integer"));
-    check("for $i in 1 to 2 return " + func.args(" $i", "a"), "1\n2", type(SUM, "xs:integer"));
-    check(func.args(" (1, 2)[. = 1]", " 0.0"), 1, type(SUM, "xs:decimal"));
-    check(func.args(" (1, 2)[. = 1]", "a"), 1, type(SUM, "xs:anyAtomicType"));
-    check(func.args(" (1, 2)[. = 1]", " (1, 2)[. = 1]"), 1, type(SUM, "xs:integer?"));
-    check(func.args(" (1, 2)[. = 1]", " ('a', 'b')[. = 'a']"), 1, type(SUM, "xs:anyAtomicType?"));
+    check("for $i in (1 to 2)[. != 0] return " + func.args(" $i"),
+        "1\n2", type(SUM, "xs:integer"));
+    check("for $i in (1 to 2)[. != 0] return " + func.args(" $i", "a"),
+        "1\n2", type(SUM, "xs:integer"));
+    check(func.args(" (1, 2)[. = 1]", " 0.0"),
+        1, type(SUM, "xs:decimal"));
+    check(func.args(" (1, 2)[. = 1]", "a"),
+        1, type(SUM, "xs:anyAtomicType"));
+    check(func.args(" (1, 2)[. = 1]", " (1, 2)[. = 1]"),
+        1, type(SUM, "xs:integer?"));
+    check(func.args(" (1, 2)[. = 1]", " ('a', 'b')[. = 'a']"),
+        1, type(SUM, "xs:anyAtomicType?"));
   }
 
   /** Test method. */

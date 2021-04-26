@@ -30,7 +30,7 @@ import org.basex.util.*;
  *     <code>{'foo':42, 'bar':()}</code>)
  * </dl>
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class JsonXQueryConverter extends JsonConverter {
@@ -54,7 +54,11 @@ public final class JsonXQueryConverter extends JsonConverter {
   }
 
   @Override
-  public Item finish(final String uri) {
+  void init(final String uri) {
+  }
+
+  @Override
+  public Item finish() {
     final Value value = stack.pop();
     return value.isEmpty() ? Empty.VALUE : (Item) value;
   }

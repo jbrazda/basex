@@ -28,7 +28,7 @@ import org.basex.util.list.*;
 /**
  * This index class retrieves texts and attribute values from the index.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ValueAccess extends IndexAccess {
@@ -79,8 +79,8 @@ public final class ValueAccess extends IndexAccess {
    */
   private ValueAccess(final InputInfo info, final IndexType type, final NameTest test,
       final IndexDb db, final Expr expr, final TokenSet tokens) {
-    super(db, info, test != null ? NodeType.ELM : type == IndexType.TEXT ? NodeType.TXT :
-      NodeType.ATT);
+    super(db, info, test != null ? NodeType.ELEMENT : type == IndexType.TEXT ? NodeType.TEXT :
+      NodeType.ATTRIBUTE);
     this.type = type;
     this.test = test;
     this.expr = expr;
@@ -182,7 +182,7 @@ public final class ValueAccess extends IndexAccess {
       return new DBNodeIter(data) {
         @Override
         public DBNode next() {
-          while(ii.more()) {
+          if(ii.more()) {
             tmp.pre(ii.pre());
             return tmp.finish();
           }
@@ -197,7 +197,7 @@ public final class ValueAccess extends IndexAccess {
 
       @Override
       public DBNode next() {
-        while(ii.more()) {
+        if(ii.more()) {
           final int pre = ii.pre();
           tmp.pre(pre);
           list.add(pre);

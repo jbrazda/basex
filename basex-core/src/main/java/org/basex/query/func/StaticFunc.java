@@ -25,7 +25,7 @@ import org.basex.util.hash.*;
 /**
  * A static user-defined function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class StaticFunc extends StaticDecl implements XQFunction {
@@ -149,7 +149,7 @@ public final class StaticFunc extends StaticDecl implements XQFunction {
   }
 
   @Override
-  public Item invItem(final QueryContext qc, final InputInfo ii, final Value... arg)
+  public Value invokeInternal(final QueryContext qc, final InputInfo ii, final Value[] args)
       throws QueryException {
 
     // reset context and evaluate function
@@ -158,40 +158,11 @@ public final class StaticFunc extends StaticDecl implements XQFunction {
     qf.value = null;
     try {
       final int pl = params.length;
-      for(int p = 0; p < pl; p++) qc.set(params[p], arg[p]);
-      return expr.item(qc, info);
-    } finally {
-      qf.value = cv;
-    }
-  }
-
-  @Override
-  public Value invValue(final QueryContext qc, final InputInfo ii, final Value... arg)
-      throws QueryException {
-
-    // reset context and evaluate function
-    final QueryFocus qf = qc.focus;
-    final Value cv = qf.value;
-    qf.value = null;
-    try {
-      final int pl = params.length;
-      for(int p = 0; p < pl; p++) qc.set(params[p], arg[p]);
+      for(int p = 0; p < pl; p++) qc.set(params[p], args[p]);
       return expr.value(qc);
     } finally {
       qf.value = cv;
     }
-  }
-
-  @Override
-  public Value invokeValue(final QueryContext qc, final InputInfo ii, final Value... args)
-      throws QueryException {
-    return FuncCall.invoke(this, args, false, qc, info);
-  }
-
-  @Override
-  public Item invokeItem(final QueryContext qc, final InputInfo ii, final Value... args)
-      throws QueryException {
-    return (Item) FuncCall.invoke(this, args, true, qc, info);
   }
 
   /**

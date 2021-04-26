@@ -25,7 +25,7 @@ import org.basex.util.options.Options.*;
  * This class serializes items as JSON. The input must conform to the rules
  * defined in the {@link JsonDirectConverter} and {@link JsonAttsConverter} class.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class JsonNodeSerializer extends JsonSerializer {
@@ -67,9 +67,9 @@ public final class JsonNodeSerializer extends JsonSerializer {
 
   @Override
   protected void node(final ANode node) throws IOException {
-    if(node.type == NodeType.DOC || custom) {
+    if(node.type == NodeType.DOCUMENT_NODE || custom) {
       super.node(node);
-    } else if(level == 0 && node.type == NodeType.ELM && eq(JSON, node.name())) {
+    } else if(level == 0 && node.type == NodeType.ELEMENT && eq(JSON, node.name())) {
       final boolean c = custom;
       custom = true;
       super.node(node);
@@ -112,7 +112,7 @@ public final class JsonNodeSerializer extends JsonSerializer {
     } else if(atts && eq(name, NAME)) {
       key = value;
       if(!eq(elem.string(), PAIR)) throw error("<%> found, <pair> expected", elem);
-    } else if(!eq(name, XMLNS) && !startsWith(name, XMLNSC)) {
+    } else if(!eq(name, XMLNS) && !startsWith(name, XMLNS_COLON)) {
       throw error("<%> has invalid attribute \"%\"", elem, name);
     }
   }

@@ -6,7 +6,7 @@ import org.basex.util.options.*;
 /**
  * Full-text index options.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class FtIndexOptions extends Options {
@@ -14,6 +14,8 @@ public class FtIndexOptions extends Options {
   public static final EnumOption<FTMode> MODE = new EnumOption<>("mode", FTMode.ANY);
   /** Option: fuzzy. */
   public static final BooleanOption FUZZY = new BooleanOption("fuzzy", false);
+  /** Option: Levenshtein errors. */
+  public static final NumberOption ERRORS = new NumberOption("errors");
   /** Option: wildcards. */
   public static final BooleanOption WILDCARDS = new BooleanOption("wildcards", false);
   /** Option: ordered. */

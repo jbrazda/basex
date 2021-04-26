@@ -14,7 +14,7 @@ import org.junit.jupiter.api.*;
 /**
  * Tests all function signatures.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class SignatureTest extends SandboxTest {
@@ -55,11 +55,11 @@ public final class SignatureTest extends SandboxTest {
         if(p != 0) qu.append(", ");
         if(in) {
           // test arguments
-          if(fd.params[p].type == AtomType.STR) {
+          if(fd.params[p].type == AtomType.STRING) {
             qu.append((char) (48 + p));
           } else { // any type (skip test)
             qu.append("'").append((char) (65 + p)).append("'");
-            if(SeqType.STR_O.instanceOf(fd.params[p])) any++;
+            if(SeqType.STRING_O.instanceOf(fd.params[p])) any++;
           }
         } else {
           // test wrong number of arguments

@@ -6,16 +6,41 @@ import static org.basex.query.func.Function.*;
 import org.basex.query.ast.*;
 import org.basex.query.expr.*;
 import org.basex.query.expr.constr.*;
+import org.basex.query.expr.gflwor.*;
 import org.basex.query.value.item.*;
 import org.junit.jupiter.api.*;
 
 /**
  * This class tests the functions of the Utility Module.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class UtilModuleTest extends QueryPlanTest {
+  /** Test method. */
+  @Test public void arrayMembers() {
+    final Function func = _UTIL_ARRAY_MEMBERS;
+
+    query(func.args(" []"), "");
+    query(func.args(" [ () ]"), "[()]");
+    query(func.args(" [ 1 ]"), "[1]");
+    query(func.args(" [ 1, 2 ]"), "[1]\n[2]");
+    query(func.args(" [ (1, 2) ]"), "[(1, 2)]");
+    query(func.args(" [ (1, 2), 3 ]"), "[(1, 2)]\n[3]");
+  }
+
+  /** Test method. */
+  @Test public void arrayValues() {
+    final Function func = _UTIL_ARRAY_VALUES;
+
+    query(func.args(" []"), "");
+    query(func.args(" [ () ]"), "");
+    query(func.args(" [ 1 ]"), "1");
+    query(func.args(" [ 1, 2 ]"), "1\n2");
+    query(func.args(" [ (1, 2) ]"), "1\n2");
+    query(func.args(" [ (1, 2), 3 ]"), "1\n2\n3");
+  }
+
   /** Test method. */
   @Test public void chars() {
     final Function func = _UTIL_CHARS;
@@ -53,6 +78,62 @@ public final class UtilModuleTest extends QueryPlanTest {
     query(func.args(1, 1), true);
     query(func.args(1, 1, "ALLNODES"), true);
     error(func.args("(1 to 2)", "(1 to 2)", "X"), INVALIDOPTION_X);
+  }
+
+  /** Test method. */
+  @Test public void duplicates() {
+    final Function func = _UTIL_DUPLICATES;
+
+    query(func.args(1), "");
+    query(func.args(" (1, 2)"), "");
+    query(func.args(" (1, 2, 1)"), 1);
+    query(func.args(" (1, 2, 1, 1)"), 1);
+    query(func.args(" (1, 2, 2, 1)"), "2\n1");
+    query(func.args(" (1, 'a', true())"), "");
+    query(func.args(" 1 to 5000000000"), "");
+    query(func.args(" (1 to 5000000000) ! 1"), 1);
+    query(func.args(" <_>1</_> to 5000000000"), "");
+
+    query(func.args(" (1 to 5) ! <_>1</_>"), 1);
+    query(func.args(" (<a>1</a>, <b>1</b>)"), 1);
+
+    query(func.args(" 'a'", "?lang=de"), "");
+    query(func.args(" ('a', 'a')", "?lang=de"), "a");
+    query(func.args(" ('a', 'a', 'a')", "?lang=de"), "a");
+
+    error(func.args(" (1, true#0)"), FIATOM_X);
+    error(func.args(" (1 to 5) ! true#0"), FIATOM_X);
+
+    // optimizations
+    String seq = "let $seq := (<_>1</_>, 2, <_>1</_>) return ";
+    check(seq + "count($seq)  = count(distinct-values($seq))", false, root(EMPTY), exists(func));
+    check(seq + "count($seq) <= count(distinct-values($seq))", false, root(EMPTY), exists(func));
+    check(seq + "count($seq) <  count(distinct-values($seq))", false, root(Bln.class));
+    check(seq + "count($seq) >= count(distinct-values($seq))", true, root(Bln.class));
+    check(seq + "count($seq) >  count(distinct-values($seq))", true, root(EXISTS), exists(func));
+    check(seq + "count($seq) != count(distinct-values($seq))", true, root(EXISTS), exists(func));
+
+    check(seq + "count(distinct-values($seq))  = count($seq)", false, root(EMPTY), exists(func));
+    check(seq + "count(distinct-values($seq)) <= count($seq)", true, root(Bln.class));
+    check(seq + "count(distinct-values($seq)) <  count($seq)", true, root(EXISTS), exists(func));
+    check(seq + "count(distinct-values($seq)) >= count($seq)", false, root(EMPTY), exists(func));
+    check(seq + "count(distinct-values($seq)) >  count($seq)", false, root(Bln.class));
+    check(seq + "count(distinct-values($seq)) != count($seq)", true, root(EXISTS), exists(func));
+
+    seq = "let $seq := (<_>1</_>, 2, <_>1</_>)[. = 1] return ";
+    check(seq + "count($seq)  = count(distinct-values($seq))", false, root(EMPTY), exists(func));
+    check(seq + "count($seq) <= count(distinct-values($seq))", false, root(EMPTY), exists(func));
+    check(seq + "count($seq) <  count(distinct-values($seq))", false, root(Bln.class));
+    check(seq + "count($seq) >= count(distinct-values($seq))", true, root(Bln.class));
+    check(seq + "count($seq) >  count(distinct-values($seq))", true, root(EXISTS), exists(func));
+    check(seq + "count($seq) != count(distinct-values($seq))", true, root(EXISTS), exists(func));
+
+    check(seq + "count(distinct-values($seq))  = count($seq)", false, root(EMPTY), exists(func));
+    check(seq + "count(distinct-values($seq)) <= count($seq)", true, root(Bln.class));
+    check(seq + "count(distinct-values($seq)) <  count($seq)", true, root(EXISTS), exists(func));
+    check(seq + "count(distinct-values($seq)) >= count($seq)", false, root(EMPTY), exists(func));
+    check(seq + "count(distinct-values($seq)) >  count($seq)", false, root(Bln.class));
+    check(seq + "count(distinct-values($seq)) != count($seq)", true, root(EXISTS), exists(func));
   }
 
   /** Test method. */
@@ -105,8 +186,9 @@ public final class UtilModuleTest extends QueryPlanTest {
     check(func.args(func.args(" (<a/>, <b/>)")), "", empty());
     check(func.args(func.args(" (<a/>, <b/>, <c/>)")), "<a/>", root(CElem.class));
     check(func.args(func.args(" (<a/>, <b/>, <c/>, <d/>)")), "<a/>\n<b/>", root(List.class));
-    check(func.args(func.args(" (1 to 3) ! <a>{. }</a>")), "<a>1</a>", root(HEAD));
-    check(func.args(func.args(" (1 to 4) ! <a>{. }</a>")), "<a>1</a>\n<a>2</a>", root(SUBSEQUENCE));
+    check(func.args(func.args(" (1 to 10) ! <a>{. }</a>")),
+        "<a>1</a>\n<a>2</a>\n<a>3</a>\n<a>4</a>\n<a>5</a>\n<a>6</a>\n<a>7</a>\n<a>8</a>",
+        root(SUBSEQUENCE));
 
     check(func.args(" util:replicate(<a/>, 2)"), "<a/>", root(CElem.class));
     check(func.args(" util:replicate(<a/>, 3)"), "<a/>\n<a/>", root(_UTIL_REPLICATE));
@@ -116,18 +198,38 @@ public final class UtilModuleTest extends QueryPlanTest {
     check(func.args(" (<a/>, <b/>, <c/>)"), "<a/>\n<b/>", root(List.class), empty(_UTIL_INIT));
     check(func.args(" (<a/>, 1 to 2)"), "<a/>\n1", root(List.class), empty(_UTIL_INIT));
 
-    check(func.args(" subsequence((1 to 5) ! <_>{ . }</_>, 1, 1)"),
+    check(func.args(" subsequence((1 to 10) ! <_>{ . }</_>, 1, 1)"),
         "", empty());
-    check(func.args(" subsequence((1 to 5) ! <_>{ . }</_>, 1, 2)"),
+    check(func.args(" subsequence((1 to 10) ! <_>{ . }</_>, 1, 2)"),
         "<_>1</_>", root(HEAD));
-    check(func.args(" subsequence((1 to 5) ! <_>{ . }</_>, 1, 3)"),
+    check(func.args(" subsequence((1 to 10) ! <_>{ . }</_>, 1, 3)"),
         "<_>1</_>\n<_>2</_>", root(SUBSEQUENCE));
-    check(func.args(" subsequence((1 to 5) ! <_>{ . }</_>, 2, 3)"),
+    check(func.args(" subsequence((1 to 10) ! <_>{ . }</_>, 2, 3)"),
         "<_>2</_>\n<_>3</_>", root(SUBSEQUENCE));
-    check(func.args(" subsequence((1 to 5) ! <_>{ . }</_>, 4, 2)"),
+    check(func.args(" subsequence((1 to 10) ! <_>{ . }</_>, 4, 2)"),
         "<_>4</_>", root(_UTIL_ITEM));
-    check(func.args(" subsequence((1 to 5) ! <_>{ . }</_>, 5, 1)"),
+    check(func.args(" subsequence((1 to 10) ! <_>{ . }</_>, 5, 1)"),
         "", empty());
+  }
+
+  /** Test method. */
+  @Test public void intersperse() {
+    final Function func = _UTIL_INTERSPERSE;
+
+    query(func.args(" ()", " ()"), "");
+    query(func.args(" ()", 1), "");
+    query(func.args(1, " ()"), 1);
+    query(func.args(" (1, 2)", " ()"), "1\n2");
+
+    query(func.args(1, "a"), 1);
+    query(func.args(1, " ('a', 'b')"), 1);
+    query(func.args(" (1, 2)", "a"), "1\na\n2");
+    query(func.args(" (1, 2)", " ('a', 'b')"), "1\na\nb\n2");
+
+    check(func.args(1, "a") + " => count()", 1, root(Int.class));
+    check(func.args(" 1[. = <_>1</_>]", "a"), 1, root(If.class));
+    check(func.args(" (1, 2)[. = <_>3</_>]", " 'a'"), "", root(func));
+    check(func.args(" (1, 2)", " 'a'[. = <_/>]"), "1\n2", root(func));
   }
 
   /** Test method. */
@@ -233,6 +335,29 @@ public final class UtilModuleTest extends QueryPlanTest {
   }
 
   /** Test method. */
+  @Test public void mapEntries() {
+    final Function func = _UTIL_MAP_ENTRIES;
+
+    query(func.args(" map {}"), "");
+    query(func.args(" map { 1: 2 }") + "?key", 1);
+    query(func.args(" map { 1: 2 }") + "?value", 2);
+    query(func.args(" map { 1: (2, 3) }") + "?key", 1);
+    query(func.args(" map { 1: (2, 3) }") + "?value", "2\n3");
+    query(func.args(" map { 1: 2, 3: 4 }") + "?key", "1\n3");
+    query(func.args(" map { 1: 2, 3: 4 }") + "?value", "2\n4");
+  }
+
+  /** Test method. */
+  @Test public void mapValues() {
+    final Function func = _UTIL_MAP_VALUES;
+
+    query(func.args(" map {}"), "");
+    query(func.args(" map { 1: 2 }"), 2);
+    query(func.args(" map { 1: (2, 3) }"), "2\n3");
+    query(func.args(" map { 1: 2, 3: 4 }"), "2\n4");
+  }
+
+  /** Test method. */
   @Test public void or() {
     final Function func = _UTIL_OR;
     query(func.args(1, 2), 1);
@@ -333,5 +458,130 @@ public final class UtilModuleTest extends QueryPlanTest {
         "<_/>\n<_/>\n<_/>\n<_/>", count(_UTIL_REPLICATE, 1));
     check("(1,1) ! " + func.args(" .", 2),
         "1\n1\n1\n1", empty(_UTIL_REPLICATE));
+
+    check("(1,1) ! " + func.args(" .", 2),
+        "1\n1\n1\n1", empty(_UTIL_REPLICATE));
+  }
+
+  /** Test method. */
+  @Test public void within() {
+    final Function func = _UTIL_WITHIN;
+
+    // minimum
+    query(func.args(" ()", -1), true);
+    query(func.args(" ()", 0), true);
+    query(func.args(" ()", 1), false);
+
+    query(func.args(9, -1), true);
+    query(func.args(9, 0), true);
+    query(func.args(9, 1), true);
+    query(func.args(9, 2), false);
+
+    query(func.args(" <a/>", -1), true);
+    query(func.args(" <a/>", 0), true);
+    query(func.args(" <a/>", 1), true);
+    query(func.args(" <a/>", 2), false);
+
+    query(func.args(" trace(1)", 1), true);
+
+    query(func.args(" (8, 9)", 1), true);
+    query(func.args(" (8, 9)", 2), true);
+    query(func.args(" (8, 9)", 3), false);
+
+    check(func.args(" (8, 9, 9)[. = 9]", 0), true, root(Bln.class));
+    check(func.args(" (8, 9, 9)[. = 9]", 1), true, root(Bln.class));
+    query(func.args(" (8, 9, 9)[. = 9]", 2), true);
+    query(func.args(" (8, 9, 9)[. = 9]", 3), false);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>1</_>"), true);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>2</_>"), true);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>3</_>"), false);
+
+    // minimum and maximum
+    query(func.args(" ()", 0, 0), true);
+    query(func.args(" ()", 0, 1), true);
+    query(func.args(" ()", 1, 0), false);
+
+    query(func.args(9, 0, 0), false);
+    query(func.args(9, 0, 1), true);
+    query(func.args(9, 0, 1), true);
+    query(func.args(9, 1, 2), true);
+    query(func.args(9, 2, 1), false);
+
+    query(func.args(" <a/>", 0, 0), false);
+    query(func.args(" <a/>", 0, 1), true);
+    query(func.args(" <a/>", 0, 1), true);
+    query(func.args(" <a/>", 1, 2), true);
+    query(func.args(" <a/>", 2, 1), false);
+
+    query(func.args(" trace(1)", 1, 2), true);
+
+    query(func.args(" (8, 9)", 1, 1), false);
+    query(func.args(" (8, 9)", 1, 2), true);
+    query(func.args(" (8, 9)", 2, 2), true);
+    query(func.args(" (8, 9)", 2, 3), true);
+    query(func.args(" (8, 9)", 3, 2), false);
+
+    check(func.args(" (8, 9, 9)[. = 9]", 0, 0), false, root(Bln.class));
+    query(func.args(" (8, 9, 9)[. = 9]", 1, 1), false);
+    query(func.args(" (8, 9, 9)[. = 9]", 1, 2), true);
+    query(func.args(" (8, 9, 9)[. = 9]", 2, 2), true);
+    query(func.args(" (8, 9, 9)[. = 9]", 2, 3), true);
+    check(func.args(" (8, 9, 9)[. = 9]", 3, 2), false, root(Bln.class));
+
+    query(func.args(" (8, 9, 9)[. = 9]", 0, " <_>0</_>"), false);
+    query(func.args(" (8, 9, 9)[. = 9]", 1, " <_>1</_>"), false);
+    query(func.args(" (8, 9, 9)[. = 9]", 1, " <_>2</_>"), true);
+    query(func.args(" (8, 9, 9)[. = 9]", 2, " <_>2</_>"), true);
+    query(func.args(" (8, 9, 9)[. = 9]", 2, " <_>3</_>"), true);
+    query(func.args(" (8, 9, 9)[. = 9]", 3, " <_>2</_>"), false);
+
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>0</_>", 0), false);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>1</_>", 1), false);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>1</_>", 2), true);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>2</_>", 2), true);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>2</_>", 3), true);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>3</_>", 2), false);
+
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>0</_>", " <_>0</_>"), false);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>1</_>", " <_>1</_>"), false);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>1</_>", " <_>2</_>"), true);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>2</_>", " <_>2</_>"), true);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>2</_>", " <_>3</_>"), true);
+    query(func.args(" (8, 9, 9)[. = 9]", " <_>3</_>", " <_>2</_>"), false);
+
+    // simplified arguments
+    check(func.args(" sort(<_/>)", " <_>0</_>"), true, empty(SORT));
+    check(func.args(" reverse(<_/>)", " <_>0</_>"), true, empty(REVERSE));
+    check(func.args(" for $i in 1 to 2 order by $i return $i", " <_>0</_>"),
+        true, empty(GFLWOR.class));
+
+    // rewritings
+    check("count((8, 9, 9)[. >= 9]) < 3", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) < 2.1", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) < 2", false, root(func));
+
+    check("count((8, 9, 9)[. >= 9]) <= 2.1", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) <= 2", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) <= 1.9", false, root(func));
+
+    check("count((8, 9, 9)[. >= 9]) > 1", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) > 1.1", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) > 1.9", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) > 2", false, root(func));
+    check("count((8, 9, 9)[. >= 9]) > 2.1", false, root(func));
+
+    check("count((8, 9, 9)[. >= 9]) >= 1.9", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) >= 2", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) >= 2.1", false, root(func));
+
+    check("count((8, 9, 9)[. >= 9]) = 1", false, root(func));
+    check("count((8, 9, 9)[. >= 9]) = 2", true, root(func));
+    check("count((8, 9, 9)[. >= 9]) = 3", false, root(func));
+
+    check("count((1 to 10)[. < 5]) = 1 to 3", false, root(func));
+    check("count((1 to 10)[. < 5]) = 3 to 5", true, root(func));
+    check("count((1 to 10)[. < 5]) = 5 to 7", false, root(func));
+
+    check("(1 to 2) ! (count((1 to 10)[. < 5]) = .)", "false\nfalse", exists(func));
   }
 }

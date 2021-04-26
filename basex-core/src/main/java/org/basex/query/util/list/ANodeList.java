@@ -15,7 +15,7 @@ import org.basex.util.list.*;
 /**
  * Resizable-array implementation for nodes.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ANodeList extends ObjectList<ANode, ANodeList> {
@@ -57,7 +57,7 @@ public final class ANodeList extends ObjectList<ANode, ANodeList> {
       }
       @Override
       public Value value(final QueryContext qc, final Expr expr) {
-        return ItemSeq.get(list, size, NodeType.NOD.refine(expr));
+        return ItemSeq.get(list, size, NodeType.NODE.refine(expr));
       }
     };
   }

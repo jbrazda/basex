@@ -17,7 +17,7 @@ import org.basex.util.hash.*;
 /**
  * FTContains expression with index access.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FTIndexAccess extends Simple {
@@ -33,7 +33,7 @@ public final class FTIndexAccess extends Simple {
    * @param db index database
    */
   public FTIndexAccess(final InputInfo info, final FTExpr ftexpr, final IndexDb db) {
-    super(info, SeqType.TXT_ZM);
+    super(info, SeqType.TEXT_ZM);
     this.ftexpr = ftexpr;
     this.db = db;
   }

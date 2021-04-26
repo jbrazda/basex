@@ -14,7 +14,7 @@ import org.basex.util.hash.*;
 /**
  * This class defines is an abstract class for full-text expressions.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class FTExpr extends ParseExpr {
@@ -27,7 +27,7 @@ public abstract class FTExpr extends ParseExpr {
    * @param exprs expressions
    */
   FTExpr(final InputInfo info, final FTExpr... exprs) {
-    super(info, SeqType.BLN_O);
+    super(info, SeqType.BOOLEAN_O);
     this.exprs = exprs;
   }
 

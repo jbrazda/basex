@@ -13,7 +13,7 @@ import org.basex.util.hash.*;
 /**
  * Context value.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ContextValue extends Simple {
@@ -26,6 +26,16 @@ public final class ContextValue extends Simple {
    */
   public ContextValue(final InputInfo info) {
     super(info, SeqType.ITEM_ZM);
+  }
+
+  /**
+   * Creates a new, optimized context value expression.
+   * @param cc compilation context
+   * @param ii input info
+   * @return optimized expression
+   */
+  public static Expr get(final CompileContext cc, final InputInfo ii) {
+    return new ContextValue(ii).optimize(cc);
   }
 
   @Override

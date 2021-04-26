@@ -15,14 +15,14 @@ import org.basex.util.options.*;
 /**
  * This class contains constants and system properties which are used all around the project.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Prop {
   /** Project name. */
   public static final String NAME = "BaseX";
   /** Code version (may contain major, minor and optional patch number). */
-  public static final String VERSION = version("9.4.4 RC1");
+  public static final String VERSION = version("9.5.2 beta");
 
   /** Project name. */
   public static final String PROJECT = NAME.toLowerCase(Locale.ENGLISH);

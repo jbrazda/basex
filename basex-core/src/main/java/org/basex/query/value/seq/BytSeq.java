@@ -11,7 +11,7 @@ import org.basex.util.list.*;
 /**
  * Sequence of items of type {@link Int xs:byte}, containing at least two of them.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class BytSeq extends NativeSeq {
@@ -23,7 +23,7 @@ public final class BytSeq extends NativeSeq {
    * @param values bytes
    */
   private BytSeq(final byte[] values) {
-    super(values.length, AtomType.BYT);
+    super(values.length, AtomType.BYTE);
     this.values = values;
   }
 
@@ -60,7 +60,7 @@ public final class BytSeq extends NativeSeq {
    */
   public static Value get(final byte[] values) {
     final int vl = values.length;
-    return vl == 0 ? Empty.VALUE : vl == 1 ? Int.get(values[0], AtomType.BYT) : new BytSeq(values);
+    return vl == 0 ? Empty.VALUE : vl == 1 ? Int.get(values[0], AtomType.BYTE) : new BytSeq(values);
   }
 
   /**

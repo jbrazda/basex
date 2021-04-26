@@ -22,7 +22,7 @@ import org.basex.util.hash.*;
 /**
  * Group of type switch cases.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class TypeswitchGroup extends Single {
@@ -140,7 +140,7 @@ public final class TypeswitchGroup extends Single {
   }
 
   @Override
-  public Expr inline(final InlineContext ic) throws QueryException {
+  public Expr inline(final InlineContext ic) {
     try {
       return super.inline(ic);
     } catch(final QueryException qe) {

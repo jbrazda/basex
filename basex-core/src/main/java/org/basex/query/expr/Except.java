@@ -22,7 +22,7 @@ import org.basex.util.hash.*;
 /**
  * Except expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Except extends Set {
@@ -42,7 +42,7 @@ public final class Except extends Set {
 
     // determine type
     SeqType st = exprs[0].seqType();
-    if(st.zero()) st = SeqType.NOD_ZM;
+    if(st.zero()) st = SeqType.NODE_ZM;
 
     // skip optimizations if operands do not have the correct type
     if(st.type instanceof NodeType) {

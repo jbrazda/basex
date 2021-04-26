@@ -13,7 +13,7 @@ import org.basex.query.value.type.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnOneOrMore extends StandardFunc {
@@ -52,7 +52,7 @@ public final class FnOneOrMore extends StandardFunc {
     if(st.oneOrMore()) return expr;
     if(st.zero()) throw ONEORMORE.get(info);
 
-    exprType.assign(st.with(Occ.ONE_MORE));
+    exprType.assign(st.with(Occ.ONE_OR_MORE));
     data(expr.data());
     return this;
   }

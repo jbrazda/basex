@@ -20,7 +20,7 @@ import org.basex.util.*;
 /**
  * Set expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 abstract class Set extends Arr {
@@ -33,7 +33,7 @@ abstract class Set extends Arr {
    * @param exprs expressions
    */
   Set(final InputInfo info, final Expr[] exprs) {
-    super(info, SeqType.NOD_ZM, exprs);
+    super(info, SeqType.NODE_ZM, exprs);
   }
 
   @Override

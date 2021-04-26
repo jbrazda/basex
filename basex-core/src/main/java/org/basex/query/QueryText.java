@@ -8,7 +8,7 @@ import org.basex.util.*;
  * This class assembles text string and tokens required by the XQuery processor
  * implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public interface QueryText {
@@ -59,6 +59,7 @@ public interface QueryText {
   /** Parser token. */ String ENCODING = "encoding";
   /** Parser token. */ String END = "end";
   /** Parser token. */ String ENTIRE = "entire";
+  /** Parser token. */ String ERRORS = "errors";
   /** Parser token. */ String EVERY = "every";
   /** Parser token. */ String EXACTLY = "exactly";
   /** Parser token. */ String EXCEPT = "except";
@@ -391,7 +392,7 @@ public interface QueryText {
   /** Query Info. */ String INCLUDE_MIN = "include-min";
   /** Query Info. */ String INCLUDE_MAX = "include-max";
   /** Query Info. */ String INF = "inf";
-  /** Query Info. */ String TCL = "tailCall";
+  /** Query Info. */ String TAILCALL = "tailCall";
   /** Query Info. */ String ENTRIES = "entries";
   /** Query Info. */ String PROMOTE = "promote";
   /** Query Info. */ String DATABASE = "database";
@@ -435,6 +436,7 @@ public interface QueryText {
   // MISCELLANEOUS ================================================================================
 
   /** Base token. */ byte[] BASE = token("base");
+  /** Error token. */ byte[] ERROR = token("error");
   /** Language attribute. */ byte[] LANG = token("xml:lang");
 
   /** Serialization. */ byte[] SERIALIZATION_PARAMETERS = token("serialization-parameters");

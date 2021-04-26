@@ -2,6 +2,7 @@ package org.basex.query.expr.constr;
 
 import static org.basex.query.QueryError.*;
 import static org.basex.query.QueryText.*;
+import static org.basex.query.func.Function.*;
 
 import org.basex.query.*;
 import org.basex.query.expr.*;
@@ -16,7 +17,7 @@ import org.basex.util.hash.*;
 /**
  * Map constructor.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class CMap extends Arr {
@@ -33,6 +34,7 @@ public final class CMap extends Arr {
   public Expr optimize(final CompileContext cc) throws QueryException {
     // determine static key type (all keys must be single items)
     final int el = exprs.length;
+    if(el == 2) return cc.function(_MAP_ENTRY, info, exprs);
 
     Type kt = null;
     for(int e = 0; e < el; e += 2) {
@@ -44,7 +46,7 @@ public final class CMap extends Arr {
       }
       kt = kt == null ? type : kt.union(type);
     }
-    if(kt == null) kt = AtomType.AAT;
+    if(kt == null) kt = AtomType.ANY_ATOMIC_TYPE;
 
     // determine static value type
     SeqType dt = null;
@@ -52,7 +54,7 @@ public final class CMap extends Arr {
       final SeqType dst = exprs[e].seqType();
       dt = dt == null ? dst : dt.union(dst);
     }
-    dt = dt != null ? dt.union(SeqType.EMP) : SeqType.ITEM_ZM;
+    dt = dt != null ? dt.union(SeqType.EMPTY_SEQUENCE_Z) : SeqType.ITEM_ZM;
 
     exprType.assign(MapType.get((AtomType) kt, dt));
 

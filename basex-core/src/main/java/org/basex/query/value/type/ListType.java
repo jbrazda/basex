@@ -15,16 +15,16 @@ import org.basex.util.*;
 /**
  * XQuery list types.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public enum ListType implements Type {
   /** NMTOKENS type. */
-  NMT("NMTOKENS", AtomType.NMT),
+  NMTOKENS("NMTOKENS", AtomType.NMTOKEN),
   /** ENTITIES type. */
-  ENT("ENTITIES", AtomType.ENT),
+  ENTITIES("ENTITIES", AtomType.ENTITY),
   /** IDREFS type. */
-  IDR("IDREFS", AtomType.IDR);
+  IDREFS("IDREFS", AtomType.IDREF);
 
   /** Cached enums (faster). */
   private static final ListType[] VALUES = values();
@@ -145,12 +145,12 @@ public enum ListType implements Type {
 
   /**
    * Finds and returns the specified type.
-   * @param type type
+   * @param qname name of type
    * @return type or {@code null}
    */
-  public static ListType find(final QNm type) {
+  public static ListType find(final QNm qname) {
     for(final ListType lt : VALUES) {
-      if(lt.name.eq(type)) return lt;
+      if(lt.name.eq(qname)) return lt;
     }
     return null;
   }

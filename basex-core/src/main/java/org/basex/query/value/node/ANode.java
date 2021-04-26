@@ -17,13 +17,14 @@ import org.basex.util.*;
 /**
  * Abstract node type.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class ANode extends Item {
   /** Node Types. */
   private static final NodeType[] TYPES = {
-    NodeType.DOC, NodeType.ELM, NodeType.TXT, NodeType.ATT, NodeType.COM, NodeType.PI
+    NodeType.DOCUMENT_NODE, NodeType.ELEMENT, NodeType.TEXT, NodeType.ATTRIBUTE,
+    NodeType.COMMENT, NodeType.PROCESSING_INSTRUCTION
   };
   /** Static node counter. */
   private static final AtomicInteger ID = new AtomicInteger();
@@ -56,6 +57,11 @@ public abstract class ANode extends Item {
    * @return string value
    */
   public abstract byte[] string();
+
+  @Override
+  public final boolean comparable(final Item item) {
+    return item.type.isStringOrUntyped();
+  }
 
   @Override
   public final boolean eq(final Item item, final Collation coll, final StaticContext sc,
@@ -91,7 +97,13 @@ public abstract class ANode extends Item {
    * @return item
    */
   public Item atomItem() {
-    return type == NodeType.PI || type == NodeType.COM ? Str.get(string()) : new Atm(string());
+    return type == NodeType.PROCESSING_INSTRUCTION || type == NodeType.COMMENT ? Str.get(string()) :
+      new Atm(string());
+  }
+
+  @Override
+  public boolean ddo() {
+    return true;
   }
 
   @Override
@@ -178,7 +190,7 @@ public abstract class ANode extends Item {
         }
       }
       node = node.parent();
-    } while(node != null && node.type == NodeType.ELM);
+    } while(node != null && node.type == NodeType.ELEMENT);
     if(sc != null) sc.ns.inScope(ns);
     return ns;
   }
@@ -310,7 +322,7 @@ public abstract class ANode extends Item {
   /**
    * Returns a light-weight, low-level ancestor axis iterator.
    * Before nodes are added to the result, they must be finalized via {@link ANode#finish()}.
-   * Overwritten by {@link DBNode#ancestorIter}.
+   * Overwritten by {@link DBNode#ancestorIter()}.
    * @return iterator
    */
   public BasicNodeIter ancestorIter() {
@@ -328,7 +340,7 @@ public abstract class ANode extends Item {
   /**
    * Returns a light-weight ancestor-or-self axis iterator.
    * Before nodes are added to the result, they must be finalized via {@link ANode#finish()}.
-   * Overwritten by {@link DBNode#ancestorOrSelfIter}.
+   * Overwritten by {@link DBNode#ancestorOrSelfIter()}.
    * @return iterator
    */
   public BasicNodeIter ancestorOrSelfIter() {
@@ -390,7 +402,7 @@ public abstract class ANode extends Item {
           ANode node = ANode.this, root = node.parent();
           while(root != null) {
             final BasicNodeIter ir = root.childIter();
-            if(node.type != NodeType.ATT) {
+            if(node.type != NodeType.ATTRIBUTE) {
               for(final ANode nd : ir) {
                 if(nd.is(node)) break;
               }
@@ -464,7 +476,7 @@ public abstract class ANode extends Item {
           final ANodeList list = new ANodeList();
           ANode node = ANode.this, root = node.parent();
           while(root != null) {
-            if(node.type != NodeType.ATT) {
+            if(node.type != NodeType.ATTRIBUTE) {
               final ANodeList tmp = new ANodeList();
               for(final ANode c : root.childIter()) {
                 if(c.is(node)) break;
@@ -496,7 +508,7 @@ public abstract class ANode extends Item {
       @Override
       public ANode next() {
         if(iter == null) {
-          if(type == NodeType.ATT) return null;
+          if(type == NodeType.ATTRIBUTE) return null;
           final ANode root = parent();
           if(root == null) return null;
 
@@ -557,12 +569,12 @@ public abstract class ANode extends Item {
    */
   public static int kind(final NodeType type) {
     switch(type) {
-      case DOC: return Data.DOC;
-      case ELM: return Data.ELEM;
-      case TXT: return Data.TEXT;
-      case ATT: return Data.ATTR;
-      case COM: return Data.COMM;
-      case PI : return Data.PI;
+      case DOCUMENT_NODE: return Data.DOC;
+      case ELEMENT: return Data.ELEM;
+      case TEXT: return Data.TEXT;
+      case ATTRIBUTE: return Data.ATTR;
+      case COMMENT: return Data.COMM;
+      case PROCESSING_INSTRUCTION : return Data.PI;
       default : return -1;
     }
   }

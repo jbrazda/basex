@@ -11,7 +11,7 @@ import org.basex.util.*;
 /**
  * Base class for all update primitives that operate on a specific node.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 public abstract class NodeUpdate extends DataUpdate {
@@ -41,11 +41,11 @@ public abstract class NodeUpdate extends DataUpdate {
   /**
    * Prepares this update primitive before execution. This includes e.g. the
    * preparation of insertion sequences.
-   * @param tmp temporary database
+   * @param memData temporary data instance
    * @param qc query context
    * @throws QueryException query exception
    */
-  public abstract void prepare(MemData tmp, QueryContext qc) throws QueryException;
+  public abstract void prepare(MemData memData, QueryContext qc) throws QueryException;
 
   /**
    * Updates the name pool, which is used to find duplicate attributes

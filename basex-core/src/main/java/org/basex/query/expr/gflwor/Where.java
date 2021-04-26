@@ -16,7 +16,7 @@ import org.basex.util.hash.*;
 /**
  * GFLWOR {@code where} clause, filtering tuples not satisfying the predicate.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class Where extends Clause {
@@ -29,7 +29,7 @@ public final class Where extends Clause {
    * @param info input info
    */
   public Where(final Expr expr, final InputInfo info) {
-    super(info, SeqType.BLN_O);
+    super(info, SeqType.BOOLEAN_O);
     this.expr = expr;
   }
 

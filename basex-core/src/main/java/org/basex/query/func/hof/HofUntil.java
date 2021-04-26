@@ -10,7 +10,7 @@ import org.basex.query.value.type.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class HofUntil extends StandardFunc {
@@ -19,9 +19,8 @@ public final class HofUntil extends StandardFunc {
     final FItem pred = checkArity(exprs[0], 1, qc), func = checkArity(exprs[1], 1, qc);
     Value value = exprs[2].value(qc);
 
-    while(!toBoolean(pred.invokeItem(qc, info, value))) {
-      qc.checkStop();
-      value = func.invokeValue(qc, info, value);
+    while(!toBoolean(pred.invoke(qc, info, value).item(qc, info))) {
+      value = func.invoke(qc, info, value);
     }
     return value;
   }

@@ -10,7 +10,7 @@ import org.basex.query.value.item.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ArrayFoldLeft extends ArrayFn {
@@ -19,12 +19,16 @@ public final class ArrayFoldLeft extends ArrayFn {
     final XQArray array = toArray(exprs[0], qc);
     Value result = exprs[1].value(qc);
     final FItem func = checkArity(exprs[2], 2, qc);
-    for(final Value value : array.members()) result = func.invokeValue(qc, info, result, value);
+
+    for(final Value value : array.members()) result = func.invoke(qc, info, result, value);
     return result;
   }
 
   @Override
   protected Expr opt(final CompileContext cc) throws QueryException {
+    final Expr expr1 = exprs[0], expr2 = exprs[1];
+    if(expr1 == XQArray.empty()) return expr2;
+
     FnFoldLeft.opt(this, cc, true, true);
     return this;
   }

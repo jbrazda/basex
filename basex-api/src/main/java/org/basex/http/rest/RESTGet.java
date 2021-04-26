@@ -13,7 +13,7 @@ import org.basex.util.*;
 /**
  * This class processes GET requests sent to the REST server.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class RESTGet {
@@ -38,7 +38,8 @@ final class RESTGet {
       final String[] values = param.getValue();
 
       if(Strings.eqic(key, COMMAND, QUERY, RUN)) {
-        if(op != null || values.length > 1) throw HTTPCode.ONEOP.get();
+        if(op != null || values.length > 1)
+          throw HTTPCode.MULTIPLE_OPS_X.get(String.join(", ", values));
         op = key;
         input = values[0];
       } else if(key.equalsIgnoreCase(CONTEXT)) {

@@ -16,7 +16,7 @@ import org.basex.util.hash.*;
 /**
  * Function call for user-defined functions.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class StaticFuncCall extends FuncCall {
@@ -163,7 +163,7 @@ public final class StaticFuncCall extends FuncCall {
 
   @Override
   public void plan(final QueryPlan plan) {
-    plan.add(plan.create(this, NAME, name.string(), TCL, tco), exprs);
+    plan.add(plan.create(this, NAME, name.string(), TAILCALL, tco), exprs);
   }
 
   @Override

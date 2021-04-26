@@ -20,7 +20,7 @@ import org.basex.util.options.*;
 /**
  * This class parses options specified in function arguments.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FuncOptions {
@@ -52,7 +52,7 @@ public final class FuncOptions {
    * @param root name of root node (can be {@code null})
    * @param info input info
    */
-  private FuncOptions(final QNm root, final InputInfo info) {
+  public FuncOptions(final QNm root, final InputInfo info) {
     test = root == null ? null : new NameTest(root);
     this.root = root;
     this.info = info;
@@ -121,7 +121,7 @@ public final class FuncOptions {
     final TokenBuilder tb = new TokenBuilder();
     // interpret options
     for(final ANode child : node.childIter()) {
-      if(child.type != NodeType.ELM) continue;
+      if(child.type != NodeType.ELEMENT) continue;
 
       // ignore elements in other namespace
       final QNm qname = child.qname();
@@ -192,7 +192,7 @@ public final class FuncOptions {
    */
   private static boolean hasElements(final ANode node) {
     for(final ANode nd : node.childIter()) {
-      if(nd.type == NodeType.ELM) return true;
+      if(nd.type == NodeType.ELEMENT) return true;
     }
     return false;
   }

@@ -9,18 +9,18 @@ import org.basex.util.*;
 /**
  * Query job specification.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class QueryJobSpec {
   /** Variable bindings. */
-  public final HashMap<String, Value> bindings;
+  final HashMap<String, Value> bindings;
   /** Options. */
-  public final JobsOptions options;
+  final JobsOptions options;
   /** Query. */
-  public final String query;
+  final String query;
   /** Simple query without URI. */
-  public final boolean simple;
+  final boolean simple;
 
   /**
    * Constructor.

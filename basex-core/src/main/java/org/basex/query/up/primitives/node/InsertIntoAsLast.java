@@ -11,7 +11,7 @@ import org.basex.util.*;
 /**
  * Insert into as last primitive.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 public final class InsertIntoAsLast extends NodeCopy {
@@ -40,5 +40,6 @@ public final class InsertIntoAsLast extends NodeCopy {
   }
 
   @Override
-  public void update(final NamePool pool) { }
+  public void update(final NamePool pool) {
+  }
 }

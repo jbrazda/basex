@@ -4,6 +4,7 @@ import static org.basex.query.QueryText.*;
 
 import org.basex.query.*;
 import org.basex.query.CompileContext.*;
+import org.basex.query.func.*;
 import org.basex.query.value.*;
 import org.basex.query.value.item.*;
 import org.basex.query.value.seq.*;
@@ -15,7 +16,7 @@ import org.basex.util.hash.*;
 /**
  * Arithmetic expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Arith extends Arr {
@@ -30,7 +31,7 @@ public final class Arith extends Arr {
    * @param calc calculation operator
    */
   public Arith(final InputInfo info, final Expr expr1, final Expr expr2, final Calc calc) {
-    super(info, SeqType.AAT_ZO, expr1, expr2);
+    super(info, SeqType.ANY_ATOMIC_TYPE_ZO, expr1, expr2);
     this.calc = calc;
   }
 
@@ -56,9 +57,18 @@ public final class Arith extends Arr {
 
     final Type type = calc.type(type1, type2);
     final boolean noarray = !st1.mayBeArray() && !st2.mayBeArray();
-    exprType.assign(type, noarray && st1.oneOrMore() && st2.oneOrMore() ? Occ.ONE : Occ.ZERO_ONE);
+    final boolean one = noarray && st1.oneOrMore() && st2.oneOrMore();
+    exprType.assign(type, one ? Occ.EXACTLY_ONE : Occ.ZERO_OR_ONE);
 
     Expr expr = emptyExpr();
+    // 0 - $x  ->  -$x
+    if(expr == this && expr1 == Int.ZERO && calc == Calc.MINUS) {
+      expr = new Unary(info, expr2, true).optimize(cc);
+    }
+    // count($n/@*) + count($n/*)  ->  count(($n/@*, $n/*))
+    if(expr == this && Function.COUNT.is(expr1) && calc == Calc.PLUS && Function.COUNT.is(expr2)) {
+      expr = cc.function(Function.COUNT, info, List.get(cc, info, expr1.arg(0), expr2.arg(0)));
+    }
     if(expr == this && nums && noarray && st1.one() && st2.one()) {
       // example: number($a) + 0  ->  number($a)
       final Expr ex = calc.optimize(expr1, expr2, info, cc);
@@ -79,8 +89,8 @@ public final class Arith extends Arr {
           }
         } else if(acalc == calc.invert() && arg2.equals(expr2)) {
           // E + INT - INT  ->  E
-          expr = arg1.seqType().instanceOf(SeqType.NUM_O) ? arg1 :
-            new Cast(cc.sc(), info, arg1, SeqType.NUM_O).optimize(cc);
+          expr = arg1.seqType().instanceOf(SeqType.NUMERIC_O) ? arg1 :
+            new Cast(cc.sc(), info, arg1, SeqType.NUMERIC_O).optimize(cc);
         }
       }
     }

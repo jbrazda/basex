@@ -11,7 +11,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnAbs extends StandardFunc {
@@ -27,8 +27,10 @@ public final class FnAbs extends StandardFunc {
     if(expr != this) return expr;
 
     Type type = exprs[0].seqType().type;
-    if(type.isUntyped()) type = AtomType.DBL;
-    if(type.isNumber()) exprType.assign(type.instanceOf(AtomType.ITR) ? AtomType.ITR : type);
+    if(type.isUntyped()) type = AtomType.DOUBLE;
+    if(type.isNumber()) {
+      exprType.assign(type.instanceOf(AtomType.INTEGER) ? AtomType.INTEGER : type);
+    }
     return this;
   }
 }

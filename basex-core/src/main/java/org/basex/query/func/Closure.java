@@ -25,7 +25,7 @@ import org.basex.util.hash.*;
 /**
  * Inline function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class Closure extends Single implements Scope, XQFunctionExpr {
@@ -78,7 +78,7 @@ public final class Closure extends Single implements Scope, XQFunctionExpr {
    */
   Closure(final InputInfo info, final QNm name, final SeqType declType, final Var[] params,
       final Expr expr, final AnnList anns, final Map<Var, Expr> global, final VarScope vs) {
-    super(info, expr, SeqType.FUNC_O);
+    super(info, expr, SeqType.FUNCTION_O);
     this.name = name;
     this.params = params;
     this.declType = declType == null || declType.eq(SeqType.ITEM_ZM) ? null : declType;
@@ -104,7 +104,8 @@ public final class Closure extends Single implements Scope, XQFunctionExpr {
 
   @Override
   public FuncType funcType() {
-    return FuncType.get(anns, declType, params);
+    final FuncType type = super.funcType();
+    return type != null ? type : FuncType.get(anns, declType, params);
   }
 
   @Override
@@ -173,7 +174,7 @@ public final class Closure extends Single implements Scope, XQFunctionExpr {
               final Var var2 = cc.copy(expr2.getKey(), null);
               if(add == null) add = new HashMap<>();
               add.put(var2, expr2.getValue());
-              expr2.setValue(new VarRef(cl.info, var2));
+              expr2.setValue(new VarRef(cl.info, var2).optimize(cc));
             }
             inline = cl;
           }

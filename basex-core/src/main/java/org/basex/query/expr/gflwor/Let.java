@@ -19,7 +19,7 @@ import org.basex.util.hash.*;
 /**
  * FLWOR {@code let} clause, binding an expression to a variable.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class Let extends ForLet {
@@ -39,28 +39,29 @@ public final class Let extends ForLet {
    * @param scoring scoring flag
    */
   public Let(final Var var, final Expr expr, final boolean scoring) {
-    super(var.info, scoring ? SeqType.DBL_O : SeqType.ITEM_ZM, var, expr, scoring, var);
+    super(var.info, scoring ? SeqType.DOUBLE_O : SeqType.ITEM_ZM, var, expr, scoring, var);
   }
 
   /**
    * Creates a let expression from a for loop over a single item.
    * @param fr for loop
+   * @param cc compilation context
    * @return let binding
+   * @throws QueryException query exception
    */
-  static Let fromFor(final For fr) {
-    final Let lt = new Let(fr.var, fr.expr);
-    lt.adoptType(fr.expr);
-    return lt;
+  static Let fromFor(final For fr, final CompileContext cc) throws QueryException {
+    return new Let(fr.var, fr.expr).optimize(cc);
   }
 
   /**
    * Creates a let binding for the score variable of a for clause.
    * @param fr for clause
+   * @param cc compilation context
    * @return let binding for the score variable
+   * @throws QueryException query exception
    */
-  static Let fromForScore(final For fr) {
-    final Expr varRef = new VarRef(fr.info, fr.var);
-    return new Let(fr.score, varRef, true);
+  static Let fromForScore(final For fr, final CompileContext cc) throws QueryException {
+    return new Let(fr.score, new VarRef(fr.info, fr.var).optimize(cc), true).optimize(cc);
   }
 
   @Override

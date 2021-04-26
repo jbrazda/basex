@@ -1,7 +1,5 @@
 package org.basex.query.func.fn;
 
-import static org.basex.util.Token.*;
-
 import org.basex.query.*;
 import org.basex.query.expr.*;
 import org.basex.query.func.*;
@@ -13,18 +11,18 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnStringJoin extends StandardFunc {
   @Override
   public Str item(final QueryContext qc, final InputInfo ii) throws QueryException {
     final Iter iter = exprs[0].atomIter(qc, info);
-    final byte[] token = exprs.length == 2 ? toToken(exprs[1], qc) : EMPTY;
+    final byte[] token = exprs.length == 2 ? toToken(exprs[1], qc) : Token.EMPTY;
 
     // no results: empty string
     Item item = iter.next();
-    if(item == null) return Str.ZERO;
+    if(item == null) return Str.EMPTY;
 
     // single result
     final byte[] first = item.string(info);
@@ -40,7 +38,8 @@ public final class FnStringJoin extends StandardFunc {
 
   @Override
   protected Expr opt(final CompileContext cc) throws QueryException {
-    final SeqType st1 = exprs[0].seqType(), st2 = (exprs.length > 1 ? exprs[1] : Str.WC).seqType();
+    final SeqType st1 = exprs[0].seqType();
+    final SeqType st2 = (exprs.length > 1 ? exprs[1] : Str.EMPTY).seqType();
     return (st1.zero() || st1.one() && st1.type.isStringOrUntyped()) &&
         st2.type.isStringOrUntyped() ? cc.function(Function.STRING, info, exprs[0]) : this;
   }

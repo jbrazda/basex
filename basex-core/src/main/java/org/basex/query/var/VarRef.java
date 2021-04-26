@@ -12,7 +12,7 @@ import org.basex.util.hash.*;
 /**
  * Local Variable Reference expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  * @author Leo Woerteler
  */
@@ -36,7 +36,7 @@ public final class VarRef extends ParseExpr {
   }
 
   @Override
-  public ParseExpr optimize(final CompileContext cc) {
+  public VarRef optimize(final CompileContext cc) {
     exprType.assign(var.seqType(), var.size());
     return this;
   }

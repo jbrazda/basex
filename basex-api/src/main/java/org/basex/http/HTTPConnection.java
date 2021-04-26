@@ -24,7 +24,7 @@ import org.basex.util.http.*;
 /**
  * Single HTTP connection.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class HTTPConnection implements ClientInfo {
@@ -103,21 +103,22 @@ public final class HTTPConnection implements ClientInfo {
   }
 
   /**
-   * Returns the content type of a request, or an empty string.
+   * Returns the content type of a request as media type.
    * @return content type
    */
-  public MediaType contentType() {
+  public MediaType mediaType() {
     return mediaType(request);
   }
 
   /**
-   * Initializes the output. Sets the expected encoding and content type.
+   * Initializes the output and assigns the character encoding and content type.
    */
   public void initResponse() {
-    final SerializerOptions opts = sopts();
-    final String encoding = opts.get(SerializerOptions.ENCODING);
-    final MediaType mt = new MediaType(mediaType(opts) + "; " + CHARSET + '=' + encoding);
-    response.setCharacterEncoding(encoding);
+    final SerializerOptions sopts = sopts();
+    final MediaType mt = mediaType(sopts);
+    final HashMap<String, String> params = mt.parameters();
+    params.putIfAbsent(CHARSET, sopts.get(SerializerOptions.ENCODING));
+    response.setCharacterEncoding(params.get(CHARSET));
     response.setContentType(mt.toString());
   }
 
@@ -350,13 +351,26 @@ public final class HTTPConnection implements ClientInfo {
   }
 
   /**
-   * Returns the content type of a request, or an empty string.
+   * Returns the content type of a request as media type.
    * @param request servlet request
    * @return content type
    */
   public static MediaType mediaType(final HttpServletRequest request) {
     final String ct = request.getContentType();
-    return new MediaType(ct == null ? "" : ct);
+    return ct == null ? MediaType.ALL_ALL : new MediaType(ct);
+  }
+
+  /**
+   * Returns the content type of a request, or an empty string.
+   * @param request servlet request
+   * @return content type
+   */
+  public static String remoteAddress(final HttpServletRequest request) {
+    for(final String header : FORWARDING_HEADERS) {
+      final String addr = request.getHeader(header);
+      if (addr != null && !addr.isEmpty() && !"unknown".equalsIgnoreCase(addr)) return addr;
+    }
+    return request.getRemoteAddr();
   }
 
   // PRIVATE METHODS ==============================================================================
@@ -465,11 +479,7 @@ public final class HTTPConnection implements ClientInfo {
    * @return client address
    */
   private String getRemoteAddr() {
-    for(final String header : FORWARDING_HEADERS) {
-      final String addr = request.getHeader(header);
-      if (addr != null && !addr.isEmpty() && !"unknown".equalsIgnoreCase(addr)) return addr;
-    }
-    return request.getRemoteAddr();
+    return remoteAddress(request);
   }
 
   /**

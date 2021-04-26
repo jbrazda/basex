@@ -14,7 +14,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnCodepointsToString extends StandardFunc {
@@ -41,7 +41,7 @@ public final class FnCodepointsToString extends StandardFunc {
 
   @Override
   protected Expr opt(final CompileContext cc) {
-    singleInt = exprs[0].seqType().instanceOf(SeqType.ITR_O);
+    singleInt = exprs[0].seqType().instanceOf(SeqType.INTEGER_O);
     return this;
   }
 

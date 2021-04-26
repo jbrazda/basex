@@ -8,7 +8,7 @@ import org.basex.util.*;
 /**
  * Untyped atomic item ({@code xs:untypedAtomic}).
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Atm extends Item {
@@ -20,7 +20,7 @@ public final class Atm extends Item {
    * @param value value
    */
   public Atm(final byte[] value) {
-    super(AtomType.ATM);
+    super(AtomType.UNTYPED_ATOMIC);
     this.value = value;
   }
 
@@ -40,6 +40,11 @@ public final class Atm extends Item {
   @Override
   public boolean bool(final InputInfo ii) {
     return value.length != 0;
+  }
+
+  @Override
+  public boolean comparable(final Item item) {
+    return item.type.isStringOrUntyped();
   }
 
   @Override

@@ -15,7 +15,7 @@ import org.basex.util.*;
 /**
  * Empty sequence.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Empty extends Item {
@@ -96,7 +96,7 @@ public final class Empty extends Item {
 
   @Override
   public SeqType seqType() {
-    return SeqType.EMP;
+    return SeqType.EMPTY_SEQUENCE_Z;
   }
 
   @Override

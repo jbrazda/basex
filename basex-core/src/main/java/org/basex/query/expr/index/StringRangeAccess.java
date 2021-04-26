@@ -22,7 +22,7 @@ import org.basex.util.list.*;
 /**
  * This index class retrieves string ranges from a value index.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class StringRangeAccess extends IndexAccess {
@@ -36,7 +36,7 @@ public final class StringRangeAccess extends IndexAccess {
    * @param db index database
    */
   public StringRangeAccess(final InputInfo info, final StringRange index, final IndexDb db) {
-    super(db, info, index.type() == IndexType.TEXT ? NodeType.TXT : NodeType.ATT);
+    super(db, info, index.type() == IndexType.TEXT ? NodeType.TEXT : NodeType.ATTRIBUTE);
     this.index = index;
   }
 

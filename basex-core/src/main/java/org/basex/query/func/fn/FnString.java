@@ -13,15 +13,15 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnString extends ContextFn {
   @Override
   public Item item(final QueryContext qc, final InputInfo ii) throws QueryException {
     final Item item = ctxArg(0, qc).item(qc, info);
-    if(item == Empty.VALUE) return Str.ZERO;
-    if(item.type == AtomType.STR) return item;
+    if(item == Empty.VALUE) return Str.EMPTY;
+    if(item.type == AtomType.STRING) return item;
 
     if(item instanceof FItem) throw FISTRING_X.get(info, item.type);
     return Str.get(item.string(info));
@@ -34,27 +34,26 @@ public final class FnString extends ContextFn {
 
     final boolean context = contextAccess();
     final Expr expr = context ? cc.qc.focus.value : exprs[0];
-    if(expr != null && expr.seqType().eq(SeqType.STR_O)) {
+    if(expr != null && expr.seqType().eq(SeqType.STRING_O)) {
       // string('x')  ->  'x'
       // $string[string() = 'a']  ->  $string[. = 'a']
-      return context && cc.nestedFocus() ? new ContextValue(info).optimize(cc) : expr;
+      return context && cc.nestedFocus() ? ContextValue.get(cc, info) : expr;
     }
     return this;
   }
 
   @Override
   public Expr simplifyFor(final Simplify mode, final CompileContext cc) throws QueryException {
-    final boolean context = contextAccess();
-    final Expr expr = context ? cc.qc.focus.value : exprs[0];
-    if(mode == Simplify.STRING && expr != null) {
-      final SeqType st = expr.seqType();
-      if(st.one() && st.type.isStringOrUntyped()) {
-        // string(<a>1</a>) = '1'  ->  <a>1</a> = '1'
-        if(!context) return cc.simplify(this, exprs[0]);
-        // $node[string() = 'x']  ->  $node[. = 'x']
-        if(cc.nestedFocus()) return cc.simplify(this, new ContextValue(info).optimize(cc));
-      }
+    Expr expr = null;
+    final Expr expr1 = contextAccess() ? ContextValue.get(cc, info) : exprs[0];
+    final SeqType st1 = expr1.seqType();
+    if(mode == Simplify.STRING && st1.type.isStringOrUntyped() && st1.one()) {
+      // $node[string() = 'x']  ->  $node[. = 'x']
+      expr = expr1;
+    } else if(mode == Simplify.EBV || mode == Simplify.PREDICATE) {
+      // boolean(string($node))  ->  boolean($node/descendant::text())
+      expr = simplifyEbv(expr1, cc);
     }
-    return super.simplifyFor(mode, cc);
+    return expr != null ? cc.simplify(this, expr) : super.simplifyFor(mode, cc);
   }
 }

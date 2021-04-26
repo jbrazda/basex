@@ -25,7 +25,7 @@ import org.eclipse.jetty.websocket.api.*;
 /**
  * This class defines an abstract WebSocket. It inherits the Jetty WebSocket adapter.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Johannes Finckh
  */
 public final class WebSocket extends WebSocketAdapter implements ClientInfo {
@@ -50,7 +50,7 @@ public final class WebSocket extends WebSocketAdapter implements ClientInfo {
    * Constructor.
    * @param request request
    */
-  WebSocket(final HttpServletRequest request) {
+  private WebSocket(final HttpServletRequest request) {
     this.request = request;
 
     final String pi = request.getPathInfo();
@@ -134,8 +134,7 @@ public final class WebSocket extends WebSocketAdapter implements ClientInfo {
 
   @Override
   public String clientAddress() {
-    final Session ws = getSession();
-    return ws != null ? ws.getRemoteAddress().toString() : null;
+    return HTTPConnection.remoteAddress(request);
   }
 
   @Override

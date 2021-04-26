@@ -13,7 +13,7 @@ import org.basex.util.hash.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnFormatInteger extends StandardFunc {
@@ -26,7 +26,7 @@ public final class FnFormatInteger extends StandardFunc {
     final byte[] language = exprs.length == 2 ? EMPTY : toToken(exprs[2], qc);
 
     final Item item = exprs[0].atomItem(qc, info);
-    if(item == Empty.VALUE) return Str.ZERO;
+    if(item == Empty.VALUE) return Str.EMPTY;
     final long number = toLong(item);
 
     IntFormat format;

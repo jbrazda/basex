@@ -19,7 +19,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnReverse extends StandardFunc {
@@ -73,7 +73,7 @@ public final class FnReverse extends StandardFunc {
     final Expr expr = exprs[0];
     // zero/single items or singleton sequence: return argument
     if(expr.seqType().zeroOrOne() || expr instanceof SingletonSeq &&
-        ((SingletonSeq) expr).value instanceof Item) return expr;
+        ((SingletonSeq) expr).singleItem()) return expr;
     // reverse sequence
     if(expr instanceof RangeSeq) return ((RangeSeq) expr).reverse(cc.qc);
 

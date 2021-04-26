@@ -19,7 +19,7 @@ import org.basex.util.hash.*;
 /**
  * The GFLWOR {@code group by} expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class GroupBy extends Clause {
@@ -206,6 +206,9 @@ public final class GroupBy extends Clause {
 
   @Override
   public boolean has(final Flag... flags) {
+    for(final Expr expr : preExpr) {
+      if(expr.has(flags)) return true;
+    }
     for(final GroupSpec spec : specs) {
       if(spec.has(flags)) return true;
     }
@@ -223,7 +226,7 @@ public final class GroupBy extends Clause {
   public GroupBy optimize(final CompileContext cc) throws QueryException {
     final int pl = preExpr.length;
     for(int p = 0; p < pl; p++) {
-      post[p].refineType(preExpr[p].seqType().union(Occ.ONE_MORE), cc);
+      post[p].refineType(preExpr[p].seqType().union(Occ.ONE_OR_MORE), cc);
     }
     SeqType st = null;
     for(final GroupSpec spec : specs) {

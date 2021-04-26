@@ -43,7 +43,7 @@ import org.basex.util.list.*;
  * This class organizes both static and dynamic properties that are specific to a
  * single query.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class QueryContext extends Job implements Closeable {
@@ -756,7 +756,7 @@ public final class QueryContext extends Job implements Closeable {
       try {
         final JsonParserOptions jp = new JsonParserOptions();
         jp.set(JsonOptions.FORMAT, JsonFormat.XQUERY);
-        return JsonConverter.get(jp).convert(token(object.toString()), "");
+        return JsonConverter.get(jp).convert(object.toString(), "");
       } catch(final QueryIOException ex) {
         throw ex.getCause();
       }
@@ -772,7 +772,7 @@ public final class QueryContext extends Job implements Closeable {
 
     Type tp;
     if(Strings.endsWith(type, ')')) {
-      tp = nm.eq(AtomType.ITEM.name) ? AtomType.ITEM : NodeType.find(nm);
+      tp = nm.eq(AtomType.ITEM.qname()) ? AtomType.ITEM : NodeType.find(nm);
       if(tp == null) tp = FuncType.find(nm);
     } else {
       tp = ListType.find(nm);

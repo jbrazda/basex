@@ -13,7 +13,7 @@ import org.junit.jupiter.api.*;
 /**
  * This class tests the functions of the Map Module.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class MapModuleTest extends QueryPlanTest {
@@ -125,6 +125,12 @@ public final class MapModuleTest extends QueryPlanTest {
     check(func.args(" map { 1: <a/> }") + "?1", "<a/>", empty(func));
     check(func.args(" (map { 1: <a/> }, map { })") + "?1", "<a/>", empty(func));
     check(func.args(" (map { 1: <a/> }, map { })") + "?*", "<a/>", empty(func));
+
+    // GH-1954
+    query(func.args(" if (<a/>/text()) then map { } else ()") + " ! map:keys(.)", "");
+
+    //
+    check(func.args(" (map:entry(1, <a/>), map { 1: <b/> })") + "?*", "<a/>", empty(func));
   }
 
   /**

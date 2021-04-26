@@ -3,21 +3,21 @@ package org.basex.query.simple;
 import static org.basex.query.func.Function.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.stream.*;
+
 import org.basex.core.*;
 import org.basex.core.cmd.*;
 import org.basex.query.*;
-import org.basex.query.value.Value;
+import org.basex.query.value.*;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.*;
+import org.junit.jupiter.params.provider.*;
 
 /**
  * Tests for {@code id} and {@code idref}.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Jens Erat
  */
 public final class IdIdrefTest extends QueryTest {
@@ -87,7 +87,7 @@ public final class IdIdrefTest extends QueryTest {
   }
 
   @Override
-  public void test() {
+  @Test public void test() {
     // super.test() is not needed since we use @ParameterizedTest with queries as parameters.
   }
 }

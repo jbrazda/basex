@@ -4,7 +4,6 @@ import static org.basex.gui.GUIMenuCmd.*;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.nio.charset.*;
 
 import javax.swing.*;
 
@@ -45,7 +44,7 @@ import org.basex.util.*;
  *   {@link #MENUITEMS} menu structure</li>
  * </ul>
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class GUIConstants {
@@ -255,16 +254,6 @@ public final class GUIConstants {
   public static Color colormark1A;
   /** Second mark color, custom alpha value. */
   public static Color colormark2A;
-
-  // ENCODING =====================================================================================
-
-  /** Available encodings. */
-  public static final String[] ENCODINGS;
-
-  // initialize encodings
-  static {
-    ENCODINGS = Charset.availableCharsets().keySet().toArray(new String[0]);
-  }
 
   // FONTS ========================================================================================
 

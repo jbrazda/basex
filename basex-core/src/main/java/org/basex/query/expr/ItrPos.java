@@ -19,7 +19,7 @@ import org.basex.util.hash.*;
 /**
  * Integer position range check.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ItrPos extends Simple implements CmpPos {
@@ -35,7 +35,7 @@ public final class ItrPos extends Simple implements CmpPos {
    * @param info input info
    */
   private ItrPos(final long min, final long max, final InputInfo info) {
-    super(info, SeqType.BLN_O);
+    super(info, SeqType.BOOLEAN_O);
     this.min = min;
     this.max = max;
   }
@@ -123,7 +123,7 @@ public final class ItrPos extends Simple implements CmpPos {
   @Override
   public Expr inline(final InlineContext ic) {
     return null;
-  };
+  }
 
   @Override
   public ItrPos copy(final CompileContext cc, final IntObjMap<Var> vm) {

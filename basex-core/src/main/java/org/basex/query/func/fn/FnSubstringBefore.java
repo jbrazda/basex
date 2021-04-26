@@ -11,7 +11,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnSubstringBefore extends StandardFunc {
@@ -19,11 +19,11 @@ public final class FnSubstringBefore extends StandardFunc {
   public Str item(final QueryContext qc, final InputInfo ii) throws QueryException {
     final byte[] string = toZeroToken(exprs[0], qc), sub = toZeroToken(exprs[1], qc);
     final Collation coll = toCollation(2, qc);
-    if(string.length == 0 || sub.length == 0) return Str.ZERO;
+    if(string.length == 0 || sub.length == 0) return Str.EMPTY;
 
     if(coll == null) {
       final int pos = indexOf(string, sub);
-      return pos == -1 ? Str.ZERO : Str.get(substring(string, 0, pos));
+      return pos == -1 ? Str.EMPTY : Str.get(substring(string, 0, pos));
     }
     return Str.get(coll.before(string, sub, info));
   }

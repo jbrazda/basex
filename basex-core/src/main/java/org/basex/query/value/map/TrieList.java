@@ -16,7 +16,7 @@ import org.basex.util.*;
 /**
  * Leaf that contains a collision list of keys with the same hash code.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 final class TrieList extends TrieNode {
@@ -308,7 +308,7 @@ final class TrieList extends TrieNode {
   @Override
   void forEach(final ValueBuilder vb, final FItem func, final QueryContext qc, final InputInfo ii)
       throws QueryException {
-    for(int i = 0; i < size; i++) vb.add(func.invokeValue(qc, ii, keys[i], values[i]));
+    for(int i = 0; i < size; i++) vb.add(func.invoke(qc, ii, keys[i], values[i]));
   }
 
   @Override

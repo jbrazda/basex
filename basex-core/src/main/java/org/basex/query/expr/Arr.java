@@ -18,7 +18,7 @@ import org.basex.util.hash.*;
 /**
  * Abstract array expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class Arr extends ParseExpr {
@@ -292,12 +292,12 @@ public abstract class Arr extends ParseExpr {
       throws QueryException {
 
     // skip if only one operand is left, or if children have no operands that can be optimized
-    if(exprs.length < 2 || !((Checks<Expr>) expr -> inverse.isInstance(expr)).any(exprs))
+    if(exprs.length < 2 || !((Checks<Expr>) inverse::isInstance).any(exprs))
       return null;
 
     // check if expressions have common operands
     final java.util.function.Function<Expr, ExprList> entries = ex ->
-      new ExprList().add(inverse.isInstance(ex) ? ((Arr) ex).exprs : new Expr[] { ex });
+      new ExprList().add(inverse.isInstance(ex) ? ex.args() : new Expr[] { ex });
     final int el = exprs.length;
     final ExprList lefts = new ExprList().add(entries.apply(exprs[0]));
     for(int e = 1; e < el && !lefts.isEmpty(); ++e) {

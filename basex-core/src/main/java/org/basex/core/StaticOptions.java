@@ -10,7 +10,7 @@ import org.basex.util.options.*;
  * This class defines options which are used all around the project.
  * The initial keys and values are also stored in the project's home directory.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class StaticOptions extends Options {
@@ -106,7 +106,7 @@ public final class StaticOptions extends Options {
     @Override
     public String toString() {
       final String name = name();
-      return name.substring(0, 1) + name.substring(1).toLowerCase(Locale.ENGLISH);
+      return name.charAt(0) + name.substring(1).toLowerCase(Locale.ENGLISH);
     }
   }
 
@@ -155,11 +155,11 @@ public final class StaticOptions extends Options {
   }
 
   /**
-   * Creates a random database directory and returns its name.
+   * Creates a temporary database directory and returns its name.
    * @param name name of the original database
    * @return name of random database
    */
-  public String createRandomDb(final String name) {
+  public String createTempDb(final String name) {
     String db;
     int c = 0;
     do {

@@ -2,11 +2,11 @@ package org.basex.query.expr;
 
 import static org.basex.query.QueryError.*;
 import static org.basex.query.QueryText.*;
+import static org.basex.query.func.Function.*;
 
 import org.basex.query.*;
 import org.basex.query.CompileContext.*;
 import org.basex.query.value.*;
-import org.basex.query.value.item.*;
 import org.basex.query.value.type.*;
 import org.basex.query.var.*;
 import org.basex.util.*;
@@ -15,13 +15,13 @@ import org.basex.util.hash.*;
 /**
  * Cast expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Cast extends Single {
   /** Static context. */
   private final StaticContext sc;
-  /** Sequence type to cast to. */
+  /** Sequence type to cast to (zero or one items). */
   final SeqType seqType;
 
   /**
@@ -29,7 +29,7 @@ public final class Cast extends Single {
    * @param sc static context
    * @param info input info
    * @param expr expression
-   * @param seqType target type
+   * @param seqType sequence type to cast to (zero or one items)
    */
   public Cast(final StaticContext sc, final InputInfo info, final Expr expr,
       final SeqType seqType) {
@@ -47,15 +47,18 @@ public final class Cast extends Single {
   public Expr optimize(final CompileContext cc) throws QueryException {
     expr = expr.simplifyFor(Simplify.STRING, cc);
 
+    if((ZERO_OR_ONE.is(expr) || EXACTLY_ONE.is(expr) || ONE_OR_MORE.is(expr)) &&
+        seqType.occ.instanceOf(expr.seqType().occ)) expr = expr.arg(0);
+
     // target type
     final SeqType est = expr.seqType();
     Type dt = seqType.type;
     Occ o = seqType.occ;
     if(dt instanceof ListType) {
       dt = dt.atomic();
-      o = Occ.ZERO_MORE;
-    } else if(o == Occ.ZERO_ONE && est.oneOrMore() && !est.mayBeArray()) {
-      o = Occ.ONE;
+      o = Occ.ZERO_OR_MORE;
+    } else if(o == Occ.ZERO_OR_ONE && est.oneOrMore() && !est.mayBeArray()) {
+      o = Occ.EXACTLY_ONE;
     }
     exprType.assign(dt, o);
 
@@ -65,7 +68,7 @@ public final class Cast extends Single {
 
       final Type et = est.type;
       if(et.instanceOf(dt)) {
-        if(est.occ.instanceOf(o) && (et.eq(dt) || dt == AtomType.NUM))
+        if(est.occ.instanceOf(o) && (et.eq(dt) || dt == AtomType.NUMERIC))
           return cc.replaceWith(this, expr);
       }
     }
@@ -74,10 +77,7 @@ public final class Cast extends Single {
 
   @Override
   public Value value(final QueryContext qc) throws QueryException {
-    final Item item = expr.atomItem(qc, info);
-    final long size = item.size();
-    if(!seqType.occ.check(size)) throw error(item);
-    return size == 0 ? item : seqType.cast(item, true, qc, sc, info);
+    return seqType.cast(expr.atomValue(qc, info), true, qc, sc, info);
   }
 
   /**

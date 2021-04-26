@@ -13,7 +13,7 @@ import org.basex.util.*;
 /**
  * Range sequence, containing at least two integers.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class RangeSeq extends Seq {
@@ -26,23 +26,23 @@ public final class RangeSeq extends Seq {
    * Constructor.
    * @param start start value
    * @param size size
-   * @param asc ascending
+   * @param asc ascending order
    */
   private RangeSeq(final long start, final long size, final boolean asc) {
-    super(size, AtomType.ITR);
+    super(size, AtomType.INTEGER);
     this.start = start;
     this.asc = asc;
   }
 
   /**
    * Returns a value representation of the specified items.
-   * @param min minimum value
+   * @param start start value
    * @param size size
-   * @param asc ascending
+   * @param asc ascending order
    * @return resulting item or sequence
    */
-  public static Value get(final long min, final long size, final boolean asc) {
-    return size < 1 ? Empty.VALUE : size == 1 ? Int.get(min) : new RangeSeq(min, size, asc);
+  public static Value get(final long start, final long size, final boolean asc) {
+    return size < 1 ? Empty.VALUE : size == 1 ? Int.get(start) : new RangeSeq(start, size, asc);
   }
 
   /**
@@ -68,7 +68,7 @@ public final class RangeSeq extends Seq {
   }
 
   @Override
-  public Item itemAt(final long pos) {
+  public Int itemAt(final long pos) {
     return Int.get(start + (asc ? pos : -pos));
   }
 

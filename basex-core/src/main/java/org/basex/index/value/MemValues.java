@@ -18,7 +18,7 @@ import org.basex.util.list.*;
 /**
  * This class provides main memory access to attribute values and text contents.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class MemValues extends ValueIndex {
@@ -81,9 +81,11 @@ public final class MemValues extends ValueIndex {
   @Override
   public EntryIterator entries(final IndexEntries entries) {
     final byte[] token = entries.token();
+
     return new EntryIterator() {
       final int s = values.size();
       int p;
+
       @Override
       public byte[] next() {
         while(++p <= s) {
@@ -93,6 +95,7 @@ public final class MemValues extends ValueIndex {
         }
         return null;
       }
+
       @Override
       public int count() {
         return lenList.get(p);

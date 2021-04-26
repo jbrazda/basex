@@ -47,7 +47,7 @@ import org.basex.util.similarity.*;
  *   {@code pre1/pos1, pre2/pos2, pre3/pos3, ...} [{@link Num}]</li>
  * </ul>
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FTIndex extends ValueIndex {
@@ -120,7 +120,7 @@ public final class FTIndex extends ValueIndex {
 
     // fuzzy search
     if(opt.is(FZ)) {
-      return fuzzy(token, lexer.lserror(token));
+      return fuzzy(token, lexer.errors(token));
     }
 
     // return cached or new result
@@ -150,6 +150,7 @@ public final class FTIndex extends ValueIndex {
   @Override
   public EntryIterator entries(final IndexEntries entries) {
     final byte[] token = entries.token();
+
     return new EntryIterator() {
       int p = token.length - 1, start, end, nr;
       boolean inner;
@@ -186,6 +187,7 @@ public final class FTIndex extends ValueIndex {
           return null;
         }
       }
+
       @Override
       public int count() {
         return nr;

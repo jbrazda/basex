@@ -10,7 +10,7 @@ import org.basex.util.list.*;
 /**
  * Update primitive for the {@link Function#_DB_DELETE} function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DBDelete extends DBUpdate {
@@ -32,9 +32,7 @@ public final class DBDelete extends DBUpdate {
   }
 
   @Override
-  public void merge(final Update update) {
-    for(final String path : ((DBDelete) update).paths) paths.add(path);
-    size += update.size();
+  public void prepare() {
   }
 
   @Override
@@ -43,10 +41,13 @@ public final class DBDelete extends DBUpdate {
   }
 
   @Override
-  public int size() {
-    return size;
+  public void merge(final Update update) {
+    for(final String path : ((DBDelete) update).paths) paths.add(path);
+    size += update.size();
   }
 
   @Override
-  public void prepare() { }
+  public int size() {
+    return size;
+  }
 }

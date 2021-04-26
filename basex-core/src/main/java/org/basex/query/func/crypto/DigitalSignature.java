@@ -31,7 +31,7 @@ import org.xml.sax.*;
 /**
  * This class generates and validates digital signatures for XML data.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 final class DigitalSignature {
@@ -243,7 +243,7 @@ final class DigitalSignature {
 
       // actually sign the document
       xmlSig.sign(signContext);
-      signedNode = NodeType.DOC.cast(inputNode, qc, null, info);
+      signedNode = NodeType.DOCUMENT_NODE.cast(inputNode, qc, null, info);
 
     } catch(final XPathExpressionException ex) {
       throw CX_XPINV.get(info, ex);

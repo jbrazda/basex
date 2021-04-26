@@ -19,7 +19,7 @@ import org.basex.util.http.*;
  * <p>The implementation is based on Adam Retter's paper presented at XMLPrague 2012,
  * titled "RESTful XQuery - Standardised XQuery 3.0 Annotations for REST".</p>
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class RestXqServlet extends BaseXServlet {
@@ -58,7 +58,7 @@ public final class RestXqServlet extends BaseXServlet {
         func = modules.restxq(conn, null);
         body = false;
       }
-      if(func == null) throw HTTPCode.NO_XQUERY.get();
+      if(func == null) throw HTTPCode.SERVICE_NOT_FOUND.get();
     }
 
     // create response

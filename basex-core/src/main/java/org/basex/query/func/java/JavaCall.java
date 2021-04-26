@@ -7,7 +7,6 @@ import static org.basex.util.Token.*;
 import java.lang.reflect.*;
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.*;
 
 import javax.xml.datatype.*;
 import javax.xml.namespace.*;
@@ -35,7 +34,7 @@ import org.w3c.dom.*;
  * This class contains common methods for executing Java code and mapping
  * Java objects to XQuery values.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class JavaCall extends Arr {
@@ -136,7 +135,7 @@ public abstract class JavaCall extends Arr {
       final short[] r = (short[]) object;
       final long[] b = new long[r.length];
       for(int v = 0; v < s; v++) b[v] = r[v];
-      return IntSeq.get(b, AtomType.SHR);
+      return IntSeq.get(b, AtomType.SHORT);
     }
     // integer array
     if(object instanceof int[]) {
@@ -275,9 +274,9 @@ public abstract class JavaCall extends Arr {
     }
 
     // no suitable method found: check if method with correct name was found
-    throw noFunction(name, arity, string(qname.string()), arities, types, ii, list -> {
-      for(final Method m : methods) list.add(m.getName());
-    });
+    final TokenList names = new TokenList();
+    for(final Method m : methods) names.add(m.getName());
+    throw noFunction(name, arity, string(qname.string()), arities, types, ii, names.finish());
   }
 
   /**
@@ -288,21 +287,20 @@ public abstract class JavaCall extends Arr {
    * @param arities arities of found methods
    * @param types types (can be {@code null})
    * @param ii input info
-   * @param consumer list of available names
+   * @param names list of available names
    * @return exception
    */
   static QueryException noFunction(final String name, final int arity, final String full,
-      final IntList arities, final String[] types, final InputInfo ii,
-      final Consumer<TokenList> consumer) {
-
+      final IntList arities, final String[] types, final InputInfo ii, final byte[][] names) {
     // functions with different arities
     if(!arities.isEmpty()) return Functions.wrongArity(full, arity, arities, ii);
 
     // find similar field/method names
-    final byte[] nm = token(name), similar = Levenshtein.similar(nm, consumer);
+    final byte[] nm = token(name);
+    final Object similar = Levenshtein.similar(nm, names);
     if(similar != null) {
       // if name is equal, no function was chosen via exact type matching
-      if(eq(nm, similar)) {
+      if(eq(nm, (byte[]) similar)) {
         final TokenBuilder tb = new TokenBuilder();
         for(final String type : types) {
           if(!tb.isEmpty()) tb.add(", ");
@@ -310,11 +308,8 @@ public abstract class JavaCall extends Arr {
         }
         return JAVAARGS_X_X.get(ii, full, tb);
       }
-      // show similar field/method name
-      return FUNCSIMILAR_X_X.get(ii, full, similar);
     }
-    // no similar field/method found, show default error
-    return WHICHFUNC_X.get(ii, full);
+    return WHICHFUNC_X.get(ii, similar(full, similar));
   }
 
   /**
@@ -344,32 +339,32 @@ public abstract class JavaCall extends Arr {
     final Type type = JavaMapping.type(object.getClass(), true);
     if(type != null) return type;
 
-    if(object instanceof Element) return NodeType.ELM;
-    if(object instanceof Document) return NodeType.DOC;
-    if(object instanceof DocumentFragment) return NodeType.DOC;
-    if(object instanceof Attr) return NodeType.ATT;
-    if(object instanceof Comment) return NodeType.COM;
-    if(object instanceof ProcessingInstruction) return NodeType.PI;
-    if(object instanceof Text) return NodeType.TXT;
+    if(object instanceof Element) return NodeType.ELEMENT;
+    if(object instanceof Document) return NodeType.DOCUMENT_NODE;
+    if(object instanceof DocumentFragment) return NodeType.DOCUMENT_NODE;
+    if(object instanceof Attr) return NodeType.ATTRIBUTE;
+    if(object instanceof Comment) return NodeType.COMMENT;
+    if(object instanceof ProcessingInstruction) return NodeType.PROCESSING_INSTRUCTION;
+    if(object instanceof Text) return NodeType.TEXT;
 
     if(object instanceof Duration) {
       final Duration d = (Duration) object;
       return !d.isSet(DatatypeConstants.YEARS) && !d.isSet(DatatypeConstants.MONTHS)
-          ? AtomType.DTD : !d.isSet(DatatypeConstants.HOURS) &&
+          ? AtomType.DAY_TIME_DURATION : !d.isSet(DatatypeConstants.HOURS) &&
           !d.isSet(DatatypeConstants.MINUTES) && !d.isSet(DatatypeConstants.SECONDS)
-          ? AtomType.YMD : AtomType.DUR;
+          ? AtomType.YEAR_MONTH_DURATION : AtomType.DURATION;
     }
 
     if(object instanceof XMLGregorianCalendar) {
       final QName qnm = ((XMLGregorianCalendar) object).getXMLSchemaType();
-      if(qnm == DatatypeConstants.DATE) return AtomType.DAT;
-      if(qnm == DatatypeConstants.DATETIME) return AtomType.DTM;
-      if(qnm == DatatypeConstants.TIME) return AtomType.TIM;
-      if(qnm == DatatypeConstants.GYEARMONTH) return AtomType.YMO;
-      if(qnm == DatatypeConstants.GMONTHDAY) return AtomType.MDA;
-      if(qnm == DatatypeConstants.GYEAR) return AtomType.YEA;
-      if(qnm == DatatypeConstants.GMONTH) return AtomType.MON;
-      if(qnm == DatatypeConstants.GDAY) return AtomType.DAY;
+      if(qnm == DatatypeConstants.DATE) return AtomType.DATE;
+      if(qnm == DatatypeConstants.DATETIME) return AtomType.DATE_TIME;
+      if(qnm == DatatypeConstants.TIME) return AtomType.TIME;
+      if(qnm == DatatypeConstants.GYEARMONTH) return AtomType.G_YEAR_MONTH;
+      if(qnm == DatatypeConstants.GMONTHDAY) return AtomType.G_MONTH_DAY;
+      if(qnm == DatatypeConstants.GYEAR) return AtomType.G_YEAR;
+      if(qnm == DatatypeConstants.GMONTH) return AtomType.G_MONTH;
+      if(qnm == DatatypeConstants.GDAY) return AtomType.G_DAY;
     }
     return null;
   }

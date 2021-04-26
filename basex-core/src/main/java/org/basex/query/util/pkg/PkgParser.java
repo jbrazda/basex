@@ -18,7 +18,7 @@ import org.basex.util.*;
 /**
  * Parses the package descriptors and performs schema checks.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Rositsa Shadura
  */
 public final class PkgParser {
@@ -133,7 +133,7 @@ public final class PkgParser {
       public ANode next() {
         while(true) {
           final ANode n = ch.next();
-          if(n == null || n.type == NodeType.ELM) return n;
+          if(n == null || n.type == NodeType.ELEMENT) return n;
         }
       }
     };

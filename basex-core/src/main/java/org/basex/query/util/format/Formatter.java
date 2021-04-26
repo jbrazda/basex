@@ -16,7 +16,7 @@ import org.basex.util.list.*;
 /**
  * Abstract class for formatting data in different languages.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class Formatter extends FormatUtil {
@@ -155,7 +155,7 @@ public abstract class Formatter extends FormatUtil {
         BigDecimal frac = null;
         long num = 0;
 
-        final boolean dat = date.type == AtomType.DAT, tim = date.type == AtomType.TIM;
+        final boolean dat = date.type == AtomType.DATE, tim = date.type == AtomType.TIME;
         boolean err = false;
         switch(compSpec) {
           case 'Y':

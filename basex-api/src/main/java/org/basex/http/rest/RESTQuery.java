@@ -11,7 +11,7 @@ import org.basex.query.value.type.*;
 /**
  * Evaluate queries via REST.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 class RESTQuery extends RESTCmd {
@@ -52,7 +52,7 @@ class RESTQuery extends RESTCmd {
       if(cmd instanceof XQuery) {
         final XQuery xq = (XQuery) cmd;
         // create query instance
-        if(value != null) xq.bind(null, value, NodeType.DOC.toString());
+        if(value != null) xq.bind(null, value, NodeType.DOCUMENT_NODE.toString());
 
         // bind HTTP context and external variables
         xq.putExternal(HTTPText.REQUEST, conn.requestCtx);

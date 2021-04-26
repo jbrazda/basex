@@ -9,19 +9,19 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class FnName extends FnNodeName {
   @Override
   public final Str item(final QueryContext qc, final InputInfo ii) throws QueryException {
     final ANode node = toNodeOrNull(ctxArg(0, qc), qc);
-    return node == null || empty(node.type) ? Str.ZERO : Str.get(name(node));
+    return node == null || empty(node.type) ? Str.EMPTY : Str.get(name(node));
   }
 
   @Override
   protected final Expr opt(final CompileContext cc) {
-    return empty(cc, false) ? Str.ZERO : this;
+    return empty(cc, false) ? Str.EMPTY : this;
   }
 
   /**

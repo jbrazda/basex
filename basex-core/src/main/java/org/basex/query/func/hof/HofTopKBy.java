@@ -13,7 +13,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class HofTopKBy extends StandardFunc {
@@ -34,7 +34,7 @@ public final class HofTopKBy extends StandardFunc {
 
     try {
       for(Item item; (item = qc.next(iter)) != null;) {
-        heap.insert(checkNoEmpty(getKey.invokeItem(qc, info, item)), item);
+        heap.insert(checkNoEmpty(getKey.invoke(qc, info, item).item(qc, info)), item);
         if(heap.size() > k) heap.removeMin();
       }
     } catch(final QueryRTException ex) { throw ex.getCause(); }

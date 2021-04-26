@@ -15,7 +15,7 @@ import org.basex.util.hash.*;
 /**
  * Instance test.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Instance extends Single {
@@ -31,7 +31,7 @@ public final class Instance extends Single {
    * @param seqType sequence type to check for
    */
   public Instance(final InputInfo info, final Expr expr, final SeqType seqType) {
-    super(info, expr, SeqType.BLN_O);
+    super(info, expr, SeqType.BOOLEAN_O);
     this.seqType = seqType;
   }
 

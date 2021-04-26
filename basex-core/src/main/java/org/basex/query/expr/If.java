@@ -19,7 +19,7 @@ import org.basex.util.hash.*;
 /**
  * If expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class If extends Arr {
@@ -113,7 +113,7 @@ public final class If extends Arr {
     if(!ndt && cmp != null && cmp.equals(br1)) return
         cc.function(_UTIL_OR, info, br1, br2);
 
-    // if(A) then B else B  ->  B (errors in A will be ignored)
+    // if(A) then B else B  ->  prof:void(A), B
     if(br1.equals(br2)) return cc.merge(cond, br1, info);
 
     // determine type
@@ -121,7 +121,7 @@ public final class If extends Arr {
     exprType.assign(st1.union(st2));
 
     // logical rewritings
-    if(st1.eq(SeqType.BLN_O) && st2.eq(SeqType.BLN_O)) {
+    if(st1.eq(SeqType.BOOLEAN_O) && st2.eq(SeqType.BOOLEAN_O)) {
       if(br1 == Bln.TRUE) return br2 == Bln.FALSE ?
         // if(A) then true() else false()  ->  boolean(A)
         cc.function(BOOLEAN, info, cond) :

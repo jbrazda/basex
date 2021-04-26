@@ -10,7 +10,7 @@ import org.basex.query.value.type.*;
 /**
  * Contains helper functions for retrieving XML contents.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class XMLAccess {
@@ -38,7 +38,7 @@ public final class XMLAccess {
       @Override
       public ANode next() {
         for(ANode child; (child = children.next()) != null;) {
-          if(child.type == NodeType.ELM && (name == null || eq(child.qname().id(), name)))
+          if(child.type == NodeType.ELEMENT && (name == null || eq(child.qname().id(), name)))
             return child;
         }
         return null;

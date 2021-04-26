@@ -12,7 +12,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class MathPow extends MathFn {
@@ -32,7 +32,7 @@ public final class MathPow extends MathFn {
     if(exp instanceof ANum) {
       final double e = ((ANum) exp).dbl();
       if(e == 0) return Dbl.ONE;
-      if(e == 1) return new Cast(sc, info, base, SeqType.DBL_O).optimize(cc);
+      if(e == 1) return new Cast(sc, info, base, SeqType.DOUBLE_O).optimize(cc);
     }
     return super.opt(cc);
   }

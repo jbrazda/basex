@@ -1,6 +1,7 @@
 package org.basex.query.func.map;
 
 import org.basex.query.*;
+import org.basex.query.expr.*;
 import org.basex.query.func.*;
 import org.basex.query.iter.*;
 import org.basex.query.value.*;
@@ -12,7 +13,7 @@ import org.basex.query.value.seq.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class MapFind extends StandardFunc {
@@ -21,6 +22,11 @@ public final class MapFind extends StandardFunc {
     final ArrayBuilder builder = new ArrayBuilder();
     find(exprs[0].iter(qc), toAtomItem(exprs[1], qc), builder, qc);
     return builder.freeze();
+  }
+
+  @Override
+  protected Expr opt(final CompileContext cc) {
+    return exprs[0] == XQMap.EMPTY  ? XQArray.empty() : this;
   }
 
   /**

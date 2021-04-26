@@ -12,7 +12,7 @@ import org.basex.util.list.*;
  * Text renderer, supporting syntax highlighting and highlighting of selected, erroneous
  * or linked text.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class TextRenderer extends BaseXBack {
@@ -73,7 +73,7 @@ final class TextRenderer extends BaseXBack {
   /** Indicates if the cursor is located in the current line. */
   private boolean lineC;
   /** String rendering cache. */
-  final TokenBuilder stringCache = new TokenBuilder(4);
+  private final TokenBuilder stringCache = new TokenBuilder(4);
 
   /** Cursor position. */
   private final int[] cursor = new int[2];

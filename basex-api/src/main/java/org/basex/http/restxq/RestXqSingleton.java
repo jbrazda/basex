@@ -9,7 +9,7 @@ import org.basex.util.*;
 /**
  * Information on RESTXQ singleton functions.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class RestXqSingleton {
@@ -40,7 +40,7 @@ final class RestXqSingleton {
   /**
    * Waits until a running query has been stopped.
    */
-  void queue() {
+  private void queue() {
     final QueryContext oldQc = qc();
     if(oldQc != null) {
       oldQc.stop();
@@ -51,7 +51,7 @@ final class RestXqSingleton {
   /**
    * Registers a query.
    */
-  void register() {
+  private void register() {
     synchronized(MUTEX) {
       session.setAttribute(id, qc);
     }

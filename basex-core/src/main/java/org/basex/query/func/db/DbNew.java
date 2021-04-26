@@ -15,15 +15,15 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 abstract class DbNew extends DbAccess {
   /**
-   * Creates a {@link Data} instance for the specified document.
+   * Creates a container for the specified input.
    * @param input input item (node or string)
    * @param path path argument (optional, can be empty)
-   * @return database instance
+   * @return input container
    * @throws QueryException query exception
    */
   final NewInput checkInput(final Item input, final byte[] path) throws QueryException {
@@ -46,7 +46,7 @@ abstract class DbNew extends DbAccess {
       }
 
       // adding a document node
-      if(node.type == NodeType.ATT) throw UPDOCTYPE_X.get(info, node);
+      if(node.type == NodeType.ATTRIBUTE) throw UPDOCTYPE_X.get(info, node);
       ni.node = node;
       ni.path = string(name);
       return ni;

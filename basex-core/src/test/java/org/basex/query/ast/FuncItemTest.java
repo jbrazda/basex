@@ -12,10 +12,15 @@ import org.junit.jupiter.api.*;
 /**
  * Tests for compiling function items.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class FuncItemTest extends QueryPlanTest {
+  /** Resets optimizations. */
+  @BeforeEach public void init() {
+    inline(true);
+  }
+
   /** Checks if the identity function is pre-compiled. */
   @Test public void idTest() {
     check("function($x) { $x }(42)",
@@ -42,9 +47,9 @@ public final class FuncItemTest extends QueryPlanTest {
 
   /** Checks if a partial application with non-empty closure is left alone. */
   @Test public void partApp2Test() {
-    check("for $sub in ('foo', 'bar')" +
-        "return starts-with(?, $sub)('foobar')",
-        "true\nfalse",
+    check("for $sub in ('a', 'b', 'c', 'd', 'e', 'f')" +
+        "return starts-with(?, $sub)('a')",
+        "true\nfalse\nfalse\nfalse\nfalse\nfalse",
         exists(PartFunc.class)
     );
   }
@@ -194,11 +199,11 @@ public final class FuncItemTest extends QueryPlanTest {
 
   /** Checks if nested closures are inlined. */
   @Test public void nestedClosures() {
-    check("for $i in 1 to 3 "
+    check("for $i in 1 to 6 "
         + "let $f := function($x) { $i * $x },"
         + "    $g := function($y) { 2 * $f($y) }"
         + "return $g($g(42))",
-        "168\n672\n1512",
+        "168\n672\n1512\n2688\n4200\n6048",
         count(Util.className(Closure.class), 1)
     );
   }

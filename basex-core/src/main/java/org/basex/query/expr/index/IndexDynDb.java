@@ -16,7 +16,7 @@ import org.basex.util.hash.*;
 /**
  * This class defines a dynamic database source for index operations.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class IndexDynDb extends IndexDb {
@@ -85,7 +85,7 @@ public final class IndexDynDb extends IndexDb {
   Data data(final QueryContext qc) throws QueryException {
     final Value value = expr.value(qc);
     final Data data = value.data();
-    if(data == null || !value.seqType().type.instanceOf(NodeType.DOC))
+    if(data == null || !value.seqType().type.instanceOf(NodeType.DOCUMENT_NODE))
       throw DB_NODE_X.get(info, value);
     return data;
   }

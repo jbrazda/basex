@@ -18,7 +18,7 @@ import org.basex.util.list.*;
 /**
  * This class contains functions for generating a plain XQuery documentation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class PlainDoc extends Inspect {
@@ -48,7 +48,7 @@ final class PlainDoc extends Inspect {
     parseQuery(io);
     final FElem root = elem("module", null);
     if(module instanceof LibraryModule) {
-      final QNm name = ((LibraryModule) module).sc.module;
+      final QNm name = module.sc.module;
       root.add("prefix", name.string());
       root.add("uri", name.uri());
     }

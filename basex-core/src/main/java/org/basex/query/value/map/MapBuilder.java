@@ -8,7 +8,7 @@ import org.basex.query.value.seq.*;
 /**
  * A convenience class for building new maps.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class MapBuilder {
@@ -19,34 +19,30 @@ public final class MapBuilder {
    * Adds a key/value pair to the map.
    * @param key key
    * @param value value
-   * @return self reference
    * @throws QueryException query exception
    */
-  public MapBuilder put(final Item key, final Value value) throws QueryException {
+  public void put(final Item key, final Value value) throws QueryException {
     map = map.put(key, value, null);
-    return this;
   }
 
   /**
    * Adds a key string and a value to the map.
    * @param key key
    * @param value value
-   * @return self reference
    * @throws QueryException query exception
    */
-  public MapBuilder put(final String key, final Value value) throws QueryException {
-    return put(Str.get(key), value);
+  public void put(final String key, final Value value) throws QueryException {
+    put(Str.get(key), value);
   }
 
   /**
    * Adds key/value strings to the map.
    * @param key key
    * @param value value (can be {@code null})
-   * @return self reference
    * @throws QueryException query exception
    */
-  public MapBuilder put(final String key, final String value) throws QueryException {
-    return put(Str.get(key), value != null ? Str.get(value) : Empty.VALUE);
+  public void put(final String key, final String value) throws QueryException {
+    put(Str.get(key), value != null ? Str.get(value) : Empty.VALUE);
   }
 
   /**

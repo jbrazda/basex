@@ -11,7 +11,7 @@ import org.basex.query.value.type.*;
 /**
  * Functions to connect remote database instances.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 abstract class ClientFn extends StandardFunc {
@@ -24,7 +24,7 @@ abstract class ClientFn extends StandardFunc {
    */
   final ClientSession session(final QueryContext qc, final boolean del) throws QueryException {
     final ClientSessions sessions = sessions(qc);
-    final Uri id = (Uri) checkType(exprs[0], qc, AtomType.URI);
+    final Uri id = (Uri) checkType(exprs[0], qc, AtomType.ANY_URI);
     final ClientSession cs = sessions.get(id);
     if(cs == null) throw CLIENT_ID_X.get(info, id);
     if(del) sessions.remove(id);

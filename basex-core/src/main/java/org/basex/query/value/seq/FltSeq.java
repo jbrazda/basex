@@ -11,7 +11,7 @@ import org.basex.util.*;
 /**
  * Sequence of items of type {@link Int xs:float}, containing at least two of them.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FltSeq extends NativeSeq {
@@ -23,7 +23,7 @@ public final class FltSeq extends NativeSeq {
    * @param values bytes
    */
   private FltSeq(final float[] values) {
-    super(values.length, AtomType.FLT);
+    super(values.length, AtomType.FLOAT);
     this.values = values;
   }
 

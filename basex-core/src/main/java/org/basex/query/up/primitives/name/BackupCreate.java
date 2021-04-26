@@ -13,7 +13,7 @@ import org.basex.util.*;
 /**
  * Update primitive for the {@link Function#_DB_CREATE_BACKUP} function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 public final class BackupCreate extends NameUpdate {
@@ -28,6 +28,10 @@ public final class BackupCreate extends NameUpdate {
   }
 
   @Override
+  public void prepare() {
+  }
+
+  @Override
   public void apply() throws QueryException {
     try {
       CreateBackup.backup(name, qc.context.soptions, null);
@@ -37,8 +41,7 @@ public final class BackupCreate extends NameUpdate {
   }
 
   @Override
-  public void prepare() { }
-
-  @Override
-  public String operation() { return "backed up"; }
+  public String operation() {
+    return "backed up";
+  }
 }

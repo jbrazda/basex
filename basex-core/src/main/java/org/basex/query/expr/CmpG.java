@@ -21,7 +21,7 @@ import org.basex.util.hash.*;
 /**
  * General comparison.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class CmpG extends Cmp {
@@ -138,7 +138,7 @@ public class CmpG extends Cmp {
    */
   public CmpG(final Expr expr1, final Expr expr2, final OpG op, final Collation coll,
       final StaticContext sc, final InputInfo info) {
-    super(info, expr1, expr2, coll, SeqType.BLN_O, sc);
+    super(info, expr1, expr2, coll, SeqType.BOOLEAN_O, sc);
     this.op = op;
   }
 
@@ -173,6 +173,7 @@ public class CmpG extends Cmp {
     expr = opt(cc);
 
     // range comparisons
+    if(expr == this) expr = optArith(cc);
     if(expr == this) expr = CmpIR.get(this, false, cc);
     if(expr == this) expr = CmpR.get(this, cc);
     if(expr == this) expr = CmpSR.get(this, cc);
@@ -183,12 +184,12 @@ public class CmpG extends Cmp {
       final SeqType st1 = expr1.seqType(), st2 = expr2.seqType();
       final Type type1 = st1.type, type2 = st2.type;
       // skip type check if types are identical (and a child instance of of any atomic type)
-      check = !(type1 == type2 && !AtomType.AAT.instanceOf(type1) &&
+      check = !(type1 == type2 && !AtomType.ANY_ATOMIC_TYPE.instanceOf(type1) &&
           (type1.isSortable() || op != OpG.EQ && op != OpG.NE) ||
           type1.isUntyped() || type2.isUntyped() ||
-          type1.instanceOf(AtomType.STR) && type2.instanceOf(AtomType.STR) ||
-          type1.instanceOf(AtomType.NUM) && type2.instanceOf(AtomType.NUM) ||
-          type1.instanceOf(AtomType.DUR) && type2.instanceOf(AtomType.DUR));
+          type1.instanceOf(AtomType.STRING) && type2.instanceOf(AtomType.STRING) ||
+          type1.instanceOf(AtomType.NUMERIC) && type2.instanceOf(AtomType.NUMERIC) ||
+          type1.instanceOf(AtomType.DURATION) && type2.instanceOf(AtomType.DURATION));
 
       CmpHashG hash = null;
       if(st1.zeroOrOne() && !st1.mayBeArray() && st2.zeroOrOne() && !st2.mayBeArray()) {
@@ -211,6 +212,30 @@ public class CmpG extends Cmp {
 
     // return optimized, pre-evaluated or original expression
     return expr instanceof CmpG ? expr : cc.replaceWith(this, expr);
+  }
+
+  /**
+   * Tries to rewrite arithmetic operations.
+   * @param cc compilation context
+   * @return optimized or original expression
+   * @throws QueryException query exception
+   */
+  private Expr optArith(final CompileContext cc) throws QueryException {
+    final Expr expr1 = exprs[0], count = exprs[1];
+    if(expr1 instanceof Arith && count instanceof ANum) {
+      final Arith arith = (Arith) expr1;
+      final Expr op1 = arith.arg(0), op2 = arith.arg(1);
+      if(arith.calc == Calc.MINUS && op2.seqType().instanceOf(SeqType.NUMERIC_O) &&
+          count == Int.ZERO) {
+        // sum(A) - sum(B) = 0  ->  sum(A) = sum(B)
+        return new CmpG(op1, op2, op, coll, sc, info).optimize(cc);
+      } else if(arith.calc != Calc.MOD && arith.calc != Calc.IDIV && op2 instanceof ANum) {
+        // count(E) div 2 = 1  ->  count(E) = 1 * 2
+        final Expr arg2 = new Arith(info, count, op2, arith.calc.invert()).optimize(cc);
+        return new CmpG(op1, arg2, op, coll, sc, info).optimize(cc);
+      }
+    }
+    return this;
   }
 
   @Override
@@ -374,9 +399,13 @@ public class CmpG extends Cmp {
     if(op != OpG.EQ || coll != null) return false;
 
     Expr expr1 = exprs[0];
-    final boolean tokenize = Function.TOKENIZE.is(expr1);
-    if(tokenize) expr1 = ((FnTokenize) expr1).input();
-    return ii.create(exprs[1], ii.type(expr1, tokenize ? IndexType.TOKEN : null), false, info);
+    IndexType type = null;
+    if(Function.TOKENIZE.is(expr1)) {
+      if(!(expr1.arg(0).seqType().zeroOrOne() && ((FnTokenize) expr1).whitespaces())) return false;
+      expr1 = expr1.arg(0);
+      type = IndexType.TOKEN;
+    }
+    return ii.create(exprs[1], ii.type(expr1, type), false, info);
   }
 
   @Override

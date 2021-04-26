@@ -11,7 +11,7 @@ import org.basex.util.*;
 /**
  * Insert into primitive.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 public class InsertInto extends NodeCopy {
@@ -39,5 +39,6 @@ public class InsertInto extends NodeCopy {
   }
 
   @Override
-  public final void update(final NamePool pool) { }
+  public final void update(final NamePool pool) {
+  }
 }

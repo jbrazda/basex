@@ -8,7 +8,7 @@ import org.w3c.dom.*;
 /**
  * Text node fragment.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FTxt extends FNode {
@@ -25,7 +25,7 @@ public final class FTxt extends FNode {
    * @param value text value
    */
   public FTxt(final byte[] value) {
-    super(NodeType.TXT);
+    super(NodeType.TEXT);
     this.value = value;
   }
 

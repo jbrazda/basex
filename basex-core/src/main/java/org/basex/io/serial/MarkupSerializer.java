@@ -22,7 +22,7 @@ import org.basex.util.options.*;
 /**
  * This class serializes items to in a markup language.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 abstract class MarkupSerializer extends StandardSerializer {
@@ -281,7 +281,7 @@ abstract class MarkupSerializer extends StandardSerializer {
 
   @Override
   protected boolean skipElement(final ANode node) {
-    if(node.type == NodeType.ELM && eq(node.name(), META)) {
+    if(node.type == NodeType.ELEMENT && eq(node.name(), META)) {
       final byte[] value = node.attribute(HTTP_EQUIV);
       return value != null && eq(trim(value), CONTENT_TYPE);
     }

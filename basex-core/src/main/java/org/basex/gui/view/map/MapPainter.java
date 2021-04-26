@@ -11,14 +11,14 @@ import org.basex.query.value.seq.*;
 /**
  * Adds default paint operations to the tree map.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class MapPainter {
   /** Graphics reference. */
-  final MapView view;
+  private final MapView view;
   /** GUI options. */
-  final GUIOptions gopts;
+  private final GUIOptions gopts;
 
   /**
    * Constructor.
@@ -37,7 +37,7 @@ final class MapPainter {
    * @param data data reference
    * @return next color mark or {@code null}
    */
-  Color color(final MapRects rects, final int ri, final Data data) {
+  private Color color(final MapRects rects, final int ri, final Data data) {
     // find marked node
     final DBNodes marked = view.gui.context.marked;
     if(marked != null) {

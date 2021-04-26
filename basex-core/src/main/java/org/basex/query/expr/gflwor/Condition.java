@@ -19,7 +19,7 @@ import org.basex.util.hash.*;
 /**
  * A window {@code start} of {@code end} condition.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class Condition extends Single {
@@ -74,10 +74,10 @@ public final class Condition extends Single {
    */
   void compile(final Expr ex, final CompileContext cc) throws QueryException {
     final SeqType st = ex.seqType();
-    if(item != null) item.refineType(st.with(Occ.ONE), 1, cc);
-    if(pos  != null) pos.refineType(SeqType.ITR_O, 1, cc);
-    if(prev != null) prev.refineType(st.with(Occ.ZERO_ONE), -1, cc);
-    if(next != null) next.refineType(st.with(Occ.ZERO_ONE), -1, cc);
+    if(item != null) item.refineType(st.with(Occ.EXACTLY_ONE), 1, cc);
+    if(pos  != null) pos.refineType(SeqType.INTEGER_O, 1, cc);
+    if(prev != null) prev.refineType(st.with(Occ.ZERO_OR_ONE), -1, cc);
+    if(next != null) next.refineType(st.with(Occ.ZERO_OR_ONE), -1, cc);
     compile(cc);
   }
 

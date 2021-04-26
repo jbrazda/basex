@@ -12,11 +12,13 @@ import org.basex.query.value.item.*;
 import org.basex.query.value.node.*;
 import org.basex.query.value.type.*;
 import org.basex.util.*;
+import org.basex.util.hash.*;
+import org.basex.util.list.*;
 
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class IndexFacets extends IndexFn {
@@ -29,9 +31,9 @@ public final class IndexFacets extends IndexFn {
   /** Name: max. */
   private static final String MAX = "max";
   /** Name: elements. */
-  private static final byte[] ELM = NodeType.ELM.name;
+  private static final byte[] ELM = NodeType.ELEMENT.qname().local();
   /** Name: attributes. */
-  private static final byte[] ATT = NodeType.ATT.name;
+  private static final byte[] ATT = NodeType.ATTRIBUTE.qname().local();
   /** Flag: flat output. */
   private static final byte[] FLAT = token("flat");
 
@@ -48,7 +50,7 @@ public final class IndexFacets extends IndexFn {
    * @return element
    */
   private static FElem flat(final Data data) {
-    final FElem elem = new FElem(new QNm(NodeType.DOC.name));
+    final FElem elem = new FElem(NodeType.DOCUMENT_NODE.qname());
     index(data.elemNames, ELM, elem);
     index(data.attrNames, ATT, elem);
     return elem;
@@ -61,7 +63,7 @@ public final class IndexFacets extends IndexFn {
    * @return element
    */
   private static FElem tree(final Data data, final PathNode root) {
-    final FElem elem = new FElem(new QNm(ANode.type(root.kind).name));
+    final FElem elem = new FElem(ANode.type(root.kind).qname());
     final boolean elm = root.kind == Data.ELEM;
     final Names names = elm ? data.elemNames : data.attrNames;
     if(root.kind == Data.ATTR || elm) elem.add(NAME, names.key(root.name));
@@ -100,8 +102,16 @@ public final class IndexFacets extends IndexFn {
       elem.add(MAX, mx == stats.max ? token(mx) : token(stats.max));
     }
     if(isCategory(type)) {
-      for(final byte[] value : stats.values) {
-        elem.add(new FElem(ENTRY).add(COUNT, token(stats.values.get(value))).add(value));
+      final TokenIntMap map = stats.values;
+      final IntList list = new IntList(map.size());
+      final TokenList values = new TokenList(map.size());
+      for(final byte[] value : map) {
+        list.add(map.get(value));
+        values.add(value);
+      }
+      for(final int o : list.createOrder(false)) {
+        final byte[] value = values.get(o);
+        elem.add(new FElem(ENTRY).add(COUNT, token(map.get(value))).add(value));
       }
     }
   }

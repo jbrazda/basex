@@ -17,7 +17,7 @@ import org.basex.util.options.*;
 /**
  * Update primitive for the optimize function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Dimitar Popov
  */
 public final class DBOptimize extends DBUpdate {
@@ -52,12 +52,8 @@ public final class DBOptimize extends DBUpdate {
   }
 
   @Override
-  public void merge(final Update update) {
-    all |= ((DBOptimize) update).all;
+  public void prepare() {
   }
-
-  @Override
-  public void prepare() { }
 
   @Override
   public void apply() throws QueryException {
@@ -72,47 +68,46 @@ public final class DBOptimize extends DBUpdate {
     options.assignIfAbsent(MainOptions.ATTRINCLUDE, meta.attrinclude);
     options.assignIfAbsent(MainOptions.TOKENINCLUDE, meta.tokeninclude);
     options.assignIfAbsent(MainOptions.FTINCLUDE, meta.ftinclude);
-    options.assignIfAbsent(MainOptions.SPLITSIZE, meta.splitsize);
     options.assignIfAbsent(MainOptions.UPDINDEX, meta.updindex);
     options.assignIfAbsent(MainOptions.AUTOOPTIMIZE, meta.autooptimize);
+    options.assignIfAbsent(MainOptions.SPLITSIZE, meta.splitsize);
+    options.assignIfAbsent(MainOptions.MAXCATS, meta.maxcats);
+    options.assignIfAbsent(MainOptions.MAXLEN, meta.maxlen);
     options.assignTo(opts);
 
-    // adopt options to database meta data
-    meta.createtext = opts.get(MainOptions.TEXTINDEX);
-    meta.createattr = opts.get(MainOptions.ATTRINDEX);
-    meta.createtoken = opts.get(MainOptions.TOKENINDEX);
-    meta.createft = opts.get(MainOptions.FTINDEX);
-
-    meta.updindex = opts.get(MainOptions.UPDINDEX);
-    meta.autooptimize = opts.get(MainOptions.AUTOOPTIMIZE);
-    meta.splitsize = opts.get(MainOptions.SPLITSIZE);
-
-    // check if other indexing options have changed
-    final int maxcats = opts.get(MainOptions.MAXCATS);
+    // check which options have changed
     final int maxlen = opts.get(MainOptions.MAXLEN);
     final String textinclude = opts.get(MainOptions.TEXTINCLUDE);
     final String attrinclude = opts.get(MainOptions.ATTRINCLUDE);
     final String tokeninclude = opts.get(MainOptions.TOKENINCLUDE);
-    final boolean rebuild = maxlen != meta.maxlen;
-    final boolean rebuildText = !meta.textinclude.equals(textinclude) || rebuild;
-    final boolean rebuildAttr = !meta.attrinclude.equals(attrinclude) || rebuild;
-    final boolean rebuildToken = !meta.tokeninclude.equals(tokeninclude);
-    meta.textinclude = textinclude;
-    meta.attrinclude = attrinclude;
-    meta.tokeninclude = tokeninclude;
-    meta.maxcats = maxcats;
-    meta.maxlen = maxlen;
-
-    // check if fulltext indexing options have changed
     final String ftinclude = opts.get(MainOptions.FTINCLUDE);
     final boolean stemming = opts.get(MainOptions.STEMMING);
     final boolean casesens = opts.get(MainOptions.CASESENS);
     final boolean diacritics = opts.get(MainOptions.DIACRITICS);
     final Language language = Language.get(opts);
     final String stopwords = opts.get(MainOptions.STOPWORDS);
+
+    final boolean rebuild = maxlen != meta.maxlen;
+    final boolean rebuildText = !meta.textinclude.equals(textinclude) || rebuild;
+    final boolean rebuildAttr = !meta.attrinclude.equals(attrinclude) || rebuild;
+    final boolean rebuildToken = !meta.tokeninclude.equals(tokeninclude);
     final boolean rebuildFt = !meta.ftinclude.equals(ftinclude) || rebuild ||
         stemming != meta.stemming || casesens != meta.casesens || diacritics != meta.diacritics ||
         !language.equals(meta.language) || !stopwords.equals(meta.stopwords);
+
+    // assign options to meta data
+    meta.createtext = opts.get(MainOptions.TEXTINDEX);
+    meta.createattr = opts.get(MainOptions.ATTRINDEX);
+    meta.createtoken = opts.get(MainOptions.TOKENINDEX);
+    meta.createft = opts.get(MainOptions.FTINDEX);
+    meta.maxcats = opts.get(MainOptions.MAXCATS);
+    meta.updindex = opts.get(MainOptions.UPDINDEX);
+    meta.autooptimize = opts.get(MainOptions.AUTOOPTIMIZE);
+    meta.splitsize = opts.get(MainOptions.SPLITSIZE);
+    meta.textinclude = textinclude;
+    meta.attrinclude = attrinclude;
+    meta.tokeninclude = tokeninclude;
+    meta.maxlen = maxlen;
     meta.ftinclude = ftinclude;
     meta.stemming   = stemming;
     meta.casesens   = casesens;
@@ -129,6 +124,11 @@ public final class DBOptimize extends DBUpdate {
 
     // remove old database reference
     if(all) qc.resources.remove(meta.name);
+  }
+
+  @Override
+  public void merge(final Update update) {
+    all |= ((DBOptimize) update).all;
   }
 
   @Override

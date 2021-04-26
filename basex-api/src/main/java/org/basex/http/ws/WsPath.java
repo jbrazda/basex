@@ -5,7 +5,7 @@ import org.basex.http.web.*;
 /**
  * This class represents the Path of a WebSocket endpoint.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Johannes Finckh
  */
 public final class WsPath extends WebPath implements Comparable<WsPath> {
@@ -13,7 +13,7 @@ public final class WsPath extends WebPath implements Comparable<WsPath> {
    * Constructor.
    * @param path WebSocket path
    */
-  public WsPath(final String path) {
+  WsPath(final String path) {
     super(path);
   }
 

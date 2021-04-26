@@ -5,13 +5,14 @@ import static org.basex.query.QueryError.*;
 import org.basex.data.*;
 import org.basex.io.*;
 import org.basex.query.*;
+import org.basex.query.expr.*;
 import org.basex.query.value.item.*;
 import org.basex.util.*;
 
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DbExists extends DbAccess {
@@ -28,6 +29,16 @@ public final class DbExists extends DbAccess {
         raw = io.exists() && !io.isDir();
       }
       return Bln.get(raw || data.resources.doc(path) != -1);
+    } catch(final QueryException ex) {
+      if(ex.error() == DB_OPEN2_X) return Bln.FALSE;
+      throw ex;
+    }
+  }
+
+  @Override
+  protected Expr opt(final CompileContext cc) throws QueryException {
+    try {
+      return compileData(cc);
     } catch(final QueryException ex) {
       if(ex.error() == DB_OPEN2_X) return Bln.FALSE;
       throw ex;

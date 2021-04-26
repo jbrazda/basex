@@ -27,7 +27,7 @@ import org.basex.util.*;
  *
  * <p>If T is a text node and the new text value is empty, T is deleted.</p>
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 public final class ReplaceValue extends NodeUpdate {
@@ -50,7 +50,7 @@ public final class ReplaceValue extends NodeUpdate {
   }
 
   @Override
-  public void prepare(final MemData tmp, final QueryContext qc) { }
+  public void prepare(final MemData memData, final QueryContext qc) { }
 
   @Override
   public void merge(final Update update) throws QueryException {
@@ -140,5 +140,6 @@ public final class ReplaceValue extends NodeUpdate {
   }
 
   @Override
-  public void update(final NamePool pool) { }
+  public void update(final NamePool pool) {
+  }
 }

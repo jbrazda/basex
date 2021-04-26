@@ -16,7 +16,7 @@ import org.basex.util.*;
 /**
  * Dialog window for displaying the progress of a command execution.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DialogProgress extends BaseXDialog implements ActionListener {
@@ -50,7 +50,7 @@ public final class DialogProgress extends BaseXDialog implements ActionListener 
    * @param dialog dialog window
    * @param cmd progress reference
    */
-  public DialogProgress(final BaseXDialog dialog, final Command cmd) {
+  private DialogProgress(final BaseXDialog dialog, final Command cmd) {
     super(dialog, "");
     init(dialog, cmd);
   }

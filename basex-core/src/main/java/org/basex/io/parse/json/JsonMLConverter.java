@@ -15,7 +15,7 @@ import org.basex.util.*;
  * The specified JSON input is first transformed into a tree representation
  * and then converted to an XML document.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  * @author Leo Woerteler
  */
@@ -34,8 +34,8 @@ final class JsonMLConverter extends JsonXmlConverter {
   }
 
   @Override
-  public FDoc finish(final String uri) {
-    return new FDoc(uri).add(stack.pop());
+  FDoc finish() {
+    return doc.add(stack.pop());
   }
 
   /**

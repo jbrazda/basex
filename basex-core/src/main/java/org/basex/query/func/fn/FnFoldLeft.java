@@ -1,5 +1,6 @@
 package org.basex.query.func.fn;
 
+import org.basex.core.*;
 import org.basex.query.*;
 import org.basex.query.expr.*;
 import org.basex.query.func.*;
@@ -12,50 +13,56 @@ import org.basex.query.value.type.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnFoldLeft extends StandardFunc {
   @Override
   public Value value(final QueryContext qc) throws QueryException {
     final Iter iter = exprs[0].iter(qc);
-    final FItem func = checkArity(exprs[2], 2, qc);
-
-    Value value = exprs[1].value(qc);
-    for(Item item; (item = qc.next(iter)) != null;) {
-      value = func.invokeValue(qc, info, value, item);
-    }
-    return value;
+    final Item item = iter.next();
+    return item != null ? value(iter, item, qc) : exprs[1].value(qc);
   }
 
   @Override
   public Iter iter(final QueryContext qc) throws QueryException {
     final Iter iter = exprs[0].iter(qc);
-    final FItem func = checkArity(exprs[2], 2, qc);
+    final Item item = iter.next();
+    return item != null ? value(iter, item, qc).iter() : exprs[1].iter(qc);
+  }
 
-    // don't convert to a value if not necessary
-    Item item = iter.next();
-    if(item == null) return exprs[1].iter(qc);
-
+  /**
+   * Evaluates the expression.
+   * @param iter input iterator
+   * @param item first item
+   * @param qc query context
+   * @return result
+   * @throws QueryException query exception
+   */
+  private Value value(final Iter iter, final Item item, final QueryContext qc)
+      throws QueryException {
     Value value = exprs[1].value(qc);
+    final FItem func = checkArity(exprs[2], 2, qc);
+    Item it = item;
     do {
-      value = func.invokeValue(qc, info, value, item);
-    } while((item = qc.next(iter)) != null);
-    return value.iter();
+      value = func.invoke(qc, info, value, it);
+    } while((it = qc.next(iter)) != null);
+    return value;
   }
 
   @Override
   protected Expr opt(final CompileContext cc) throws QueryException {
-    final Expr expr1 = exprs[0], expr2 = exprs[1];
+    final Expr expr1 = exprs[0], expr2 = exprs[1], expr3 = exprs[2];
     if(expr1 == Empty.VALUE) return expr2;
 
     opt(this, cc, false, true);
 
-    if(allAreValues(false) && expr1.size() <= UNROLL_LIMIT) {
+    final int limit = cc.qc.context.options.get(MainOptions.UNROLLLIMIT);
+    if(expr1 instanceof Value && expr3 instanceof Value && expr1.size() <= limit) {
       // unroll the loop
       Expr expr = expr2;
       for(final Item item : (Value) expr1) {
-        expr = new DynFuncCall(info, sc, exprs[2], expr, item).optimize(cc);
+        expr = new DynFuncCall(info, sc, expr3, expr, item).optimize(cc);
       }
       cc.info(QueryText.OPTUNROLL_X, this);
       return expr;
@@ -79,7 +86,8 @@ public final class FnFoldLeft extends StandardFunc {
     if(func instanceof FuncItem) {
       // function argument is a single function item
       final SeqType seq = exprs[0].seqType(), zero = exprs[1].seqType(), curr = array &&
-          seq.type instanceof ArrayType ? ((ArrayType) seq.type).declType : seq.with(Occ.ONE);
+          seq.type instanceof ArrayType ? ((ArrayType) seq.type).declType :
+            seq.with(Occ.EXACTLY_ONE);
 
       // assign item type of iterated value, optimize function
       final SeqType[] args = { left ? SeqType.ITEM_ZM : curr, left ? curr : SeqType.ITEM_ZM };

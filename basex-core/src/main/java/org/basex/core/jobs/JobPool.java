@@ -9,12 +9,13 @@ import org.basex.util.Performance;
 /**
  * Job pool.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class JobPool {
   /** Number of queries to be queued. */
-  public static final int MAXQUERIES = 1000;
+  static final int MAXQUERIES = 1000;
+
   /** Queued or running jobs. */
   public final Map<String, Job> active = new ConcurrentHashMap<>();
   /** Cached results. */

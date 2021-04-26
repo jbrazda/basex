@@ -14,7 +14,7 @@ import org.basex.util.hash.*;
 /**
  * Array constructor.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class CArray extends Arr {
@@ -37,7 +37,7 @@ public final class CArray extends Arr {
     SeqType dt = null;
     for(final Expr expr : exprs) {
       SeqType st = expr.seqType();
-      if(!seq) st = st.with(Occ.ONE);
+      if(!seq) st = st.with(Occ.EXACTLY_ONE);
       dt = dt == null ? st : dt.union(st);
     }
     if(dt != null) exprType.assign(ArrayType.get(dt));

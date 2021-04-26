@@ -28,7 +28,7 @@ import org.basex.util.hash.*;
 /**
  * Compilation context.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class CompileContext {
@@ -105,7 +105,7 @@ public final class CompileContext {
    * @param ext text text extensions
    */
   public void info(final String string, final Object... ext) {
-    qc.info.compInfo(string, ext);
+    if(qc.parent == null) qc.info.compInfo(string, ext);
   }
 
   /**
@@ -196,7 +196,7 @@ public final class CompileContext {
       final Value value = qc.focus.value;
       if(value != null) data = value.data();
     }
-    return new Dummy(expr.seqType().with(Occ.ONE), data);
+    return new Dummy(expr.seqType().with(Occ.EXACTLY_ONE), data);
   }
 
   /**
@@ -336,8 +336,8 @@ public final class CompileContext {
   }
 
   /**
-   * Creates a single expression from a condition and a return expression.
-   * @param cond condition
+   * Creates a list expression from a condition and a return expression.
+   * @param cond condition (an optional result will be swallowed)
    * @param rtrn return expression
    * @param ii input info
    * @return function

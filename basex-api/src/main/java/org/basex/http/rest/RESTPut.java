@@ -15,7 +15,7 @@ import org.basex.util.http.*;
 /**
  * REST-based evaluation of PUT operations.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class RESTPut {
@@ -32,17 +32,16 @@ final class RESTPut {
     // create new database or update resource
     final HTTPConnection conn = session.conn;
     final String db = conn.db();
-    if(db.isEmpty()) throw HTTPCode.NO_PATH.get();
+    if(db.isEmpty()) throw HTTPCode.NO_DATABASE_SPECIFIED.get();
 
     RESTCmd.parseOptions(session);
 
     final MainOptions options = conn.context.options;
     final InputStream is = conn.request.getInputStream();
-    final MediaType mt = conn.contentType();
+    final MediaType mt = conn.mediaType();
 
     // choose correct importer
     boolean xml = true;
-    final String ct = mt.type();
     if(mt.isJSON()) {
       final JsonParserOptions opts = new JsonParserOptions();
       opts.assign(mt);
@@ -63,7 +62,7 @@ final class RESTPut {
       opts.assign(mt);
       options.set(MainOptions.TEXTPARSER, opts);
       options.set(MainOptions.PARSER, MainParser.TEXT);
-    } else if(!ct.isEmpty() && !mt.isXML()) {
+    } else if(!mt.is(MediaType.ALL_ALL) && !mt.isXML()) {
       xml = false;
     }
 

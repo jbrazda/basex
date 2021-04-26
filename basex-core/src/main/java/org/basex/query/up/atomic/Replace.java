@@ -9,7 +9,7 @@ import org.basex.data.*;
 /**
  * Replaces a node in the database with an insertion sequence.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 final class Replace extends StructuralUpdate {
@@ -46,21 +46,25 @@ final class Replace extends StructuralUpdate {
 
   @Override
   void apply(final Data data) {
-    if(data.nspaces.isEmpty() && clip.data.nspaces.isEmpty()) {
-      // Lazy Replace: rewrite to value updates if structure has not changed
-      if(lazyReplace(data)) return;
-      // Rapid Replace: in-place update, overwrite existing table entries
-      data.replace(location, clip);
-    } else {
-      // fallback: delete old entries, add new ones
-      final int kind = data.kind(location), par = data.parent(location, kind);
-      // delete first - otherwise insert must be at location+1
-      data.delete(location);
-      if(kind == Data.ATTR) {
-        data.insertAttr(location, par, clip);
+    try {
+      if(data.nspaces.isEmpty() && clip.data.nspaces.isEmpty()) {
+        // Lazy Replace: rewrite to value updates if structure has not changed
+        if(lazyReplace(data)) return;
+        // Rapid Replace: in-place update, overwrite existing table entries
+        data.replace(location, clip);
       } else {
-        data.insert(location, par, clip);
+        // fallback: delete old entries, add new ones
+        final int kind = data.kind(location), par = data.parent(location, kind);
+        // delete first - otherwise insert must be at location+1
+        data.delete(location);
+        if(kind == Data.ATTR) {
+          data.insertAttr(location, par, clip);
+        } else {
+          data.insert(location, par, clip);
+        }
       }
+    } finally {
+      clip.finish();
     }
   }
 
@@ -120,7 +124,7 @@ final class Replace extends StructuralUpdate {
         }
       }
     }
-    for(final BasicUpdate bu : valueUpdates) bu.apply(data);
+    for(final BasicUpdate update : valueUpdates) update.apply(data);
     return true;
   }
 

@@ -25,7 +25,7 @@ import org.basex.util.*;
  * This class provides static layout and paint helper methods which are used all over
  * the GUI.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class BaseXLayout {
@@ -234,7 +234,7 @@ public final class BaseXLayout {
 
   /**
    * Drag and drop handler.
-   * @author BaseX Team 2005-20, BSD License
+   * @author BaseX Team 2005-21, BSD License
    * @author Christian Gruen
    */
   public interface DropHandler {
@@ -411,7 +411,7 @@ public final class BaseXLayout {
   }
 
   /**
-   * Draws the specified string. Chops the last character if space is not enough space.
+   * Draws the specified string and chops the last characters if there is not enough space.
    * @param g graphics reference
    * @param string string
    * @param x x coordinate

@@ -13,7 +13,7 @@ import org.basex.util.*;
 /**
  * Update primitive for the {@link Function#_DB_ALTER_BACKUP} function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class BackupAlter extends NameUpdate {
@@ -34,8 +34,7 @@ public final class BackupAlter extends NameUpdate {
   }
 
   @Override
-  public void merge(final Update update) throws QueryException {
-    throw DB_CONFLICT2_X_X.get(info, name, operation());
+  public void prepare() {
   }
 
   @Override
@@ -48,8 +47,12 @@ public final class BackupAlter extends NameUpdate {
   }
 
   @Override
-  public void prepare() { }
+  public void merge(final Update update) throws QueryException {
+    throw DB_CONFLICT2_X_X.get(info, name, operation());
+  }
 
   @Override
-  protected String operation() { return "renamed"; }
+  protected String operation() {
+    return "renamed";
+  }
 }

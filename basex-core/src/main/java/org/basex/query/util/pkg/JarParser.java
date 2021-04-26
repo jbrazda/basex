@@ -16,7 +16,7 @@ import org.basex.util.*;
 /**
  * Parses the jar descriptors and performs schema checks.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Rositsa Shadura
  */
 final class JarParser {
@@ -42,7 +42,7 @@ final class JarParser {
     try {
       final ANode node = new DBNode(io).childIter().next();
       for(final ANode next : node.childIter()) {
-        if(next.type != NodeType.ELM) continue;
+        if(next.type != NodeType.ELEMENT) continue;
 
         final QNm name = next.qname();
         // ignore namespace to improve compatibility

@@ -14,7 +14,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnZeroOrOne extends StandardFunc {
@@ -34,7 +34,7 @@ public final class FnZeroOrOne extends StandardFunc {
     if(st.zeroOrOne()) return expr;
     if(expr.size() > 1) throw ZEROORONE.get(info);
 
-    exprType.assign(st.with(Occ.ZERO_ONE));
+    exprType.assign(st.with(Occ.ZERO_OR_ONE));
     data(expr.data());
     return this;
   }

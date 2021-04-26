@@ -12,7 +12,7 @@ import org.basex.util.options.*;
 /**
  * This class contains database options which are used all around the project.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class MainOptions extends Options {
@@ -123,8 +123,10 @@ public final class MainOptions extends Options {
   public static final BooleanOption MIXUPDATES = new BooleanOption("MIXUPDATES", false);
   /** External variables, separated by commas. */
   public static final StringOption BINDINGS = new StringOption("BINDINGS", "");
-  /** Flag for the size limit on inlineable functions. */
+  /** Limit for inlining functions. */
   public static final NumberOption INLINELIMIT = new NumberOption("INLINELIMIT", 50);
+  /** Limit for unrolling loops. */
+  public static final NumberOption UNROLLLIMIT = new NumberOption("UNROLLLIMIT", 5);
   /** Flag for tail-call optimization. */
   public static final NumberOption TAILCALLS = new NumberOption("TAILCALLS", 256);
   /** Look up documents in databases. */

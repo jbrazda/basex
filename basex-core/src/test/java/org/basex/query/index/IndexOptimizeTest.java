@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 /**
  * This class tests if queries are rewritten for index access.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class IndexOptimizeTest extends QueryPlanTest {
@@ -24,6 +24,12 @@ public final class IndexOptimizeTest extends QueryPlanTest {
     set(MainOptions.FTINDEX, true);
     set(MainOptions.TOKENINDEX, true);
     set(MainOptions.QUERYINFO, true);
+  }
+
+  /** Resets optimizations. */
+  @AfterEach public void init() {
+    inline(false);
+    unroll(false);
   }
 
   /** Checks the open command. */
@@ -109,6 +115,7 @@ public final class IndexOptimizeTest extends QueryPlanTest {
     createDoc();
     execute(new Open(NAME));
     indexCheck("data(//*[tokenize(@idref) = 'id1'])", 1);
+    indexCheck("data(//*[tokenize(@idref, '\\s+') = 'id1'])", 1);
     indexCheck("data(//@*[tokenize(.) = 'id1'])", "id1 id2");
     indexCheck("for $s in ('id2', 'id3') return data(//*[tokenize(@idref) = $s])", 1);
     indexCheck("for $s in ('id2', 'id3') return data(//@*[tokenize(.) = $s])", "id1 id2");
@@ -144,6 +151,8 @@ public final class IndexOptimizeTest extends QueryPlanTest {
   /** Checks index optimizations inside functions. */
   @Test public void functionInlining() {
     createColl();
+    inline(true);
+
     // document access after inlining
     indexCheck("declare function db:a($d) { collection($d)//text()[. = '1'] }; "
         + "db:a('" + NAME + "')", 1);

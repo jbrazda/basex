@@ -34,17 +34,15 @@ import org.basex.query.var.*;
 import org.basex.util.*;
 import org.basex.util.hash.*;
 import org.basex.util.options.*;
+import org.basex.util.similarity.*;
 
 /**
  * Built-in functions.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class StandardFunc extends Arr {
-  /** Minimum size of a loop that should not be unrolled. */
-  public static final int UNROLL_LIMIT = 5;
-
   /** Function definition. */
   public FuncDefinition definition;
   /** Static context. */
@@ -102,8 +100,8 @@ public abstract class StandardFunc extends Arr {
       // consider variable-size parameters
       final int p = Math.min(e, definition.params.length - 1);
       final Type type = definition.params[p].type;
-      if(type.instanceOf(AtomType.AAT)) {
-        final Simplify mode = type.instanceOf(AtomType.NUM) ? Simplify.NUMBER : Simplify.STRING;
+      if(type.instanceOf(AtomType.ANY_ATOMIC_TYPE)) {
+        final Simplify mode = type.instanceOf(AtomType.NUMERIC) ? Simplify.NUMBER : Simplify.STRING;
         exprs[e] = exprs[e].simplifyFor(mode, cc);
       }
     }
@@ -155,7 +153,7 @@ public abstract class StandardFunc extends Arr {
     if(expr != null) {
       final SeqType st = expr.seqType();
       if(st.zero()) return expr;
-      if(occ && st.oneOrMore() && !(atom && st.mayBeArray())) exprType.assign(Occ.ONE);
+      if(occ && st.oneOrMore() && !(atom && st.mayBeArray())) exprType.assign(Occ.EXACTLY_ONE);
     }
     return this;
   }
@@ -282,7 +280,7 @@ public abstract class StandardFunc extends Arr {
    * @throws QueryException query exception
    */
   protected final DBNode toDBNode(final Item item) throws QueryException {
-    if(checkNoEmpty(item, NodeType.NOD) instanceof DBNode) return (DBNode) item;
+    if(checkNoEmpty(item, NodeType.NODE) instanceof DBNode) return (DBNode) item;
     throw DB_NODE_X.get(info, item);
   }
 
@@ -403,13 +401,15 @@ public abstract class StandardFunc extends Arr {
       throws QueryException {
 
     if(i >= exprs.length) return null;
-    final String encoding = string(toToken(exprs[i], qc));
+    final byte[] encoding = toToken(exprs[i], qc);
     try {
-      if(Charset.isSupported(encoding)) return Strings.normEncoding(encoding);
+      final String enc = string(toToken(exprs[i], qc));
+      if(Charset.isSupported(enc)) return Strings.normEncoding(enc);
     } catch(final IllegalArgumentException ignored) {
       /* character set is invalid or unknown (e.g. empty string) */
     }
-    throw err.get(info, encoding);
+    throw err.get(info, QueryError.similar(encoding,
+        Levenshtein.similar(encoding, Strings.encodings())));
   }
 
   /**
@@ -553,7 +553,7 @@ public abstract class StandardFunc extends Arr {
    * @throws QueryException query exception
    */
   protected final long dateTimeToMs(final Expr expr, final QueryContext qc) throws QueryException {
-    final Dtm dtm = (Dtm) checkType(expr, qc, AtomType.DTM);
+    final Dtm dtm = (Dtm) checkType(expr, qc, AtomType.DATE_TIME);
     if(dtm.yea() > 292278993) throw INTRANGE_X.get(info, dtm.yea());
     return dtm.toJava().toGregorianCalendar().getTimeInMillis();
   }

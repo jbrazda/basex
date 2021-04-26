@@ -11,7 +11,7 @@ import org.basex.query.value.type.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnFilter extends StandardFunc {
@@ -23,7 +23,7 @@ public final class FnFilter extends StandardFunc {
 
     final ValueBuilder vb = new ValueBuilder(qc);
     for(Item item; (item = iter.next()) != null;) {
-      if(toBoolean(func.invokeItem(qc, info, item))) vb.add(item);
+      if(toBoolean(func.invoke(qc, info, item).item(qc, info))) vb.add(item);
     }
     return vb.value(this);
   }
@@ -36,9 +36,9 @@ public final class FnFilter extends StandardFunc {
 
     // create filter expression
     final Expr pred = cc.get(items, () -> {
-      Expr p = new ContextValue(info).optimize(cc);
+      Expr p = ContextValue.get(cc, info);
       p = new DynFuncCall(info, sc, exprs[1], p).optimize(cc);
-      p = new TypeCheck(sc, info, p, SeqType.BLN_O, true).optimize(cc);
+      p = new TypeCheck(sc, info, p, SeqType.BOOLEAN_O, true).optimize(cc);
       return p;
     });
     return Filter.get(cc, info, items, cc.function(Function.BOOLEAN, info, pred));

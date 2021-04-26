@@ -19,7 +19,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class FnSum extends StandardFunc {
@@ -27,68 +27,74 @@ public class FnSum extends StandardFunc {
   public Item item(final QueryContext qc, final InputInfo ii) throws QueryException {
     final Expr expr = exprs[0];
     if(expr instanceof RangeSeq || expr instanceof Range) {
-      final Item item = range(expr.value(qc));
+      final Item item = range(expr.value(qc), false);
       if(item != null) return item;
     } else {
       if(expr instanceof SingletonSeq) {
-        final Item item = singleton((SingletonSeq) expr);
+        final Item item = singleton((SingletonSeq) expr, false);
         if(item != null) return item;
       }
       final Iter iter = exprs[0].atomIter(qc, info);
       final Item item = iter.next();
       if(item != null) return sum(iter, item, false, qc);
     }
-
     // return default item
     return exprs.length == 2 ? exprs[1].atomItem(qc, info) : Int.ZERO;
   }
 
   @Override
-  protected void simplifyArgs(final CompileContext cc) {
-    // do not simplify summed-up items and zero argument
-  }
-
-  @Override
   protected Expr opt(final CompileContext cc) throws QueryException {
-    final Expr expr1 = exprs[0], expr2 = exprs.length == 2 ? exprs[1] : null;
-    if(expr1 instanceof RangeSeq) return range((Value) expr1);
+    final Expr expr1 = exprs[0];
+    if(expr1 instanceof RangeSeq) return range((Value) expr1, false);
     if(expr1 instanceof SingletonSeq) {
-      final Item item = singleton((SingletonSeq) expr1);
+      final Item item = singleton((SingletonSeq) expr1, false);
       if(item != null) return item;
     }
 
-    // empty sequence: replace with default item
+    final Expr expr2 = exprs.length == 2 ? exprs[1] : null;
     final SeqType st1 = expr1.seqType(), st2 = expr2 != null ? expr2.seqType() : null;
     if(st1.zero()) {
       // sequence is empty: check if it also deterministic
       if(!expr1.has(Flag.NDT)) {
         if(expr2 == null) return Int.ZERO;
         if(expr2 == Empty.VALUE) return expr1;
-        if(st2.instanceOf(SeqType.ITR_O)) return expr2;
+        if(st2.instanceOf(SeqType.INTEGER_O)) return expr2;
       }
     } else if(st1.oneOrMore() && !st1.mayBeArray()) {
       // sequence is not empty: assign result type
       final Type type1 = st1.type;
       if(type1.isNumber()) exprType.assign(type1.seqType());
-      else if(type1.isUntyped()) exprType.assign(SeqType.DBL_O);
+      else if(type1.isUntyped()) exprType.assign(SeqType.DOUBLE_O);
     } else if(st2 != null && !st2.zero() && !st2.mayBeArray()) {
       // if input may be empty: consider default argument in static type
-      exprType.assign(Calc.PLUS.type(st1.type, st2.type), st2.oneOrMore() ? Occ.ONE : Occ.ZERO_ONE);
+      final Occ occ = st2.oneOrMore() ? Occ.EXACTLY_ONE : Occ.ZERO_OR_ONE;
+      exprType.assign(Calc.PLUS.type(st1.type, st2.type), occ);
     }
     return this;
+  }
+
+  @Override
+  protected final void simplifyArgs(final CompileContext cc) {
+    // do not simplify summed-up items and zero argument
   }
 
   /**
    * Compute result from range value.
    * @param value sequence
+   * @param avg calculate average
    * @return result, or {@code null} if sequence is empty
    * @throws QueryException query exception
    */
-  private Item range(final Value value) throws QueryException {
+  protected final Item range(final Value value, final boolean avg) throws QueryException {
     if(value.isEmpty()) return null;
 
-    // Little Gauss computation
     long min = value.itemAt(0).itr(info), max = value.itemAt(value.size() - 1).itr(info);
+    if(avg) {
+      final BigDecimal bs = BigDecimal.valueOf(min), be = BigDecimal.valueOf(max);
+      return Dec.get(bs.add(be).divide(Dec.BD_2, MathContext.DECIMAL64));
+    }
+
+    // Little Gauss computation
     // swap values if order is descending
     if(min > max) {
       final long t = max;
@@ -111,13 +117,19 @@ public class FnSum extends StandardFunc {
   /**
    * Compute result from singleton value.
    * @param seq singleton sequence
+   * @param avg calculate average
    * @return result, or {@code null} if value cannot be evaluated
    * @throws QueryException query exception
    */
-  private Item singleton(final SingletonSeq seq) throws QueryException {
-    Item item = seq.itemAt(0);
-    if(item.type.isUntyped()) item = Dbl.get(item.dbl(info));
-    return item.type.isNumber() ? Calc.MULT.eval(item, Int.get(seq.size()), info) : null;
+  protected final Item singleton(final SingletonSeq seq, final boolean avg) throws QueryException {
+    if(seq.singleItem()) {
+      Item item = seq.itemAt(0);
+      if(item.type.isUntyped()) item = Dbl.get(item.dbl(info));
+      if(item.type.isNumber()) {
+        return avg ? item : Calc.MULT.eval(item, Int.get(seq.size()), info);
+      }
+    }
+    return null;
   }
 
   /**
@@ -129,11 +141,12 @@ public class FnSum extends StandardFunc {
    * @return summed up item
    * @throws QueryException query exception
    */
-  Item sum(final Iter iter, final Item item, final boolean avg, final QueryContext qc)
+  final Item sum(final Iter iter, final Item item, final boolean avg, final QueryContext qc)
       throws QueryException {
 
     Item result = item.type.isUntyped() ? Dbl.get(item.dbl(info)) : item;
-    final boolean num = result instanceof ANum, dtd = result.type == DTD, ymd = result.type == YMD;
+    final boolean num = result instanceof ANum;
+    final boolean dtd = result.type == DAY_TIME_DURATION, ymd = result.type == YEAR_MONTH_DURATION;
     if(!num && !dtd && !ymd) throw SUM_X_X.get(info, result.type, result);
 
     int c = 1;
@@ -141,10 +154,15 @@ public class FnSum extends StandardFunc {
       final Type type = it.type;
       Type tp = null;
       if(type.isNumberOrUntyped()) {
-        if(!num) tp = DUR;
+        if(!num) {
+          tp = DURATION;
+        }
       } else {
-        if(num) tp = NUM;
-        else if(dtd && type != DTD || ymd && type != YMD) tp = DUR;
+        if(num) {
+          tp = NUMERIC;
+        } else if(dtd && type != DAY_TIME_DURATION || ymd && type != YEAR_MONTH_DURATION) {
+          tp = DURATION;
+        }
       }
       if(tp != null) throw CMP_X_X_X.get(info, tp, type, it);
       result = Calc.PLUS.eval(result, it, info);

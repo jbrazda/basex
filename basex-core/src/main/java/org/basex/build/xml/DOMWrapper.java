@@ -15,7 +15,7 @@ import org.w3c.dom.Text;
 /**
  * This class converts an DOM document instance to a database representation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DOMWrapper extends Parser {
@@ -65,7 +65,7 @@ public final class DOMWrapper extends Parser {
             final byte[] av = token(att.getValue());
             if(eq(an, XMLNS)) {
               if(!stripNS) nsp.add(EMPTY, av);
-            } else if(startsWith(an, XMLNSC)) {
+            } else if(startsWith(an, XMLNS_COLON)) {
               if(!stripNS) nsp.add(local(an), av);
             } else {
               atts.add(stripNS ? local(an) : an, av);

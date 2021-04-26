@@ -18,7 +18,7 @@ import org.basex.util.hash.*;
 /**
  * Mixed path expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class MixedPath extends Path {
@@ -34,14 +34,9 @@ public final class MixedPath extends Path {
 
   @Override
   public Iter iter(final QueryContext qc) throws QueryException {
-    final Expr rt = root != null ? root : ctxValue(qc);
+    final Value rt = root != null ? root.value(qc) : ctxValue(qc);
     Iter iter = rt.iter(qc);
     long size = iter.size();
-    // if result size is unknown, root is fully evaluated (required for requests on query focus)
-    if(size < 0) {
-      iter = iter.value(qc, rt).iter();
-      size = iter.size();
-    }
 
     final QueryFocus focus = qc.focus, qf = new QueryFocus();
     qc.focus = qf;

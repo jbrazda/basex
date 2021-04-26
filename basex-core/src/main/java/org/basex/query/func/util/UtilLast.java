@@ -14,7 +14,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class UtilLast extends StandardFunc {
@@ -59,7 +59,7 @@ public final class UtilLast extends StandardFunc {
       if(stl.oneOrMore()) return cc.function(_UTIL_LAST, info, last);
     }
 
-    exprType.assign(st.with(st.oneOrMore() ? Occ.ONE : Occ.ZERO_ONE));
+    exprType.assign(st.with(st.oneOrMore() ? Occ.EXACTLY_ONE : Occ.ZERO_OR_ONE));
     data(expr.data());
     return this;
   }

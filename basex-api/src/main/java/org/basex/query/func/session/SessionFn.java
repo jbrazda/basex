@@ -12,7 +12,7 @@ import org.basex.query.func.*;
 /**
  * Session function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 abstract class SessionFn extends ApiFunc {
@@ -25,14 +25,14 @@ abstract class SessionFn extends ApiFunc {
    */
   final ASession session(final QueryContext qc, final boolean create) throws QueryException {
     // check if HTTP connection is available
-    final HttpServletRequest requestCtx = request(qc);
+    final HttpServletRequest request = request(qc);
 
     // WebSocket context: access existing session
     HttpSession session = null;
     final Object ws = qc.getProperty(HTTPText.WEBSOCKET);
     if(ws != null) session = ((WebSocket) ws).session;
     // HTTP context: get/create session
-    if(session == null) session = requestCtx.getSession(create);
+    if(session == null) session = request.getSession(create);
     // no session created (may happen with WebSockets): raise error or return null reference
     if(session == null) {
       if(create) throw SESSION_NOTFOUND.get(info);

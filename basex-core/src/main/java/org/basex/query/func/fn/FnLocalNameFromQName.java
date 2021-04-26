@@ -11,14 +11,14 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnLocalNameFromQName extends StandardFunc {
   @Override
   public Item item(final QueryContext qc, final InputInfo ii) throws QueryException {
     final QNm qname = toQNm(exprs[0], qc, true);
-    return qname == null ? Empty.VALUE : AtomType.NCN.cast(Str.get(qname.local()), qc, sc, info);
+    return qname == null ? Empty.VALUE : AtomType.NCNAME.cast(Str.get(qname.local()), qc, sc, info);
   }
 
   @Override

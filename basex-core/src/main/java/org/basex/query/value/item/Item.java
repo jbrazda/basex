@@ -23,14 +23,12 @@ import org.basex.util.*;
 /**
  * Abstract super class for all items.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class Item extends Value {
   /** Undefined item. */
   public static final int UNDEF = Integer.MIN_VALUE;
-  /** Score value. {@code null} reference takes less memory on 32bit than a double. */
-  protected Double score;
 
   /**
    * Constructor.
@@ -156,12 +154,8 @@ public abstract class Item extends Value {
    * @param item item to be compared
    * @return result of check
    */
-  public final boolean comparable(final Item item) {
-    final Type type1 = type, type2 = item.type;
-    return type1 == type2
-        || type1.isStringOrUntyped() && type2.isStringOrUntyped()
-        || this instanceof ANum && item instanceof ANum
-        || this instanceof Dur && item instanceof Dur;
+  public boolean comparable(final Item item) {
+    return type == item.type;
   }
 
   /**
@@ -294,7 +288,7 @@ public abstract class Item extends Value {
   }
 
   @Override
-  public final boolean ddo() {
+  public boolean ddo() {
     return type instanceof NodeType;
   }
 
@@ -312,16 +306,7 @@ public abstract class Item extends Value {
    * @return score value
    */
   public double score() {
-    final Double s = score;
-    return s == null ? 0 : s;
-  }
-
-  /**
-   * Sets a new score value (do not assign if value is 0).
-   * @param s score value
-   */
-  public final void score(final double s) {
-    if(s != 0) score = s;
+    return 0;
   }
 
   @Override

@@ -21,7 +21,7 @@ import org.basex.util.hash.*;
 /**
  * Union expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Union extends Set {
@@ -45,11 +45,11 @@ public final class Union extends Set {
       if(!st2.zero()) st = st == null ? st2 : st.union(st2);
     }
     // check if all operands yield an empty sequence
-    if(st == null) st = SeqType.NOD_ZM;
+    if(st == null) st = SeqType.NODE_ZM;
 
     // skip optimizations if operands do not have the correct type
     if(st.type instanceof NodeType) {
-      exprType.assign(st.union(Occ.ONE_MORE));
+      exprType.assign(st.union(Occ.ONE_OR_MORE));
 
       final ExprList list = new ExprList(exprs.length);
       for(final Expr expr : exprs) {

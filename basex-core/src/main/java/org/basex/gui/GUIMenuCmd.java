@@ -23,7 +23,7 @@ import org.basex.util.list.*;
 /**
  * This enumeration encapsulates all commands that are triggered by GUI operations.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public enum GUIMenuCmd implements GUICommand {
@@ -405,11 +405,11 @@ public enum GUIMenuCmd implements GUICommand {
 
       final StringList sl = insert.result;
       final NodeType type = ANode.type(insert.kind);
-      String item = Strings.concat(type.name, " { ", quote(sl.get(0)), " }");
+      String item = Strings.concat(type.qname().local(), " { ", quote(sl.get(0)), " }");
 
-      if(type == NodeType.ATT || type == NodeType.PI) {
+      if(type == NodeType.ATTRIBUTE || type == NodeType.PROCESSING_INSTRUCTION) {
         item += " { " + quote(sl.get(1)) + " }";
-      } else if(type == NodeType.ELM) {
+      } else if(type == NodeType.ELEMENT) {
         item += " { () }";
       }
 

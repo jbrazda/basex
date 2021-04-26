@@ -15,7 +15,7 @@ import org.basex.util.list.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnIndexOf extends StandardFunc {
@@ -58,7 +58,7 @@ public final class FnIndexOf extends StandardFunc {
     final Expr expr = exprs[0];
     final SeqType st = expr.seqType();
     if(st.zero()) return expr;
-    if(st.zeroOrOne() && !st.mayBeArray()) exprType.assign(Occ.ZERO_ONE);
+    if(st.zeroOrOne() && !st.mayBeArray()) exprType.assign(Occ.ZERO_OR_ONE);
     return this;
   }
 }

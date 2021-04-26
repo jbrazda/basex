@@ -16,7 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * This class tests the update features of the {@link Data} class.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Tim Petrowsky
  */
 //@RunWith(Parameterized.class)
@@ -41,15 +41,10 @@ public abstract class DataUpdateTest extends SandboxTest {
   /** Test file size in nodes. */
   int size;
 
-  /** Main memory flag. */
-  //@Parameter
-  //public Object mainmem;
-
   /**
    * Test parameters.
    * @return parameters
    */
-  //@Parameters
   public static List<Object[]> params() {
     return Arrays.asList(new Object[][] { { false }, { true } });
   }

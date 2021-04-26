@@ -10,16 +10,19 @@ import org.basex.util.*;
 /**
  * Type for arrays.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ArrayType extends FuncType {
+  /** Name. */
+  public static final byte[] ARRAY = Token.token(QueryText.ARRAY);
+
   /**
    * Constructor.
    * @param declType declared return type
    */
   ArrayType(final SeqType declType) {
-    super(declType, SeqType.ITR_O);
+    super(declType, SeqType.INTEGER_O);
   }
 
   @Override
@@ -40,13 +43,13 @@ public final class ArrayType extends FuncType {
 
   @Override
   public boolean instanceOf(final Type type) {
-    if(type.oneOf(SeqType.ARRAY, SeqType.FUNC, AtomType.ITEM)) return true;
+    if(type.oneOf(SeqType.ARRAY, SeqType.FUNCTION, AtomType.ITEM)) return true;
     if(!(type instanceof FuncType) || type instanceof MapType) return false;
 
     final FuncType ft = (FuncType) type;
     return declType.instanceOf(ft.declType) && (
       type instanceof ArrayType ||
-      ft.argTypes.length == 1 && ft.argTypes[0].instanceOf(SeqType.ITR_O)
+      ft.argTypes.length == 1 && ft.argTypes[0].instanceOf(SeqType.INTEGER_O)
     );
   }
 
@@ -59,7 +62,7 @@ public final class ArrayType extends FuncType {
       final ArrayType at = (ArrayType) type;
       return get(declType.union(at.declType));
     }
-    return type instanceof MapType  ? SeqType.FUNC :
+    return type instanceof MapType  ? SeqType.FUNCTION :
            type instanceof FuncType ? type.union(this) : AtomType.ITEM;
   }
 
@@ -76,8 +79,8 @@ public final class ArrayType extends FuncType {
 
     if(type instanceof ArrayType) return get(dt);
 
-    return ft.argTypes.length == 1 && ft.argTypes[0].instanceOf(SeqType.ITR_O) ?
-      new FuncType(dt, ft.argTypes[0].union(SeqType.ITR_O)) : null;
+    return ft.argTypes.length == 1 && ft.argTypes[0].instanceOf(SeqType.INTEGER_O) ?
+      new FuncType(dt, ft.argTypes[0].union(SeqType.INTEGER_O)) : null;
   }
 
   /**
@@ -92,6 +95,6 @@ public final class ArrayType extends FuncType {
   @Override
   public String toString() {
     final Object[] param = this == SeqType.ARRAY ? WILDCARD : new Object[] { declType };
-    return new QueryString().token(QueryText.ARRAY).params(param).toString();
+    return new QueryString().token(ARRAY).params(param).toString();
   }
 }

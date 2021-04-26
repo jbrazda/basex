@@ -9,7 +9,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DbPath extends DbAccess {
@@ -22,6 +22,6 @@ public final class DbPath extends DbAccess {
     } while(parent != null);
 
     final DBNode dbnode = toDBNode(node);
-    return dbnode.kind() == Data.DOC ? Str.get(dbnode.data().text(dbnode.pre(), true)) : Str.ZERO;
+    return dbnode.kind() == Data.DOC ? Str.get(dbnode.data().text(dbnode.pre(), true)) : Str.EMPTY;
   }
 }

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.*;
 /**
  * This class tests the functions of the Array Module.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ArrayModuleTest extends QueryPlanTest {
@@ -169,6 +169,9 @@ public final class ArrayModuleTest extends QueryPlanTest {
     check(func.args(" [ <a/> ]") + "?1", "<a/>", empty(func));
     check(func.args(" ([ <a/> ], [])") + "?1", "<a/>", empty(func));
     check(func.args(" ([ <a/> ], [])") + "?*", "<a/>", empty(func));
+
+    // GH-1954
+    query(func.args(" if (<a/>/text()) then array { } else ()") + " ! array:size(.)", 0);
   }
 
   /** Test method. */

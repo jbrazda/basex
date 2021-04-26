@@ -10,7 +10,7 @@ import org.basex.query.value.map.*;
 /**
  * This class converts CSV data to an XQuery representation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class CsvXQueryConverter extends CsvConverter {
@@ -49,7 +49,11 @@ public final class CsvXQueryConverter extends CsvConverter {
   }
 
   @Override
-  protected XQMap finish(final String uri) throws QueryIOException {
+  protected void init(final String uri) {
+  }
+
+  @Override
+  protected XQMap finish() throws QueryIOException {
     if(row != null) rows.add(row.freeze());
     try {
       XQMap map = XQMap.EMPTY;

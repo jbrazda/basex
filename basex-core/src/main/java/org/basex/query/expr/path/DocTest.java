@@ -3,12 +3,11 @@ package org.basex.query.expr.path;
 import org.basex.query.iter.*;
 import org.basex.query.value.node.*;
 import org.basex.query.value.type.*;
-import org.basex.util.*;
 
 /**
  * Document with child test.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DocTest extends Test {
@@ -20,7 +19,7 @@ public final class DocTest extends Test {
    * @param child child element test
    */
   public DocTest(final Test child) {
-    super(NodeType.DOC);
+    super(NodeType.DOCUMENT_NODE);
     this.child = child;
   }
 
@@ -31,11 +30,11 @@ public final class DocTest extends Test {
 
   @Override
   public boolean matches(final ANode node) {
-    if(node.type != NodeType.DOC) return false;
+    if(node.type != NodeType.DOCUMENT_NODE) return false;
     final BasicNodeIter iter = node.childIter();
     boolean found = false;
     for(ANode n; (n = iter.next()) != null;) {
-      if(n.type == NodeType.COM || n.type == NodeType.PI) continue;
+      if(n.type == NodeType.COMMENT || n.type == NodeType.PROCESSING_INSTRUCTION) continue;
       if(found || !child.matches(n)) return false;
       found = true;
     }
@@ -65,6 +64,6 @@ public final class DocTest extends Test {
 
   @Override
   public String toString(final boolean full) {
-    return Strings.concat(type.name, "(", child, ")");
+    return type.toString(child.toString());
   }
 }

@@ -2,6 +2,7 @@ package org.basex.query.value.item;
 
 import static org.basex.query.QueryError.*;
 import static org.basex.query.QueryText.*;
+import static org.basex.query.value.item.Dec.*;
 
 import java.math.*;
 import java.util.regex.*;
@@ -16,7 +17,7 @@ import org.basex.util.*;
 /**
  * Duration item ({@code xs:duration}).
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class Dur extends ADateDur {
@@ -42,7 +43,7 @@ public class Dur extends ADateDur {
    * @throws QueryException query exception
    */
   public Dur(final byte[] value, final InputInfo ii) throws QueryException {
-    this(value, AtomType.DUR, ii);
+    this(value, AtomType.DURATION, ii);
   }
 
   /**
@@ -58,7 +59,7 @@ public class Dur extends ADateDur {
    * @param dur duration
    */
   public Dur(final Dur dur) {
-    this(dur, AtomType.DUR);
+    this(dur, AtomType.DURATION);
   }
 
   /**
@@ -124,9 +125,9 @@ public class Dur extends ADateDur {
     final long m = match.group(pos + 5) != null ? toLong(match.group(pos + 6), true, ii) : 0;
     final BigDecimal s = match.group(pos + 7) != null ?
       toDecimal(match.group(pos + 8), true, ii) : BigDecimal.ZERO;
-    sec = s.add(BigDecimal.valueOf(d).multiply(DAYSECONDS)).
-        add(BigDecimal.valueOf(h).multiply(BD3600)).
-        add(BigDecimal.valueOf(m).multiply(BD60));
+    sec = s.add(BigDecimal.valueOf(d).multiply(BD_864000)).
+        add(BigDecimal.valueOf(h).multiply(BD_3600)).
+        add(BigDecimal.valueOf(m).multiply(BD_60));
     if(!match.group(1).isEmpty()) sec = sec.negate();
     final double v = sec.doubleValue();
     if(v <= Long.MIN_VALUE || v >= Long.MAX_VALUE) throw DURRANGE_X_X.get(ii, type, value);
@@ -144,7 +145,7 @@ public class Dur extends ADateDur {
 
   @Override
   public final long day() {
-    return sec.divideToIntegralValue(DAYSECONDS).longValue();
+    return sec.divideToIntegralValue(BD_864000).longValue();
   }
 
   @Override
@@ -159,7 +160,7 @@ public class Dur extends ADateDur {
 
   @Override
   public final BigDecimal sec() {
-    return sec.remainder(BD60);
+    return sec.remainder(BD_60);
   }
 
   /**
@@ -167,7 +168,7 @@ public class Dur extends ADateDur {
    * @return time
    */
   private long tim() {
-    return sec.remainder(DAYSECONDS).longValue();
+    return sec.remainder(BD_864000).longValue();
   }
 
   @Override
@@ -179,6 +180,11 @@ public class Dur extends ADateDur {
     time(tb);
     if(mon == 0 && ss == 0) tb.add("T0S");
     return tb.finish();
+  }
+
+  @Override
+  public final boolean comparable(final Item item) {
+    return item instanceof Dur;
   }
 
   /**
@@ -200,7 +206,7 @@ public class Dur extends ADateDur {
    * @param tb token builder
    */
   final void time(final TokenBuilder tb) {
-    if(sec.remainder(DAYSECONDS).signum() == 0) return;
+    if(sec.remainder(BD_864000).signum() == 0) return;
     tb.add('T');
     final long h = hour();
     if(h != 0) { tb.addLong(Math.abs(h)); tb.add('H'); }

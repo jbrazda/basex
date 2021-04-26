@@ -15,7 +15,7 @@ import org.basex.util.*;
 /**
  * Abstract update expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 abstract class Update extends Arr {
@@ -29,7 +29,7 @@ abstract class Update extends Arr {
    * @param expr expressions
    */
   Update(final StaticContext sc, final InputInfo info, final Expr... expr) {
-    super(info, SeqType.EMP, expr);
+    super(info, SeqType.EMPTY_SEQUENCE_Z, expr);
     this.sc = sc;
   }
 

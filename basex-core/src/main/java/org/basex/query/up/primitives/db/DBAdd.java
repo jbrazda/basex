@@ -11,14 +11,16 @@ import org.basex.util.options.*;
 /**
  * Add primitive.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Dimitar Popov
  */
 public final class DBAdd extends DBUpdate {
-  /** Container for new database documents. */
+  /** Container for new documents. */
   private final DBNew newDocs;
   /** Replace flag. */
   private final boolean replace;
+  /** Data clip with generated input. */
+  private DataClip clip;
   /** Size. */
   private int size;
 
@@ -43,6 +45,21 @@ public final class DBAdd extends DBUpdate {
   }
 
   @Override
+  public void prepare() throws QueryException {
+    size = newDocs.inputs.size();
+    clip = newDocs.prepare(data.meta.name, false);
+  }
+
+  @Override
+  public void apply() throws QueryException {
+    try {
+      newDocs.addTo(data);
+    } finally {
+      clip.finish();
+    }
+  }
+
+  @Override
   public void merge(final Update update) throws QueryException {
     final DBAdd add = (DBAdd) update;
     if(replace || add.replace) {
@@ -53,17 +70,6 @@ public final class DBAdd extends DBUpdate {
       if(path.equals(addPath)) throw UPMULTDOC_X_X.get(info, data.meta.name, addPath);
     }
     newDocs.merge(add.newDocs);
-  }
-
-  @Override
-  public void prepare() throws QueryException {
-    size = newDocs.inputs.size();
-    newDocs.prepare(data.meta.name, false);
-  }
-
-  @Override
-  public void apply() throws QueryException {
-    newDocs.add(data);
   }
 
   @Override

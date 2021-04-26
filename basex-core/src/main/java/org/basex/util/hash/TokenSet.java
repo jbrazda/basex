@@ -13,7 +13,7 @@ import org.basex.util.*;
  * This is an efficient and memory-saving hash set for storing tokens.
  * The first entry of the token set (offset 0) is always empty.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class TokenSet extends ASet implements Iterable<byte[]> {
@@ -142,7 +142,7 @@ public class TokenSet extends ASet implements Iterable<byte[]> {
     for(int p = 0, id = buckets[b]; id != 0; p = id, id = next[id]) {
       if(!eq(key, keys[id])) continue;
       if(p == 0) buckets[b] = next[id];
-      else next[p] = next[next[id]];
+      else next[p] = next[next[p]];
       keys[id] = null;
       return id;
     }

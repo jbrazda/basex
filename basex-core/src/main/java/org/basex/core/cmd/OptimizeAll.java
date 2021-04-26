@@ -21,7 +21,7 @@ import org.basex.util.list.*;
  * the currently opened database. This effectively eliminates all fragmentation
  * and can lead to significant space savings after updates.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class OptimizeAll extends ACreate {
@@ -111,7 +111,7 @@ public final class OptimizeAll extends ACreate {
 
     // build database and index structures
     final StaticOptions sopts = context.soptions;
-    final String tmpName = sopts.createRandomDb(name);
+    final String tmpName = sopts.createTempDb(name);
     final DBParser parser = new DBParser(odata, options);
     final DiskBuilder builder = new DiskBuilder(tmpName, parser, sopts, options);
     if(cmd != null) cmd.pushJob(builder);
@@ -157,7 +157,7 @@ public final class OptimizeAll extends ACreate {
   /**
    * Parser for rebuilding existing databases.
    *
-   * @author BaseX Team 2005-20, BSD License
+   * @author BaseX Team 2005-21, BSD License
    * @author Leo Woerteler
    */
   private static final class DBParser extends Parser {

@@ -14,7 +14,7 @@ import org.basex.util.*;
 /**
  * Abstract update primitive which holds a copy of nodes to be inserted.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 abstract class NodeCopy extends NodeUpdate {
@@ -38,15 +38,15 @@ abstract class NodeCopy extends NodeUpdate {
   }
 
   @Override
-  public final void prepare(final MemData tmp, final QueryContext qc) {
+  public final void prepare(final MemData memData, final QueryContext qc) {
     // merge texts. after that, text nodes still need to be merged,
     // as two adjacent iterators may lead to two adjacent text nodes
     final ANodeList list = mergeNodeCacheText(nodes);
     nodes = null;
     // build main memory representation of nodes to be copied
-    final int start = tmp.meta.size;
-    new DataBuilder(tmp, qc).build(list);
-    insseq = new DataClip(tmp, start, tmp.meta.size, list.size());
+    final int start = memData.meta.size;
+    new DataBuilder(memData, qc).build(list);
+    insseq = new DataClip(memData, start, memData.meta.size, list.size());
   }
 
   /**
@@ -79,9 +79,9 @@ abstract class NodeCopy extends NodeUpdate {
     final ANodeList s = new ANodeList(ns);
     ANode n = nl.get(0);
     for(int c = 0; c < ns;) {
-      if(n.type == NodeType.TXT) {
+      if(n.type == NodeType.TEXT) {
         final TokenBuilder tb = new TokenBuilder();
-        while(n.type == NodeType.TXT) {
+        while(n.type == NodeType.TEXT) {
           tb.add(n.string());
           if(++c == ns) break;
           n = nl.get(c);

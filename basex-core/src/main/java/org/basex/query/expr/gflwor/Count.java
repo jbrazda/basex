@@ -12,7 +12,7 @@ import org.basex.util.hash.*;
 /**
  * GFLWOR {@code count} clause.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class Count extends Clause {
@@ -24,7 +24,7 @@ public final class Count extends Clause {
    * @param var variable
    */
   public Count(final Var var) {
-    super(var.info, SeqType.ITR_O, var);
+    super(var.info, SeqType.INTEGER_O, var);
     this.var = var;
   }
 

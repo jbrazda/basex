@@ -9,7 +9,7 @@ import org.junit.jupiter.api.*;
 /**
  * Tests for XQuery arrays.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ArrayTest extends SandboxTest {
@@ -215,7 +215,7 @@ public final class ArrayTest extends SandboxTest {
     query("xs:integer([ 1 ])", 1);
 
     error("[] cast as xs:integer", INVTYPE_X_X_X);
-    error("[ 1, 2 ] cast as xs:integer", SEQFOUND_X);
+    error("[ 1, 2 ] cast as xs:integer", INVTYPE_X_X_X);
   }
 
   /** Functions. */

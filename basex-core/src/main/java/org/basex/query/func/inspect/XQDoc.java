@@ -22,7 +22,7 @@ import org.basex.util.list.*;
 /**
  * This class contains functions for generating a xqDoc documentation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class XQDoc extends Inspect {
@@ -54,7 +54,7 @@ final class XQDoc extends Inspect {
     final String type = module instanceof LibraryModule ? "library" : "main";
     final FElem mod = elem("module", xqdoc).add("type", type);
     if(module instanceof LibraryModule) {
-      final QNm name = ((LibraryModule) module).sc.module;
+      final QNm name = module.sc.module;
       elem("uri", mod).add(name.uri());
       elem("name", mod).add(io.name());
     } else {

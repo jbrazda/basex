@@ -14,7 +14,7 @@ import org.basex.util.*;
 /**
  * Organizes local variables.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class LocalVars {
@@ -84,8 +84,8 @@ public final class LocalVars {
    */
   public ParseExpr resolve(final QNm name, final InputInfo ii) throws QueryException {
     // local variable
-    final VarRef local = resolveLocal(name, ii);
-    if(local != null) return local;
+    final VarRef ref = resolveLocal(name, ii);
+    if(ref != null) return ref;
 
     // static variable
     final byte[] uri = name.uri();

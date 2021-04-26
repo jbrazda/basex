@@ -20,7 +20,7 @@ import com.vividsolutions.jts.io.gml2.*;
 /**
  * Session function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 abstract class GeoFn extends StandardFunc {
@@ -137,7 +137,7 @@ abstract class GeoFn extends StandardFunc {
    * @throws QueryException query exception
    */
   private Geometry geo(final ANode node, final QNm... names) throws QueryException {
-    if(node.type != NodeType.ELM) throw typeError(node, NodeType.ELM, null);
+    if(node.type != NodeType.ELEMENT) throw typeError(node, NodeType.ELEMENT, null);
 
     final QNm qname = node.qname();
     for(final QNm geo : names) {

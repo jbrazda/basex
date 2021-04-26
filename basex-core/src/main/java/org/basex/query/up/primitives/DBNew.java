@@ -22,14 +22,12 @@ import org.basex.util.*;
 /**
  * Contains helper methods for adding documents.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DBNew {
   /** Inputs to be added. */
   public final List<NewInput> inputs;
-  /** New database nodes. */
-  public Data data;
 
   /** Query context. */
   private final QueryContext qc;
@@ -37,6 +35,8 @@ public final class DBNew {
   private final InputInfo info;
   /** Main options for all inputs to be added. */
   private final List<DBOptions> dboptions;
+  /** New database nodes. */
+  private Data data;
 
   /**
    * Constructor.
@@ -73,43 +73,48 @@ public final class DBNew {
    * Inserts all documents to be added to a temporary database.
    * @param name name of database
    * @param create create new database
+   * @return resulting data clip (can be {@code null})
    * @throws QueryException query exception
    */
-  public void prepare(final String name, final boolean create) throws QueryException {
-    final long is = inputs.size();
-    if(is == 0) return;
-
-    // check if new resources will be cached on disk
-    final boolean cache = cache(create);
+  public DataClip prepare(final String name, final boolean create) throws QueryException {
     try {
-      if(is == 1) {
-        // single input: create temporary database
-        data = tmpData(name, 0, cache);
-      } else {
-        // multiple input: create temporary database and insert inputs
-        final Context ctx = qc.context;
-        final MainOptions mopts = ctx.options;
-        final StaticOptions sopts = ctx.soptions;
-        final String dbname = cache ? sopts.createRandomDb(name) : name;
-        data = cache ? CreateDB.create(dbname, Parser.emptyParser(mopts), ctx, mopts) :
-          new MemData(mopts);
-        data.startUpdate(mopts);
-        try {
-          for(int i = 0; i < is; i++) {
-            final Data tmpData = tmpData(dbname, i, cache);
-            try {
-              copy(tmpData, data);
-            } finally {
-              DropDB.drop(tmpData, sopts);
+      final long is = inputs.size();
+      if(is > 0) {
+        // check if new resources will be cached on disk
+        final boolean cache = cache(create);
+        if(is == 1) {
+          // single input: create temporary database
+          data = tmpData(name, 0, cache);
+        } else {
+          // multiple input: create temporary database and insert inputs
+          final Context ctx = qc.context;
+          final MainOptions mopts = ctx.options;
+          final StaticOptions sopts = ctx.soptions;
+          final String dbname = cache ? sopts.createTempDb(name) : name;
+          data = cache ? CreateDB.create(dbname, Parser.emptyParser(mopts), ctx, mopts) :
+            new MemData(mopts);
+          data.startUpdate(mopts);
+          try {
+            for(int i = 0; i < is; i++) {
+              final Data tmpData = tmpData(dbname, i, cache);
+              try {
+                copy(tmpData, data);
+              } finally {
+                DropDB.drop(tmpData, sopts);
+              }
             }
+          } finally {
+            data.finishUpdate(mopts);
           }
-        } finally {
-          data.finishUpdate(mopts);
         }
       }
+      return data == null ? null : new DataClip(data).context(qc.context);
     } catch(final IOException ex) {
-      finish();
+      if(data != null) new DataClip(data).context(qc.context).finish();
       throw UPDBERROR_X.get(info, ex);
+    } finally {
+      dboptions.clear();
+      inputs.clear();
     }
   }
 
@@ -118,28 +123,11 @@ public final class DBNew {
    * @param target database instance
    * @throws QueryException exception
    */
-  public void add(final Data target) throws QueryException {
+  public void addTo(final Data target) throws QueryException {
     try {
       copy(data, target);
     } catch(final IOException ex) {
       throw UPDBERROR_X.get(info, ex);
-    } finally {
-      finish();
-    }
-  }
-
-  /**
-   * Drops a temporary database instance.
-   */
-  public void finish() {
-    if(data != null) {
-      final Context ctx = qc.context;
-      Close.close(data, ctx);
-      DropDB.drop(data, ctx.soptions);
-      // free memory
-      dboptions.clear();
-      inputs.clear();
-      data = null;
     }
   }
 
@@ -179,7 +167,7 @@ public final class DBNew {
     // existing node: create data clip for copied instance
     ANode node = input.node;
     if(node != null) {
-      if(node.type != NodeType.DOC) node = new FDoc(name).add(node);
+      if(node.type != NodeType.DOCUMENT_NODE) node = new FDoc(name).add(node);
       final MemData mdata = (MemData) node.copy(mopts, qc).data();
       mdata.update(0, Data.DOC, token(input.path));
       return mdata;
@@ -190,7 +178,7 @@ public final class DBNew {
 
     // create temporary database on disk if requested, or if binary data needs to be written
     final Builder builder;
-    final String dbname = cache ? sopts.createRandomDb(name) : name;
+    final String dbname = cache ? sopts.createTempDb(name) : name;
     if(cache) {
       builder = new DiskBuilder(dbname, parser, sopts, mopts);
     } else {

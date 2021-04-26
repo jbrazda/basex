@@ -8,7 +8,7 @@ import org.basex.util.*;
 /**
  * Abstract string item.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class AStr extends Item {
@@ -19,7 +19,7 @@ public abstract class AStr extends Item {
    * Constructor.
    */
   AStr() {
-    super(AtomType.STR);
+    super(AtomType.STRING);
   }
 
   /**
@@ -35,6 +35,11 @@ public abstract class AStr extends Item {
   @Override
   public final boolean bool(final InputInfo ii) throws QueryException {
     return string(ii).length != 0;
+  }
+
+  @Override
+  public final boolean comparable(final Item item) {
+    return item.type.isStringOrUntyped();
   }
 
   @Override

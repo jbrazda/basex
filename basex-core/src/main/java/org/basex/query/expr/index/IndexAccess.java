@@ -11,7 +11,7 @@ import org.basex.util.*;
 /**
  * This abstract class retrieves values from an index.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class IndexAccess extends Simple {
@@ -25,7 +25,7 @@ public abstract class IndexAccess extends Simple {
    * @param type type
    */
   IndexAccess(final IndexDb db, final InputInfo info, final Type type) {
-    super(info, SeqType.get(type, Occ.ZERO_MORE));
+    super(info, SeqType.get(type, Occ.ZERO_OR_MORE));
     this.db = db;
   }
 

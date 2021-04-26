@@ -12,7 +12,7 @@ import org.w3c.dom.*;
 /**
  * Attribute node fragment.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FAttr extends FNode {
@@ -45,7 +45,7 @@ public final class FAttr extends FNode {
    * @param value value
    */
   public FAttr(final QNm name, final byte[] value) {
-    super(NodeType.ATT);
+    super(NodeType.ATTRIBUTE);
     this.name = name;
     this.value = value;
   }

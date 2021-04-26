@@ -28,7 +28,7 @@ import org.basex.util.similarity.*;
  * If an instance of this class contains no pre-defined options, assigned options will
  * be added as free options.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class Options implements Iterable<Option<?>> {
@@ -384,7 +384,7 @@ public class Options implements Iterable<Option<?>> {
     } else if(name.type.isStringOrUntyped()) {
       nm = string(name.string(ii));
     } else {
-      throw new BaseXException(Text.OPT_EXPECT_X_X_X, AtomType.STR, name.type, name);
+      throw new BaseXException(Text.OPT_EXPECT_X_X_X, AtomType.STRING, name.type, name);
     }
 
     final Item item;
@@ -429,7 +429,7 @@ public class Options implements Iterable<Option<?>> {
         tb.add(key.string(ii)).add('=');
         final Value vl = map.get(key, ii);
         if(!vl.isItem()) throw new BaseXException(
-            Text.OPT_EXPECT_X_X_X, AtomType.STR, vl.seqType(), vl);
+            Text.OPT_EXPECT_X_X_X, AtomType.STRING, vl.seqType(), vl);
         tb.add(string(((Item) vl).string(ii)).replace(",", ",,"));
       }
     } else if(item instanceof QNm) {
@@ -501,9 +501,8 @@ public class Options implements Iterable<Option<?>> {
    * @return error string
    */
   public final synchronized String error(final String name) {
-    final byte[] similar = Levenshtein.similar(token(name), list -> {
-      for(final String opts : options.keySet()) list.add(opts);
-    });
+    final Object similar = Levenshtein.similar(token(name),
+        options.keySet().toArray(new String[0]));
     return similar != null ? Util.info(Text.UNKNOWN_OPT_SIMILAR_X_X, name, similar) :
       Util.info(Text.UNKNOWN_OPTION_X, name);
   }
@@ -763,7 +762,7 @@ public class Options implements Iterable<Option<?>> {
     Object value = null;
     String expected = null;
     if(option instanceof BooleanOption) {
-      if(item.type.eq(AtomType.BLN)) {
+      if(item.type.eq(AtomType.BOOLEAN)) {
         value = item.bool(ii);
       } else {
         final String s = string(item.string(ii));
@@ -776,7 +775,7 @@ public class Options implements Iterable<Option<?>> {
       value = serialize(item, ii);
     } else if(option instanceof EnumOption) {
       byte[] token;
-      if(item.type.eq(AtomType.BLN)) {
+      if(item.type.eq(AtomType.BOOLEAN)) {
         token = item.string(ii);
       } else if(item.type.isNumber()) {
         final long l = item.itr(ii);

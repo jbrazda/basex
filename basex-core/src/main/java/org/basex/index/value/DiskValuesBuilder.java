@@ -28,7 +28,7 @@ import org.basex.util.list.*;
  * </li>
  * </ul>
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DiskValuesBuilder extends ValuesBuilder {
@@ -225,7 +225,7 @@ public final class DiskValuesBuilder extends ValuesBuilder {
     int[] order = null;
     if(tokenize) {
       // tokenization: create array with offsets to ordered values
-      order = id.createOrder();
+      order = id.createOrder(true);
     } else {
       // no token index: simple sort
       id.sort();

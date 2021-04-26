@@ -18,7 +18,7 @@ import org.basex.util.list.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class FtMark extends StandardFunc {
@@ -49,7 +49,7 @@ public class FtMark extends StandardFunc {
     if(exprs.length > 1) {
       // name of the marker element; default is <mark/>
       m = toToken(exprs[1], qc);
-      if(!XMLToken.isQName(m)) throw valueError(AtomType.QNM, m, info);
+      if(!XMLToken.isQName(m)) throw valueError(AtomType.QNAME, m, info);
     }
     if(exprs.length > 2) {
       l = (int) toLong(exprs[2], qc);

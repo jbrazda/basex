@@ -11,7 +11,7 @@ import org.basex.util.hash.*;
 /**
  * Context for inlining expressions.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class InlineContext {
@@ -61,11 +61,11 @@ public final class InlineContext {
       expr instanceof Path && expr.size() == 1 && !expr.has(Flag.CNS)
     )) {
       return false;
-    };
+    }
 
     // check if expression can be inlined into the specified target expressions
     for(final Expr target : targets) {
-      if(!target.inlineable(this)) return false;
+      if((var == null || target.uses(var)) && !target.inlineable(this)) return false;
     }
     return true;
   }

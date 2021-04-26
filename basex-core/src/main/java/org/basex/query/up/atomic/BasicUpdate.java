@@ -6,7 +6,7 @@ import org.basex.data.*;
  * Abstract atomic update.
  * Atomic updates can only be initialized via {@link AtomicUpdateCache}.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 public abstract class BasicUpdate {
@@ -55,11 +55,11 @@ public abstract class BasicUpdate {
   /**
    * Merges the given update and this update if possible.
    * @param data data reference
-   * @param bu update to merge with
+   * @param update update to merge with
    * @return merged atomic update, or {@code null} if merge not possible
    */
   @SuppressWarnings("unused")
-  public BasicUpdate merge(final Data data, final BasicUpdate bu) {
+  public BasicUpdate merge(final Data data, final BasicUpdate update) {
     return null;
   }
 

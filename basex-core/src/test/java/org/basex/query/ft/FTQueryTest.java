@@ -9,7 +9,7 @@ import org.junit.jupiter.api.*;
 /**
  * Full-text query tests.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FTQueryTest extends SandboxTest {
@@ -65,5 +65,33 @@ public final class FTQueryTest extends SandboxTest {
       query(func.args(NAME, "a.{1,1}.", options), text);
       query(func.args(NAME, "ab.{1,1}", options), text);
     }
+  }
+
+  /** Removal of scoring propagation. */
+  @Test public void gh1981() {
+    // scoring
+    query("('a b' ! ft:score(. contains text 'a' ftand 'b')) > 0", true);
+    query("let score $s := 'a' contains text 'a' return $s > 0", true);
+    query("let score $s := 'a b' contains text 'a' ftand 'b' return $s > 0", true);
+
+    // no scoring
+    query("('a b' ! ft:score(. contains text 'a' and . contains text 'b')) > 0", false);
+    query("let score $s := 'a b' contains text 'a' and 'a' contains text 'b' return $s > 0", false);
+  }
+
+  /** XQuery, ft:search: Levenshtein errors. */
+  @Test public void gh1673() {
+    query(_DB_CREATE.args(NAME, " <x>1</x>", NAME, " map { 'ftindex': true() }"));
+
+    query(_FT_SEARCH.args(NAME, "2"), "");
+    query(_FT_CONTAINS.args("1", "2"), false);
+    query(_FT_SEARCH.args(NAME, "2", " map { 'fuzzy': true(), 'errors': 0 }"), "");
+    query(_FT_CONTAINS.args("1", "2", " map { 'fuzzy': true(), 'errors': 0 }"), false);
+    query(_FT_SEARCH.args(NAME, "2", " map { 'fuzzy': true(), 'errors': 1 }"), 1);
+    query(_FT_CONTAINS.args("1", "2", " map { 'fuzzy': true(), 'errors': 1 }"), true);
+
+    query("'a' contains text 'b' using fuzzy 0 errors", false);
+    query("'a' contains text 'b' using fuzzy 1 errors", true);
+    query("'a' contains text 'b' using fuzzy 10 errors", true);
   }
 }

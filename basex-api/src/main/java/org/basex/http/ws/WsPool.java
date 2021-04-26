@@ -14,7 +14,7 @@ import org.eclipse.jetty.websocket.api.*;
 /**
  * This class defines a pool for WebSockets. It manages all connected WebSockets.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Johannes Finckh
  */
 public final class WsPool {
@@ -43,7 +43,7 @@ public final class WsPool {
    * @param socket WebSocket
    * @return client id
    */
-  public static String add(final WebSocket socket) {
+  static String add(final WebSocket socket) {
     final String id = createId();
     CLIENTS.put(id, socket);
     return id;

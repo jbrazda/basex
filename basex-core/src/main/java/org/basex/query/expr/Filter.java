@@ -2,6 +2,9 @@ package org.basex.query.expr;
 
 import static org.basex.query.func.Function.*;
 
+import java.util.function.*;
+
+import org.basex.core.*;
 import org.basex.data.*;
 import org.basex.query.*;
 import org.basex.query.CompileContext.*;
@@ -10,15 +13,18 @@ import org.basex.query.expr.gflwor.*;
 import org.basex.query.expr.path.*;
 import org.basex.query.util.*;
 import org.basex.query.util.list.*;
+import org.basex.query.value.*;
 import org.basex.query.value.item.*;
+import org.basex.query.value.seq.*;
 import org.basex.query.value.type.*;
 import org.basex.query.var.*;
 import org.basex.util.*;
+import org.basex.util.hash.*;
 
 /**
  * Abstract filter expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class Filter extends Preds {
@@ -87,7 +93,7 @@ public abstract class Filter extends Preds {
 
       // rewrite filter with document nodes to path to possibly enable index rewritings
       // example: db:open('db')[.//text() = 'x']  ->  db:open('db')/.[.//text() = 'x']
-      if(st.type == NodeType.DOC && root.ddo()) {
+      if(st.type == NodeType.DOCUMENT_NODE && root.ddo()) {
         final Expr step = Step.get(cc, root, info, exprs);
         return cc.replaceWith(this, Path.get(cc, info, root, step));
       }
@@ -100,6 +106,19 @@ public abstract class Filter extends Preds {
         return cc.replaceWith(this, iff);
       }
 
+      // unroll filters with few items
+      // example: (1, 2)[. = 1]  ->  1[. = 1], 2[. = 1]
+      final long size = root.size(), limit = cc.qc.context.options.get(MainOptions.UNROLLLIMIT);
+      if(root instanceof Seq && size <= limit) {
+        cc.info(QueryText.OPTUNROLL_X, this);
+        final ExprList results = new ExprList((int) size);
+        for(final Item item : (Value) root) {
+          results.add(Filter.get(cc, info, item, results.size() == size - 1 ? exprs :
+            Arr.copyAll(cc, new IntObjMap<>(), exprs)));
+        }
+        return List.get(cc, info, results.finish());
+      }
+
       // otherwise, return iterative filter
       return copyType(new IterFilter(info, root, exprs));
     }
@@ -108,9 +127,8 @@ public abstract class Filter extends Preds {
     Expr expr = root;
     boolean opt = false;
     final ExprList preds = new ExprList(exprs.length);
-    final QueryFunction<Expr, Expr> prepare = ex -> {
-      return preds.isEmpty() ? ex : get(cc, info, ex, preds.next());
-    };
+    final QueryFunction<Expr, Expr> prepare = ex ->
+      preds.isEmpty() ? ex : get(cc, info, ex, preds.next());
     for(final Expr pred : exprs) {
       Expr ex = null;
       if(LAST.is(pred)) {
@@ -155,12 +173,12 @@ public abstract class Filter extends Preds {
           if((opV == OpV.LT || opV == OpV.NE) && LAST.is(e)) {
             // expr[position() < last()]  ->  util:init(expr)
             ex = cc.function(_UTIL_INIT, info, prepare.apply(expr));
-          } else if(opV == OpV.NE && e.seqType().instanceOf(SeqType.ITR_O) && e.isSimple()) {
+          } else if(opV == OpV.NE && e.seqType().instanceOf(SeqType.INTEGER_O) && e.isSimple()) {
             // expr[position() != INT]  ->  remove(expr, INT)
             ex = cc.function(REMOVE, info, prepare.apply(expr), e);
           } else if(opV == OpV.EQ && e instanceof Range) {
             final Expr arg1 = e.arg(0), arg2 = e.arg(1);
-            if(LAST.is(arg2) && arg1.seqType().instanceOf(SeqType.ITR_O) && arg1.isSimple()) {
+            if(LAST.is(arg2) && arg1.seqType().instanceOf(SeqType.INTEGER_O) && arg1.isSimple()) {
               // expr[position() = INT to last()]
               ex = cc.function(SUBSEQUENCE, info, prepare.apply(expr), arg1);
             } else if(arg1 == Int.ONE && arg2 instanceof Arith) {
@@ -213,12 +231,40 @@ public abstract class Filter extends Preds {
     return copyType(get(cc, info, root, exprs));
   }
 
+  /**
+   * Rewrites a filter expression for count operations.
+   * @param cc compilation context
+   * @return optimized or original expression.
+   * @throws QueryException query exception
+   */
+  public final Expr simplifyCount(final CompileContext cc) throws QueryException {
+    if(exprs.length != 1) return this;
+
+    // exists($nodes[@attr])  ->  exists($nodes ! @attr)
+    final Expr pred = exprs[0];
+    if(pred.seqType().instanceOf(SeqType.NODE_ZO)) return SimpleMap.get(cc, info, root, pred);
+
+    // count($seq[. = 'x'])  ->  count(index-of($seq, 'x'))
+    final Function<Expr, Integer> type = expr -> {
+      final Type t = expr.seqType().type;
+      return t.isStringOrUntyped() ? 1 : t.isNumber() ? 2 : 0;
+    };
+    final int rtype = type.apply(root);
+    if(rtype != 0 && pred instanceof CmpG && ((CmpG) pred).opV() == OpV.EQ) {
+      final Expr op2 = pred.arg(1);
+      if(pred.arg(0) instanceof ContextValue && op2.seqType().one() && type.apply(op2) == rtype) {
+        return cc.function(INDEX_OF, info, root, op2);
+      }
+    }
+    return this;
+  }
+
   @Override
   public final Expr simplifyFor(final Simplify mode, final CompileContext cc)
       throws QueryException {
 
     if(mode == Simplify.EBV || mode == Simplify.PREDICATE) {
-      final Expr expr = simplifyEbv(root, cc);
+      final Expr expr = flattenEbv(root, true, cc);
       if(expr != this) return cc.simplify(this, expr);
     } else if(mode == Simplify.DISTINCT && !mayBePositional()) {
       final Expr expr = root.simplifyFor(mode, cc);

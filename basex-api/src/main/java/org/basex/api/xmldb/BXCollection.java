@@ -21,16 +21,16 @@ import org.xmldb.api.modules.*;
 /**
  * Implementation of the Collection Interface for the XMLDB:API.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class BXCollection implements Collection {
   /** Database context. */
   final BXDatabase db;
   /** Database context. */
-  public final Context ctx;
+  final Context ctx;
   /** Database. */
-  public Data data;
+  Data data;
 
   /**
    * Constructor to create/open a collection.

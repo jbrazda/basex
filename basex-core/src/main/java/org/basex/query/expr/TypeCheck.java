@@ -2,6 +2,7 @@ package org.basex.query.expr;
 
 import static org.basex.query.QueryError.*;
 import static org.basex.query.QueryText.*;
+import static org.basex.query.func.Function.*;
 
 import org.basex.data.*;
 import org.basex.query.*;
@@ -19,7 +20,7 @@ import org.basex.util.hash.*;
 /**
  * Checks the argument expression's result type.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public class TypeCheck extends Single {
@@ -53,9 +54,13 @@ public class TypeCheck extends Single {
   @Override
   public final Expr optimize(final CompileContext cc) throws QueryException {
     final SeqType st = seqType();
-    if(st.type.instanceOf(AtomType.AAT)) {
+    if(st.type.instanceOf(AtomType.ANY_ATOMIC_TYPE)) {
       expr = expr.simplifyFor(Simplify.DATA, cc);
     }
+
+    if((ZERO_OR_ONE.is(expr) || EXACTLY_ONE.is(expr) || ONE_OR_MORE.is(expr)) &&
+        st.occ.instanceOf(expr.seqType().occ)) expr = expr.arg(0);
+
     final SeqType et = expr.seqType();
     occ = et.type.instanceOf(st.type) && et.kindInstanceOf(st);
 

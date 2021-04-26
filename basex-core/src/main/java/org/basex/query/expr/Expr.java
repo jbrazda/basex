@@ -28,7 +28,7 @@ import org.basex.util.hash.*;
  * Abstract class for representing XQuery expressions.
  * Expression are divided into {@link ParseExpr} and {@link Value} classes.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class Expr extends ExprInfo {
@@ -98,7 +98,7 @@ public abstract class Expr extends ExprInfo {
   public Iter atomIter(final QueryContext qc, final InputInfo ii) throws QueryException {
     final Iter iter = iter(qc);
     final SeqType st = seqType();
-    if(st.type.instanceOf(AtomType.AAT)) return iter;
+    if(st.type.instanceOf(AtomType.ANY_ATOMIC_TYPE)) return iter;
     long size = iter.size();
     if(size != -1 && st.mayBeArray()) size = -1;
     return new AtomIter(iter, qc, ii, size);
@@ -232,7 +232,7 @@ public abstract class Expr extends ExprInfo {
    * This function is called by:
    * <ul>
    *   <li> {@link Closure#optimize}</li>
-   *   <li> {@link GFLWOR#inlineLets}</li>
+   *   <li> {@link GFLWOR#inlineForLet}</li>
    *   <li> {@link GFLWOR#optimizePos}</li>
    *   <li> {@link GFLWOR#simplify}</li>
    *   <li> {@link GFLWOR#unusedVars}</li>
@@ -291,7 +291,7 @@ public abstract class Expr extends ExprInfo {
   public Expr simplifyFor(final Simplify mode, final CompileContext cc) throws QueryException {
     // return true if a deterministic expression returns at least one node
     return (mode == Simplify.EBV || mode == Simplify.PREDICATE) &&
-      seqType().instanceOf(SeqType.NOD_OM) && !has(Flag.NDT) ? cc.simplify(this, Bln.TRUE) : this;
+      seqType().instanceOf(SeqType.NODE_OM) && !has(Flag.NDT) ? cc.simplify(this, Bln.TRUE) : this;
   }
 
   /**

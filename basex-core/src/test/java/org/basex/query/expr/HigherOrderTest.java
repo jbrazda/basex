@@ -9,7 +9,7 @@ import org.junit.jupiter.api.*;
 /**
  * Higher-order function tests.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class HigherOrderTest extends SandboxTest {
@@ -86,11 +86,11 @@ public final class HigherOrderTest extends SandboxTest {
 
   /**  Test for invalid function expressions. */
   @Test public void invalidFunTest() {
-    error("()()", NOPAREN_X_X);
-    error("1()", NOPAREN_X_X);
-    error("1.0()", NOPAREN_X_X);
-    error("1e0()", NOPAREN_X_X);
-    error("'x'()", NOPAREN_X_X);
+    error("()()", EMPTYFOUND);
+    error("1()", INVFUNCITEM_X_X);
+    error("1.0()", INVFUNCITEM_X_X);
+    error("1e0()", INVFUNCITEM_X_X);
+    error("'x'()", INVFUNCITEM_X_X);
   }
 
   /**  Tests the creation of a cast function as function item. */
@@ -141,15 +141,14 @@ public final class HigherOrderTest extends SandboxTest {
         + "  for $f in (prof:void#1(?), error#0)"
         + "  let $err := non-deterministic $f() return ()"
         + "} catch * { 'ERR' }", "ERR");
-    // FLWOR expression will be evaluated (due to internal optimizations)
     query("try {"
         + "  let $f := error#0 let $err := $f() return ()"
-        + "} catch * { 'ERR' }", "ERR");
+        + "} catch * { 'ERR' }", "");
     query("try {"
         + "  let $f := function() { fn:error(()) }"
         + "  let $e := $f()"
         + "  return ()"
-        + "} catch * { 'ERR' }", "ERR");
+        + "} catch * { 'ERR' }", "");
   }
 
   /** Ensures that updating flag is not assigned before function body is known. */

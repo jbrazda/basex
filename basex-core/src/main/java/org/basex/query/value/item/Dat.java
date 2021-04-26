@@ -10,7 +10,7 @@ import org.basex.util.*;
 /**
  * Date item ({@code xs:date}).
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Dat extends ADate {
@@ -19,7 +19,7 @@ public final class Dat extends ADate {
    * @param value date
    */
   public Dat(final ADate value) {
-    super(AtomType.DAT, value);
+    super(AtomType.DATE, value);
     clean();
   }
 
@@ -30,7 +30,7 @@ public final class Dat extends ADate {
    * @throws QueryException query exception
    */
   public Dat(final byte[] value, final InputInfo ii) throws QueryException {
-    super(AtomType.DAT);
+    super(AtomType.DATE);
     date(value, XDATE, ii);
   }
 

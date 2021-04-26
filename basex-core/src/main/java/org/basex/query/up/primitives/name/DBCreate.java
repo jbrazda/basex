@@ -19,14 +19,16 @@ import org.basex.util.options.*;
 /**
  * Update primitive for the {@link Function#_DB_CREATE} function.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 public final class DBCreate extends NameUpdate {
   /** Database update options. */
   private final DBOptions options;
-  /** Container for new database documents. */
+  /** Container for new documents. */
   private final DBNew newDocs;
+  /** Data clip with input. */
+  private DataClip clip;
 
   /**
    * Constructor.
@@ -50,7 +52,7 @@ public final class DBCreate extends NameUpdate {
 
   @Override
   public void prepare() throws QueryException {
-    newDocs.prepare(name, true);
+    clip = newDocs.prepare(name, true);
   }
 
   @Override
@@ -64,10 +66,10 @@ public final class DBCreate extends NameUpdate {
       final Data data = CreateDB.create(name, Parser.emptyParser(mopts), qc.context, mopts);
 
       // add initial documents and optimize database
-      if(newDocs.data != null) {
+      if(clip != null) {
         data.startUpdate(mopts);
         try {
-          newDocs.add(data);
+          newDocs.addTo(data);
           Optimize.optimize(data, null);
         } finally {
           data.finishUpdate(mopts);
@@ -76,16 +78,19 @@ public final class DBCreate extends NameUpdate {
       Close.close(data, qc.context);
 
     } catch(final IOException ex) {
-      newDocs.finish();
       throw UPDBERROR_X.get(info, ex);
+    } finally {
+      if(clip != null) clip.finish();
     }
+  }
+
+  @Override
+  public String operation() {
+    return "created";
   }
 
   @Override
   public String toString() {
     return Util.className(this) + '[' + newDocs.inputs + ']';
   }
-
-  @Override
-  public String operation() { return "created"; }
 }

@@ -9,10 +9,16 @@ import org.junit.jupiter.api.*;
 /**
  * This class tests the functions of the Update Module.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class UpdateModuleTest extends SandboxTest {
+  /** Resets optimizations. */
+  @AfterEach public void init() {
+    inline(false);
+    unroll(false);
+  }
+
   /** Test method. */
   @Test public void apply() {
     final Function func = _UPDATE_APPLY;
@@ -31,10 +37,18 @@ public final class UpdateModuleTest extends SandboxTest {
   /** Test method. */
   @Test public void forEach() {
     final Function func = _UPDATE_FOR_EACH;
+
     query(func.args(1, " update:output#1"), 1);
     query(func.args(" 1[. = 0]", " update:output#1"), "");
     query(func.args(" (1, 2)[. = 0]", " update:output#1"), "");
     query(func.args(1, " prof:void#1"), "");
+
+    inline(true);
+    query(func.args(1, " update:output#1"), 1);
+    query(func.args(" 1[. = 0]", " update:output#1"), "");
+    query(func.args(" (1, 2)[. = 0]", " update:output#1"), "");
+    query(func.args(1, " prof:void#1"), "");
+
     error(func.args(1, " count#1"), FUNCNOTUP_X);
   }
 

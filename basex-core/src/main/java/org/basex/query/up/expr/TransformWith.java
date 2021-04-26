@@ -5,7 +5,6 @@ import static org.basex.query.QueryText.*;
 
 import org.basex.query.*;
 import org.basex.query.expr.*;
-import org.basex.query.iter.*;
 import org.basex.query.up.*;
 import org.basex.query.util.*;
 import org.basex.query.value.*;
@@ -19,7 +18,7 @@ import org.basex.util.hash.*;
 /**
  * Transform expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class TransformWith extends Arr {
@@ -30,12 +29,13 @@ public final class TransformWith extends Arr {
    * @param modify modify expression
    */
   public TransformWith(final InputInfo info, final Expr source, final Expr modify) {
-    super(info, SeqType.NOD_ZM, source, modify);
+    super(info, SeqType.NODE_ZM, source, modify);
   }
 
   @Override
   public Expr compile(final CompileContext cc) throws QueryException {
-    return cc.get(new Dummy(exprs[0].seqType().with(Occ.ONE), null), () -> super.compile(cc));
+    return cc.get(new Dummy(exprs[0].seqType().with(Occ.EXACTLY_ONE), null),
+        () -> super.compile(cc));
   }
 
   @Override
@@ -56,34 +56,35 @@ public final class TransformWith extends Arr {
 
   @Override
   public Value value(final QueryContext qc) throws QueryException {
+    final Value value = exprs[0].value(qc);
     final Updates tmp = qc.updates();
-    final QueryFocus qf = qc.focus;
-    final Value cv = qf.value;
+    final QueryFocus focus = qc.focus, qf = new QueryFocus();
+    qc.focus = qf;
 
     final ValueBuilder vb = new ValueBuilder(qc);
     try {
-      final Iter iter = exprs[0].iter(qc);
-      for(Item item; (item = qc.next(iter)) != null;) {
+      for(final Item item : value) {
         if(!(item instanceof ANode)) throw UPSOURCE_X.get(info, item);
 
         // create main memory copy of node
-        item = ((ANode) item).copy(qc);
+        final ANode node = ((ANode) item).copy(qc);
         // set resulting node as context
-        qf.value = item;
+        qf.value = node;
 
         final Updates updates = new Updates(true);
         qc.updates = updates;
-        updates.addData(item.data());
+        updates.addData(node.data());
 
         if(!exprs[1].value(qc).isEmpty()) throw UPMODIFY.get(info);
 
         updates.prepare(qc);
         updates.apply(qc);
-        vb.add(item);
+        vb.add(node);
+        qf.pos++;
       }
     } finally {
       qc.updates = tmp;
-      qf.value = cv;
+      qc.focus = focus;
     }
     return vb.value(this);
   }
@@ -91,7 +92,13 @@ public final class TransformWith extends Arr {
   @Override
   public boolean has(final Flag... flags) {
     if(Flag.CNS.in(flags)) return true;
-    final Flag[] flgs = Flag.UPD.remove(flags);
+
+    // Context dependency, positional access: only check first expression.
+    // Example: . update { delete node a }
+    if(Flag.CTX.in(flags) && exprs[0].has(Flag.CTX)) return true;
+    if(Flag.POS.in(flags) && exprs[0].has(Flag.POS)) return true;
+
+    final Flag[] flgs = Flag.UPD.remove(Flag.POS.remove(Flag.CTX.remove(flags)));
     return flgs.length != 0 && super.has(flgs);
   }
 

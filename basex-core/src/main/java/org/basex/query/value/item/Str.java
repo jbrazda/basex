@@ -12,21 +12,19 @@ import org.basex.util.*;
 /**
  * String item ({@code xs:string}, {@code xs:normalizedString}, {@code xs:language}, etc.).
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Str extends AStr {
-  /** Wildcard string. */
-  public static final Str WC = new Str(new byte[] { '*' });
   /** Zero-length string. */
-  public static final Str ZERO = new Str(Token.EMPTY);
+  public static final Str EMPTY = new Str(Token.EMPTY);
 
   /**
    * Constructor.
    * @param value value
    */
   private Str(final byte[] value) {
-    this(value, AtomType.STR);
+    this(value, AtomType.STRING);
   }
 
   /**
@@ -44,7 +42,7 @@ public final class Str extends AStr {
    * @return instance
    */
   public static Str get(final byte[] value) {
-    return value.length == 0 ? ZERO : new Str(value);
+    return value.length == 0 ? EMPTY : new Str(value);
   }
 
   /**
@@ -102,7 +100,7 @@ public final class Str extends AStr {
   @Override
   public Expr simplifyFor(final Simplify mode, final CompileContext cc) {
     return (mode == Simplify.EBV || mode == Simplify.PREDICATE) ?
-      cc.simplify(this, Bln.get(this != ZERO)) : this;
+      cc.simplify(this, Bln.get(this != EMPTY)) : this;
   }
 
   @Override

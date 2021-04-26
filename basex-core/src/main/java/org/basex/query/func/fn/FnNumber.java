@@ -11,7 +11,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnNumber extends ContextFn {
@@ -19,10 +19,10 @@ public final class FnNumber extends ContextFn {
   public Item item(final QueryContext qc, final InputInfo ii) throws QueryException {
     final Item item = ctxArg(0, qc).atomItem(qc, info);
     if(item == Empty.VALUE) return Dbl.NAN;
-    if(item.type == AtomType.DBL) return item;
+    if(item.type == AtomType.DOUBLE) return item;
     try {
       if(info != null) info.internal(true);
-      return AtomType.DBL.cast(item, qc, sc, info);
+      return AtomType.DOUBLE.cast(item, qc, sc, info);
     } catch(final QueryException ex) {
       return Dbl.NAN;
     } finally {
@@ -34,10 +34,10 @@ public final class FnNumber extends ContextFn {
   protected Expr opt(final CompileContext cc) {
     final boolean context = contextAccess();
     final Expr expr = context ? cc.qc.focus.value : exprs[0];
-    if(expr != null && expr.seqType().eq(SeqType.DBL_O)) {
+    if(expr != null && expr.seqType().eq(SeqType.DOUBLE_O)) {
       // number(1e1)  ->  1e1
       // $double[number() = 1]  ->  $double[. = 1]
-      return context && cc.nestedFocus() ? new ContextValue(info).optimize(cc) : expr;
+      return context && cc.nestedFocus() ? ContextValue.get(cc, info) : expr;
     }
     return this;
   }
@@ -48,11 +48,11 @@ public final class FnNumber extends ContextFn {
     final Expr expr = context ? cc.qc.focus.value : exprs[0];
     if(mode == Simplify.NUMBER && expr != null) {
       final SeqType st = expr.seqType();
-      if(st.one() && (st.type.isUntyped() || st.type == AtomType.DBL)) {
+      if(st.one() && (st.type.isUntyped() || st.type == AtomType.DOUBLE)) {
         // number(<a>1</a>) + 2  ->  <a>1</a> + 2
         if(!context) return cc.simplify(this, exprs[0]);
         // A[number() = 1]  ->  A[. = 0]
-        if(cc.nestedFocus()) return new ContextValue(info).optimize(cc);
+        if(cc.nestedFocus()) return ContextValue.get(cc, info);
       }
     }
     return super.simplifyFor(mode, cc);

@@ -12,7 +12,7 @@ import org.basex.query.value.type.*;
 /**
  * Functions on relational databases.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Rositsa Shadura
  */
 abstract class SqlFn extends StandardFunc {
@@ -68,7 +68,7 @@ abstract class SqlFn extends StandardFunc {
       throws QueryException {
 
     final JDBCConnections conns = jdbc(qc);
-    final Uri id = (Uri) checkType(exprs[0], qc, AtomType.URI);
+    final Uri id = (Uri) checkType(exprs[0], qc, AtomType.ANY_URI);
     final AutoCloseable ac = conns.get(id);
     switch(mode) {
       case 1:

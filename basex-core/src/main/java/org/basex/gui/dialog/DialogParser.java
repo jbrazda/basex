@@ -1,7 +1,6 @@
 package org.basex.gui.dialog;
 
 import static org.basex.core.Text.*;
-import static org.basex.gui.GUIConstants.*;
 
 import java.awt.*;
 import java.io.*;
@@ -15,7 +14,7 @@ import org.basex.util.*;
 /**
  * Parser options panel.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 abstract class DialogParser extends BaseXBack {
@@ -74,13 +73,14 @@ abstract class DialogParser extends BaseXBack {
    * @return combo box
    */
   static BaseXCombo encoding(final BaseXDialog dialog, final String encoding) {
-    final BaseXCombo cb = new BaseXCombo(dialog, ENCODINGS);
+    final String[] encodings = Strings.encodings();
+    final BaseXCombo cb = new BaseXCombo(dialog, encodings);
     boolean f = false;
     String enc = encoding == null ? Strings.UTF8 : encoding;
-    for(final String s : ENCODINGS) f |= s.equals(enc);
+    for(final String s : encodings) f |= s.equals(enc);
     if(!f) {
       enc = enc.toUpperCase(Locale.ENGLISH);
-      for(final String s : ENCODINGS) f |= s.equals(enc);
+      for(final String s : encodings) f |= s.equals(enc);
     }
     if(!f) enc = Strings.UTF8;
     cb.setSelectedItem(enc);

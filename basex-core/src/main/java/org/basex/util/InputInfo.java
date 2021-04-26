@@ -7,7 +7,7 @@ import org.basex.query.value.type.*;
  * This class contains information on the original query, which will be evaluated for
  * error feedback and debugging purposes.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class InputInfo {
@@ -102,7 +102,7 @@ public final class InputInfo {
 
   /**
    * Activates light-weight error handling (invoked e.g. by {@link SeqType#cast(
-   * org.basex.query.value.item.Item, boolean, QueryContext, StaticContext, InputInfo)}).
+   * org.basex.query.value.Value, boolean, QueryContext, StaticContext, InputInfo)}).
    * @param value value to set
    */
   public void internal(final boolean value) {

@@ -10,6 +10,7 @@ import org.basex.query.CompileContext.*;
 import org.basex.query.expr.*;
 import org.basex.query.func.*;
 import org.basex.query.iter.*;
+import org.basex.query.util.*;
 import org.basex.query.util.collation.*;
 import org.basex.query.util.list.*;
 import org.basex.query.value.*;
@@ -20,7 +21,7 @@ import org.basex.query.value.type.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnSort extends StandardFunc {
@@ -52,10 +53,10 @@ public final class FnSort extends StandardFunc {
     final FItem key = exprs.length > 2 ? checkArity(exprs[2], 1, qc) : null;
 
     final long size = value.size();
-    final ValueList values = new ValueList(Seq.initialCapacity(size));
+    final ValueList values = new ValueList(size);
     final Iter iter = value.iter();
     for(Item item; (item = qc.next(iter)) != null;) {
-      values.add((key == null ? item : key.invokeValue(qc, info, item)).atomValue(qc, info));
+      values.add((key == null ? item : key.invoke(qc, info, item)).atomValue(qc, info));
     }
 
     final Integer[] order = sort(values, this, coll, qc);
@@ -127,7 +128,7 @@ public final class FnSort extends StandardFunc {
       if(st.zeroOrOne() && st.type.isSortable()) return expr1;
     }
     if(exprs.length == 3) {
-      exprs[2] = coerceFunc(exprs[2], cc, SeqType.AAT_ZM, st1.with(Occ.ONE));
+      exprs[2] = coerceFunc(exprs[2], cc, SeqType.ANY_ATOMIC_TYPE_ZM, st1.with(Occ.EXACTLY_ONE));
     }
     return adoptType(expr1);
   }
@@ -139,6 +140,11 @@ public final class FnSort extends StandardFunc {
       expr = cc.simplify(this, exprs[0]);
     }
     return expr == this ? super.simplifyFor(mode, cc) : expr.simplifyFor(mode, cc);
+  }
+
+  @Override
+  public boolean has(final Flag... flags) {
+    return Flag.HOF.in(flags) && exprs.length > 2 || super.has(flags);
   }
 
   /**
@@ -156,7 +162,7 @@ public final class FnSort extends StandardFunc {
       // sortable single or singleton values
       final SeqType st = value.seqType();
       if(st.type.isSortable() && (st.one() || (value instanceof SingletonSeq &&
-          ((SingletonSeq) value).value instanceof Item))) return value;
+          ((SingletonSeq) value).singleItem()))) return value;
     }
     // no quick evaluation possible
     return null;

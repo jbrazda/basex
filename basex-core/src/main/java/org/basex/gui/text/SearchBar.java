@@ -16,7 +16,7 @@ import org.basex.util.*;
 /**
  * This panel provides search and replace facilities.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class SearchBar extends BaseXBack {
@@ -263,7 +263,7 @@ public final class SearchBar extends BaseXBack {
   /**
    * Searches text in the current editor.
    */
-  public void search() {
+  private void search() {
     final boolean sel = regex.isSelected();
     multi.setEnabled(sel);
     word.setEnabled(!sel);

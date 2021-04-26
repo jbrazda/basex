@@ -12,10 +12,16 @@ import org.junit.jupiter.api.*;
 /**
  * This class tests the functions of the Higher-Order Module.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class HofModuleTest extends QueryPlanTest {
+  /** Resets optimizations. */
+  @AfterEach public void init() {
+    inline(false);
+    unroll(false);
+  }
+
   /** Test method. */
   @Test public void constTest() {
     final Function func = _HOF_CONST;
@@ -42,22 +48,23 @@ public final class HofModuleTest extends QueryPlanTest {
     query(func.args(" 1 to 10", " function($x, $y) { $x + $y }"), 55);
     error(func.args(" ()", " function($x, $y) { $x + $y }"), EMPTYFOUND);
 
+    // should not be unrolled
+    check(func.args(" 1 to 6", " function($a, $b) { $a + $b }"),
+        21,
+        exists(func));
+
     // should be unrolled and evaluated at compile time
-    final int limit = StandardFunc.UNROLL_LIMIT;
-    check(func.args(" 1 to " + limit, " function($a, $b) { $a + $b }"),
+    unroll(true);
+    check(func.args(" 1 to 5", " function($a, $b) { $a + $b }"),
         15,
         empty(func),
         exists(Int.class));
     // should be unrolled but not evaluated at compile time
-    check(func.args(" 1 to " + limit, " function($a, $b) { 0 * random:double() + $b }"),
+    check(func.args(" 1 to 5", " function($a, $b) { 0 * random:double() + $b }"),
         5,
         exists(Int.class),
         empty(func),
         count(Util.className(Arith.class) + "[@op = '+']", 4));
-    // should not be unrolled
-    check(func.args(" 1 to " + (limit + 1), " function($a, $b) { $a + $b }"),
-        21,
-        exists(func));
   }
 
   /** Test method. */

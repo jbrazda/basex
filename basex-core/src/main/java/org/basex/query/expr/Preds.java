@@ -11,18 +11,18 @@ import org.basex.query.expr.CmpV.*;
 import org.basex.query.expr.ft.*;
 import org.basex.query.expr.path.*;
 import org.basex.query.func.Function;
+import org.basex.query.func.fn.*;
 import org.basex.query.util.*;
 import org.basex.query.util.list.*;
 import org.basex.query.value.*;
 import org.basex.query.value.item.*;
 import org.basex.query.value.type.*;
 import org.basex.util.*;
-import org.basex.util.ft.*;
 
 /**
  * Abstract predicate expression, implemented by {@link Filter} and {@link Step}.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class Preds extends Arr {
@@ -108,13 +108,9 @@ public abstract class Preds extends Arr {
     final Value cv = qf.value;
     qf.value = item;
     try {
-      double s = qc.scoring ? 0 : -1;
       for(final Expr expr : exprs) {
-        final Item test = expr.test(qc, info);
-        if(test == null) return false;
-        if(s != -1) s += test.score();
+        if(expr.test(qc, info) == null) return false;
       }
-      if(s > 0) item.score(Scoring.avg(s, exprs.length));
       return true;
     } finally {
       qf.value = cv;
@@ -152,7 +148,7 @@ public abstract class Preds extends Arr {
     if(pred instanceof And && !pred.has(Flag.POS)) {
       // E[A and B]  ->  E[A][B]
       cc.info(OPTPRED_X, pred);
-      for(final Expr expr : ((Arr) pred).exprs) {
+      for(final Expr expr : pred.args()) {
         simplify(expr.seqType().mayBeNumber() ? cc.function(Function.BOOLEAN, info, expr) : expr,
           list, root, cc);
       }
@@ -251,7 +247,7 @@ public abstract class Preds extends Arr {
       final SeqType st = ex.seqType();
       if(cmp.positional() && cmp.opV() == OpV.EQ && st.one()) {
         // E[position() = last() - 1]  ->  E[last() - 1]
-        expr = new Cast(cc.sc(), info, ex, SeqType.NUM_O).optimize(cc);
+        expr = new Cast(cc.sc(), info, ex, SeqType.NUMERIC_O).optimize(cc);
       }
     }
 
@@ -262,27 +258,28 @@ public abstract class Preds extends Arr {
   }
 
   /**
-   * Optimizes the predicates for boolean evaluation.
+   * Flattens predicates for boolean evaluation.
    * Drops solitary context values, flattens nested predicates.
    * @param root root expression
+   * @param ebv EBV check
    * @param cc compilation context
-   * @return expression
+   * @return optimized or original expression
    * @throws QueryException query exception
    */
-  public final Expr simplifyEbv(final Expr root, final CompileContext cc) throws QueryException {
+  public final Expr flattenEbv(final Expr root, final boolean ebv, final CompileContext cc)
+      throws QueryException {
+
     // only single predicate can be rewritten; root must yield nodes; no positional predicates
     final SeqType rst = root.seqType();
     final int el = exprs.length;
-    if(!(rst.type instanceof NodeType) || el == 0 || mayBePositional()) return this;
+    if(el == 0 || mayBePositional() || ebv && !(rst.type instanceof NodeType)) return this;
 
     final Expr pred = exprs[el - 1];
-    final QueryFunction<Expr, Expr> createRoot = r -> {
-      return el == 1 ? r : Filter.get(cc, info, r, Arrays.copyOfRange(exprs, 0, el - 1));
-    };
-    final QueryFunction<Expr, Expr> createExpr = e -> {
-      return e instanceof ContextValue ? createRoot.apply(root) :
-        e instanceof Path ? Path.get(cc, info, createRoot.apply(root), e) : null;
-    };
+    final QueryFunction<Expr, Expr> createRoot = r ->
+      el == 1 ? r : Filter.get(cc, info, r, Arrays.copyOfRange(exprs, 0, el - 1));
+    final QueryFunction<Expr, Expr> createExpr = e ->
+      e instanceof ContextValue ? createRoot.apply(root) :
+      e instanceof Path ? Path.get(cc, info, createRoot.apply(root), e) : null;
 
     // rewrite to general comparison (right operand must not depend on context):
     // a[. = 'x']  ->  a = 'x'
@@ -310,8 +307,15 @@ public abstract class Preds extends Arr {
     }
 
     // rewrite to path: root[path]  ->  root/path
-    final Expr expr = createExpr.apply(pred);
-    if(expr != null) return expr;
+    // rewrite to path: root[data()]  ->  root/descendant::text()
+    if(rst.type instanceof NodeType) {
+      Expr expr = createExpr.apply(pred);
+      if(expr == null && (Function.DATA.is(pred) || Function.STRING.is(pred))) {
+        final ContextFn func = (ContextFn) pred;
+        if(func.contextAccess()) expr = func.simplifyEbv(root, cc);
+      }
+      if(expr != null) return expr;
+    }
 
     // rewrite to simple map: $node[string()]  ->  $node ! string()
     if(rst.zeroOrOne()) return SimpleMap.get(cc, info, createRoot.apply(root), pred);
@@ -342,7 +346,7 @@ public abstract class Preds extends Arr {
 
   @Override
   public boolean inlineable(final InlineContext ic) {
-    if(ic.expr instanceof ContextValue) {
+    if(ic.expr instanceof ContextValue && ic.var != null) {
       for(final Expr expr : exprs) {
         if(expr.uses(ic.var)) return false;
       }

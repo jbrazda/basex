@@ -11,7 +11,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnExists extends FnEmpty {
@@ -26,11 +26,13 @@ public final class FnExists extends FnEmpty {
   }
 
   @Override
-  public Expr simplifyFor(final Simplify mode, final CompileContext cc) {
+  public Expr simplifyFor(final Simplify mode, final CompileContext cc) throws QueryException {
     // if(exists(nodes))  ->  if(nodes)
     if(mode == Simplify.EBV || mode == Simplify.PREDICATE) {
       final Expr expr = exprs[0];
-      if(expr.seqType().type instanceof NodeType) return cc.simplify(this, expr);
+      if(expr.seqType().type instanceof NodeType) {
+        return cc.simplify(this, expr.simplifyFor(mode, cc));
+      }
     }
     return this;
   }

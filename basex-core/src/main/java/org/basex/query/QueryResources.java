@@ -24,7 +24,7 @@ import org.basex.util.list.*;
  * This class provides access to all kinds of resources (databases, documents, database connections,
  * sessions) used by an XQuery expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class QueryResources {
@@ -353,7 +353,7 @@ public final class QueryResources {
       final QueryInput qi = new QueryInput(path, sc);
       items.add(new DBNode(create(true, qi, null), 0, Data.DOC));
     }
-    addCollection(items.value(NodeType.DOC), name);
+    addCollection(items.value(NodeType.DOCUMENT_NODE), name);
   }
 
   /**

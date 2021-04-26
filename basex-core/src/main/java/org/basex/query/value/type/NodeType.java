@@ -22,15 +22,15 @@ import org.w3c.dom.Text;
 /**
  * XQuery node types.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public enum NodeType implements Type {
   /** Node type. */
-  NOD("node", AtomType.ITEM, ID.NOD),
+  NODE("node", AtomType.ITEM, ID.NOD),
 
   /** Text type. */
-  TXT("text", NOD, ID.TXT) {
+  TEXT("text", NODE, ID.TXT) {
     @Override
     public ANode cast(final Object value, final QueryContext qc, final StaticContext sc,
         final InputInfo ii) {
@@ -41,7 +41,7 @@ public enum NodeType implements Type {
   },
 
   /** PI type. */
-  PI("processing-instruction", NOD, ID.PI) {
+  PROCESSING_INSTRUCTION("processing-instruction", NODE, ID.PI) {
     @Override
     public ANode cast(final Object value, final QueryContext qc, final StaticContext sc,
         final InputInfo ii) throws QueryException {
@@ -54,7 +54,7 @@ public enum NodeType implements Type {
   },
 
   /** Element type. */
-  ELM("element", NOD, ID.ELM) {
+  ELEMENT("element", NODE, ID.ELM) {
     @Override
     public ANode cast(final Object value, final QueryContext qc, final StaticContext sc,
         final InputInfo ii) throws QueryException {
@@ -69,7 +69,7 @@ public enum NodeType implements Type {
   },
 
   /** Document type. */
-  DOC("document-node", NOD, ID.DOC) {
+  DOCUMENT_NODE("document-node", NODE, ID.DOC) {
     @Override
     public ANode cast(final Object value, final QueryContext qc, final StaticContext sc,
         final InputInfo ii) throws QueryException {
@@ -95,16 +95,16 @@ public enum NodeType implements Type {
   },
 
   /** Document element type. */
-  DEL("document-node(element())", DOC, ID.DEL) {
+  DOCUMENT_NODE_ELEMENT("document-node(element())", DOCUMENT_NODE, ID.DEL) {
     @Override
     public Item cast(final Object value, final QueryContext qc, final StaticContext sc,
         final InputInfo ii) throws QueryException {
-      return DOC.cast(value, qc, sc, ii);
+      return DOCUMENT_NODE.cast(value, qc, sc, ii);
     }
   },
 
   /** Attribute type. */
-  ATT("attribute", NOD, ID.ATT) {
+  ATTRIBUTE("attribute", NODE, ID.ATT) {
     @Override
     public ANode cast(final Object value, final QueryContext qc, final StaticContext sc,
         final InputInfo ii) throws QueryException {
@@ -117,7 +117,7 @@ public enum NodeType implements Type {
   },
 
   /** Comment type. */
-  COM("comment", NOD, ID.COM) {
+  COMMENT("comment", NODE, ID.COM) {
     @Override
     public ANode cast(final Object value, final QueryContext qc, final StaticContext sc,
         final InputInfo ii) throws QueryException {
@@ -130,19 +130,23 @@ public enum NodeType implements Type {
   },
 
   /** Namespace type. */
-  NSP("namespace-node", NOD, ID.NSP),
+  NAMESPACE_NODE("namespace-node", NODE, ID.NSP),
 
   /** Schema-element. */
-  SCE("schema-element", NOD, ID.SCE),
+  SCHEMA_ELEMENT("schema-element", NODE, ID.SCE),
 
   /** Schema-attribute. */
-  SCA("schema-attribute", NOD, ID.SCA);
+  SCHEMA_ATTRIBUTE("schema-attribute", NODE, ID.SCA);
 
   /** Cached enums (faster). */
   private static final NodeType[] VALUES = values();
+  /** Leaf node types. */
+  public static final NodeType[] LEAF_TYPES = {
+    ATTRIBUTE, COMMENT, NAMESPACE_NODE, PROCESSING_INSTRUCTION, TEXT
+  };
 
   /** Name. */
-  public final byte[] name;
+  private final byte[] name;
   /** Parent type. */
   private final Type parent;
   /** Type id . */
@@ -150,6 +154,8 @@ public enum NodeType implements Type {
 
   /** Sequence types (lazy instantiation). */
   private EnumMap<Occ, SeqType> seqTypes;
+  /** QName (lazy instantiation). */
+  private QNm qnm;
 
   /**
    * Constructor.
@@ -213,6 +219,15 @@ public enum NodeType implements Type {
     return seqTypes.computeIfAbsent(occ, o -> new SeqType(this, o));
   }
 
+  /**
+   * Returns the name of a node type.
+   * @return name
+   */
+  public final QNm qname() {
+    if(qnm == null) qnm = new QNm(name);
+    return qnm;
+  }
+
   @Override
   public final boolean eq(final Type type) {
     return this == type;
@@ -226,7 +241,7 @@ public enum NodeType implements Type {
 
   @Override
   public final Type union(final Type type) {
-    return this == type ? this : type instanceof NodeType ? NOD : AtomType.ITEM;
+    return this == type ? this : type instanceof NodeType ? NODE : AtomType.ITEM;
   }
 
   @Override
@@ -236,7 +251,8 @@ public enum NodeType implements Type {
 
   @Override
   public final AtomType atomic() {
-    return this == PI || this == COM ? AtomType.STR : AtomType.ATM;
+    return this == PROCESSING_INSTRUCTION || this == COMMENT ? AtomType.STRING :
+      AtomType.UNTYPED_ATOMIC;
   }
 
   @Override
@@ -262,7 +278,16 @@ public enum NodeType implements Type {
 
   @Override
   public final String toString() {
-    return Token.string(name) + "()";
+    return toString("");
+  }
+
+  /**
+   * Returns a string representation with the specified argument.
+   * @param arg argument
+   * @return string representation
+   */
+  public final String toString(final String arg) {
+    return new TokenBuilder().add(name).add('(').add(arg).add(')').toString();
   }
 
   /**

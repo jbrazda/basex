@@ -21,7 +21,7 @@ import org.basex.util.similarity.*;
  * This is a parser for command strings, creating {@link Command} instances.
  * Several commands can be formulated in one string and separated by semicolons.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class StringParser extends CommandParser {
@@ -405,9 +405,9 @@ final class StringParser extends CommandParser {
     }
 
     // output error for similar commands
-    final byte[] name = uc(token(token)), similar = Levenshtein.similar(name, list -> {
-      for(final Enum<?> s : startWith(complete, null)) list.add(s.name());
-    });
+    final byte[] name = uc(token(token));
+    final Object similar = Levenshtein.similar(name, startWith(complete, null),
+        o -> ((Enum<?>) o).name());
     if(similar != null) throw error(alt, UNKNOWN_SIMILAR_X_X, name, similar);
 
     // show unknown command error or available command extensions

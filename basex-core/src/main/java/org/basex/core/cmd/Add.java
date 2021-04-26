@@ -19,7 +19,7 @@ import org.basex.util.*;
  * the target path and file name have been merged and are now specified
  * as first argument.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Add extends ACreate {
@@ -114,7 +114,7 @@ public final class Add extends ACreate {
 
       // create random database name for disk-based creation
       if(cache(parser)) {
-        final String tmpName = soptions.createRandomDb(data.meta.name);
+        final String tmpName = soptions.createTempDb(data.meta.name);
         builder = new DiskBuilder(tmpName, parser, soptions, options);
       } else {
         builder = new MemBuilder(name, parser);

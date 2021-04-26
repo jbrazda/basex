@@ -29,7 +29,7 @@ import org.basex.util.list.*;
 /**
  * FTWords expression.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FTWords extends FTExpr {
@@ -52,7 +52,7 @@ public final class FTWords extends FTExpr {
   private FTOpt ftOpt;
 
   /**
-   * Constructor for scan-based evaluation.
+   * Constructor for sequential evaluation.
    * @param info input info
    * @param query query expression
    * @param mode search mode
@@ -160,7 +160,7 @@ public final class FTWords extends FTExpr {
         if(ftiter == null) {
           final FTTokenizer ftt = FTWords.this.get(qc);
           final FTLexer lexer = new FTLexer(ftOpt).
-              lserror(qc.context.options.get(MainOptions.LSERROR));
+              errors(qc.context.options.get(MainOptions.LSERROR));
 
           // length distinct tokens
           int len = 0;
@@ -385,7 +385,7 @@ public final class FTWords extends FTExpr {
     final ThreadLocal<FTTokenizer> tl = qc.threads.get(this);
     FTTokenizer ftt = tl.get();
     if(ftt == null) {
-      ftt = new FTTokenizer(ftOpt, qc, info);
+      ftt = new FTTokenizer(ftOpt, qc.context.options.get(MainOptions.LSERROR), info);
       tl.set(ftt);
     }
     return ftt;

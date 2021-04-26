@@ -11,7 +11,7 @@ import org.basex.util.list.*;
 /**
  * Sequence of items of type {@link Bln xs:boolean}, containing at least two of them.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class BlnSeq extends NativeSeq {
@@ -23,7 +23,7 @@ public final class BlnSeq extends NativeSeq {
    * @param values bytes
    */
   private BlnSeq(final boolean[] values) {
-    super(values.length, AtomType.BLN);
+    super(values.length, AtomType.BOOLEAN);
     this.values = values;
   }
 

@@ -1,5 +1,8 @@
 package org.basex.data;
 
+import org.basex.core.*;
+import org.basex.core.cmd.*;
+
 /**
  * Data container with start and end offset. Used mostly to save memory with insertion
  * sequence caching (only one {@link Data} instance).
@@ -7,7 +10,7 @@ package org.basex.data;
  * Arbitrary trees can be stored in this clip. To distinguish between two insertion
  * sequences, the root node of each sequence points to the virtual parent pre value -1.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class DataClip {
@@ -19,6 +22,8 @@ public final class DataClip {
   public final int end;
   /** Number of contained fragments. */
   public final int fragments;
+  /** Database context. */
+  private Context ctx;
 
   /**
    * Constructor.
@@ -58,5 +63,25 @@ public final class DataClip {
    */
   public int size() {
     return end - start;
+  }
+
+  /**
+   * Assigns a database context.
+   * @param context context
+   * @return self reference
+   */
+  public DataClip context(final Context context) {
+    ctx = context;
+    return this;
+  }
+
+  /**
+   * Unregisters and drops a temporary database instance.
+   */
+  public void finish() {
+    if(ctx != null) {
+      Close.close(data, ctx);
+      DropDB.drop(data, ctx.soptions);
+    }
   }
 }

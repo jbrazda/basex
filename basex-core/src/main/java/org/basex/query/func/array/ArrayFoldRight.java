@@ -12,7 +12,7 @@ import org.basex.query.value.item.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ArrayFoldRight extends ArrayFn {
@@ -21,13 +21,17 @@ public final class ArrayFoldRight extends ArrayFn {
     final XQArray array = toArray(exprs[0], qc);
     Value result = exprs[1].value(qc);
     final FItem func = checkArity(exprs[2], 2, qc);
+
     final ListIterator<Value> iter = array.iterator(array.arraySize());
-    while(iter.hasPrevious()) result = func.invokeValue(qc, info, iter.previous(), result);
+    while(iter.hasPrevious()) result = func.invoke(qc, info, iter.previous(), result);
     return result;
   }
 
   @Override
   protected Expr opt(final CompileContext cc) throws QueryException {
+    final Expr expr1 = exprs[0], expr2 = exprs[1];
+    if(expr1 == XQArray.empty()) return expr2;
+
     FnFoldLeft.opt(this, cc, true, false);
     return this;
   }

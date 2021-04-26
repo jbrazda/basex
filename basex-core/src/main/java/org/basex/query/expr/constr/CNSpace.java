@@ -18,7 +18,7 @@ import org.basex.util.hash.*;
 /**
  * Namespace constructor.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class CNSpace extends CName {
@@ -32,7 +32,7 @@ public final class CNSpace extends CName {
    */
   public CNSpace(final StaticContext sc, final InputInfo info, final boolean computed,
       final Expr name, final Expr value) {
-    super(sc, info, SeqType.NSP_O, computed, name, value);
+    super(sc, info, SeqType.NAMESPACE_NODE_O, computed, name, value);
   }
 
   @Override

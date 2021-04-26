@@ -14,7 +14,7 @@ import org.basex.util.*;
 /**
  * A single binding of a {@link XQMap}.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 final class TrieLeaf extends TrieNode {
@@ -218,7 +218,7 @@ final class TrieLeaf extends TrieNode {
   @Override
   void forEach(final ValueBuilder vb, final FItem func, final QueryContext qc, final InputInfo ii)
       throws QueryException {
-    vb.add(func.invokeValue(qc, ii, key, value));
+    vb.add(func.invoke(qc, ii, key, value));
   }
 
   @Override

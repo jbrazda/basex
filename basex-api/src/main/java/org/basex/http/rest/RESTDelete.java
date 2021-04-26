@@ -8,7 +8,7 @@ import org.basex.http.*;
 /**
  * REST-based evaluation of DELETE operations.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class RESTDelete {
@@ -26,7 +26,7 @@ final class RESTDelete {
 
     final HTTPConnection conn = session.conn;
     final String db = conn.db();
-    if(db.isEmpty()) throw HTTPCode.NO_PATH.get();
+    if(db.isEmpty()) throw HTTPCode.NO_DATABASE_SPECIFIED.get();
 
     // open database to ensure it exists
     final String path = conn.dbpath();

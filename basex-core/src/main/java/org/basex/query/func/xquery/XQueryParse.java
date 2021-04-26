@@ -13,7 +13,7 @@ import org.basex.util.options.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public class XQueryParse extends StandardFunc {
@@ -63,7 +63,7 @@ public class XQueryParse extends StandardFunc {
       final AModule mod = qctx.parse(string(query), toBaseUri(path, opts));
       final FElem root;
       if(mod instanceof LibraryModule) {
-        final QNm module = ((LibraryModule) mod).sc.module;
+        final QNm module = mod.sc.module;
         root = new FElem(LIBRARY_MODULE);
         root.add(PREFIX, module.string());
         root.add(URI, module.uri());

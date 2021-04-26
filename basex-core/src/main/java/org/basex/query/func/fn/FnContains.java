@@ -12,7 +12,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnContains extends StandardFunc {
@@ -28,7 +28,7 @@ public final class FnContains extends StandardFunc {
     final Expr expr1 = exprs[0], expr2 = exprs[1];
     // contains($a, ''), contains($a, $a)
     if(exprs.length < 3 && expr1.seqType().type.isStringOrUntyped() && !expr1.has(Flag.NDT)) {
-      if(expr2 == Empty.VALUE || expr2 == Str.ZERO || expr1.equals(expr2)) return Bln.TRUE;
+      if(expr2 == Empty.VALUE || expr2 == Str.EMPTY || expr1.equals(expr2)) return Bln.TRUE;
     }
     return this;
   }

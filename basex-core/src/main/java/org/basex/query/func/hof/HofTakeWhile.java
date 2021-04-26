@@ -11,7 +11,7 @@ import org.basex.query.value.type.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public class HofTakeWhile extends StandardFunc {
@@ -78,7 +78,7 @@ public class HofTakeWhile extends StandardFunc {
    */
   final boolean test(final FItem pred, final Item item, final QueryContext qc)
       throws QueryException {
-    return toBoolean(pred.invokeValue(qc, info, item), qc);
+    return toBoolean(pred.invoke(qc, info, item), qc);
   }
 
   @Override

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 /**
  * General test of the XQuery Update Facility implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 public final class UpdateTest extends SandboxTest {
@@ -1175,5 +1175,103 @@ public final class UpdateTest extends SandboxTest {
         + "  copy $_ := $a modify () return $_,"
         + "  copy $_ := $a modify () return $_"
         + ") return $c[1] is $c[2]", false);
+  }
+
+  /** Simple map, update checks. */
+  @Test public void gh1957() {
+    query("declare %updating function local:f() { (1, 2) ! prof:void(.) }; local:f()", "");
+  }
+
+  /** Simple map, update checks. */
+  @Test public void gh1978() {
+    createDB(null);
+    set(MainOptions.ADDCACHE, true);
+    try {
+      final String doc = "<_>qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+          + "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsqqquqqqqqsqqsqqq"
+          + "yqqsqqqqqqqqsqsqqqqqqqqqquqqquqqsqqqqqquqyuqqqqsqqquqqqqquqs"
+          + "sqqqqqqsqqsqqqqsqqqqqqqqsqqqqqyqqqqsqqsqqqsqqqquqqquqqqqqquq"
+          + "qqqqqqquqqqsqqqqqsuqqsqsqqqsqqqsqqsqqqqsqqqsqqqqqqqqsqsqqqsq"
+          + "qqqqqqssqqsqqsqqquqqqquqqqqqqqqqsqququqqqsqqqququqqqqqqqsqqq"
+          + "qsqqsqqqqqqqqquqqqqqqqqqqquqsqsqqqqqqqqqssqqsqyuqqqqsqqquqqq"
+          + "qqqqqqqqqqqqqsqqqqqqqqqqqqqququuyqqsqqqqqqqqsqqqqussqqsqqsqq"
+          + "qqyqqqsqqqqsqqqqqqsqqqsusqyqsqqqqqsqqqqqqqssqqqqqqqqsqsquuss"
+          + "quuqqqyqqquqqqquqqqqqqqsqqusqsqqqssqquqqqsqqqquusqqqsqqusqsq"
+          + "qqqqqqqqqquqqussqqqqyqqqsqyqqsqqqqqqqqqsqqqyqqsqqqqsqqqqsqqs"
+          + "qsqqqqqqququqqqsqqqqqqqqququqqqqqqqsqqqqsqqqqqqqqququuyqqquq"
+          + "sqsqqqqqqqqqquuqqqqqssuqqssqqqsqsqqqqqqqqqqqqqqqsqqqqquqqqqq"
+          + "ssqqsqyuqqqqsqqquqqqqsqqqqqquuqsqqqqqqsqqqqqqquqqquqqssqqqsq"
+          + "sqqqqqquqqqqqqqsququqqqqqqysqqqqqqqqqsqqqqqqqqsqqquuqqqqsqqs"
+          + "qqqqqqqqqqqqqqsqqqqqquqqqqsqqsqqqqqqqqqsqqqqqqqqsqqsqqqqqqsq"
+          + "qqyqqsqqqqqqsqqqqqqsqqqqsqqsqqqqsquqqsqyqqqqqqqsqqqqqqsququq"
+          + "qqqsqqqssqqsqqqqqqqqqqquqqqssqqsusqqquqsqqquqqqsqqsqsqqsquqq"
+          + "qqqqssqqusqsssqsqqqqqqsqqsqsquqqyqqqqsqqqqqqqqqqqusqsqqqsqqq"
+          + "suqqssqqqssqqqqsssqqsqqqqqsqqqqqquqqqqqsqqsqquqqqqqqyqqqqqqq"
+          + "qqqqsqqqqssququqqqqqqqqsqqqsqqqquqqqqqsqqqqqqqsqqqqsqqsqsqqq"
+          + "qqqqququqqyqqqquqsqqqqqqqqqqsqqqqsqqqqquqqqqqssqqsqqqqsqqqqq"
+          + "uqququqsqqsqqqqquqqqququqsqqqqqqsqqsqqqqqsquyqqqqqqqqqqqqsqq"
+          + "qssqqqsqqqqqqqqqquqqqssqqsusqqqqqqqsqqqqsqqsqsqqqyqqqqqqqqss"
+          + "qsqqsqqqqsqqqquqququqsqqsqqqquqqqququqsqqqqqqqussqsqqsqqqqqs"
+          + "quyqqsqqqqsqqqqqqqqqqqsqqqyqqsquqqqqqqqsqqsqsqqqqqqququqqqsq"
+          + "qqqqqqqququqqqqqqqqquqqqqqqqqqqqququuyqqquqsqsqqqqqqqqqquuqq"
+          + "qqqssuqqssqqqsqsqqqqqqqqqqqqqqsqqqqquqqqqqssqqsqyuqqqqsqqquq"
+          + "qqqsqqqqqquuqsqqqqqqsqqqqqqquqqquqqssqqqsqsqqqqquqqqqqqqsquq"
+          + "uqqqqqqysqqqqqqqqqsqqqqqqqqsqqquuqqqqqqqqqsqqqqquqquqqqqqqqq"
+          + "qqqqsqqqqqqqqsqqsqqqqqqsqqqyqqqqsquqqsqyqqqqqqqsqsqqqqqqsqqq"
+          + "qqqsqqqqsqqsqqqqqqsququqqqqsqqqssqqsqqqqqqqqqqquqqqssqqsusqq"
+          + "quqsqqquqqqsqqsqsqqsqqqqqqqqqsqqqqquqquqqqqqsquqqqqqqsuqqssq"
+          + "qqssqqqqsssqqqssqqusqsssqsqqqqqqsqqqqqusqsqqqqssququqqqqqqqq"
+          + "sqqqsqsquqqyqqqqsqqqqqqqquqqqqqqyqqqsqqqqqqqqqqssqqqqqqqqsqq"
+          + "qqsqqqqquqqqqqssqqqsqqqqsqqsqsqqqqqssqqqqqqqqqqqsququuqqqssq"
+          + "qqqqqqqsqqqqsqqqqquqqqqqssqqsqqquqququqsqqsqqqququqsqqqqqqsq"
+          + "qsqqqqqsquyqqqqqqqqqqqqsqqqssqqqsqqqqqqqqqquqqqssqqsuqqqsqqs"
+          + "qqqqussqqqsqqqyqqsqqqqsqqqqsqqsqsqqqqququqqqsqqqqqqququqqqsq"
+          + "qqsqqqyqqqqqqsqqqqsqqqqqqqqququuyqqquqsqsqqqqqqqqqqqqqqqqqqq"
+          + "qqqqqqsqqqqqquqqqqqssqqsqyuqqqqsqqquqqqqqqqqsqyqqqqqqqqqsqqq"
+          + "qqssuqqqqqqysqqqqqqqqqqqsqqqqussqqsqqqqsqqsqsqqqqququqqqsqqq"
+          + "qqqququqqquqsqqquqqqqqsusqyqqqqsqqqqqqqquqsqsqqqqqqqqqqsquqq"
+          + "qssqsqqsqqqqqqqysqqquuqqqqquqqqqqqsqqqsqqqyqqqqsqqqqqqsqqqqq"
+          + "qqqqqusqqqqsqqsqqqqqqqqqqqqsqqqqqqqqsqqqqqqqsqqqqqqsqqqyqqqu"
+          + "uqqqquqqqqqqqqsqqqqqqsqqqqqqqqsqsqqusqqqqsqqqyqqqyqqqqqsqqsq"
+          + "qqqqsqqqqqqqqsqsqqsqqsqyqqqqqqqqqqqsqsqqqqqqqqqsqqqquqqqqquq"
+          + "uqsqqsqqqququqsqqqsqqqqsqqsqqqqqsqqqqqqqqsqqqsqqqsququqqsqqs"
+          + "qyqqqqqqqqsqqqqqqqqqsqqqquqqqqqqququqsqqquqsqqquqqqsqqsqsqqs"
+          + "qqqsqqsqqquqsqsqqqqqqqqquqqqqqsqqusqqqqqsqqquuyqqsquqqqqqqqq"
+          + "qqqqqssqsqqqqqqsqqsqqqqqqqqsqqqqsqqqqquqqqqqssqqsqqqqqqsqqqq"
+          + "qqqqqqqqssququqqqqqqqqsqqqqqqquqqqqqqqqqqqssqssqqqsqquqqqqqq"
+          + "yqqsqqsqqqqqsquyqqsqqqqsqqqqsqqqqsqqsqsqqsqqsquqsqsssqqqqqqq"
+          + "qsqqqqsqqqqquqqqqqssqqsquqqqqqqqqqqququqqyqqqquqsqqqqsqquuqq"
+          + "ssqqqqqsqqsqsqququqsqqqqqqqqqqqqquqqqqqqqsqqqqquqqqqqsqqqqqq"
+          + "qqqqqququqsqqqqqqqququqsqqqssqsqqsqqqqquqqqqququqsqqsqqqququ"
+          + "qsqqqsqqqqqssqqqqqqqqqqqsququuqqqssqqsqqqqqsqqqqqquqqqqququq"
+          + "sqqsqqqququqsqqsqqsqqqqqsquyqqsqqqqsqqqqsqqqqsqqsqsqqssssqsq"
+          + "uqsqqqquqsqsssqsqqqqqqqqqsqqqqqqqqqsqquqsqqqqsqquqqqqqququqs"
+          + "qssuyqqsqqqqqsqqquqsqsqqqqqqqqqsqqqqqquqqqqqqqqussqqqsqqqyqq"
+          + "squqqqqqqsqqsqsqqqqququqqqsqqqqqqququqqqqqqqqquqqqqqqqqqqqqu"
+          + "quuyqqquqsqsqqqqqqqqqqqqqqqqqqqqqqqqqqqqsqqqqqquqqqqqqqqssqq"
+          + "sqyuqqqqsqqquqqqqqsqqqqqssuqqqqqqysqqqqqqqqqqqsqqqqussqqsqqq"
+          + "uuquqqqqqsqqqqqqqqquqqqqqqqsqqqqsqqsqsqququqsqqsqqsqsqqqququ"
+          + "qsqqsqqqqqqqqquqqqqqqqsqqqqqqqqqqqsqqqqqqqqsqqsqqqqqqsqqqyqq"
+          + "qqqqqqsququqqsqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+          + "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+          + "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+          + "qqqqqqqqqqqqqqqqqqq</_>";
+      execute(new Replace("x.xml", doc));
+      query("string-length(_)", 4099);
+    } finally {
+      set(MainOptions.ADDCACHE, false);
+    }
+  }
+
+  /** db:replace, ADDCACHE option. */
+  @Test public void gh1989() {
+    createDB("<a/>");
+    query("db:replace('" + NAME + "', 'Sandbox.xml', '" + DOC + "', map { 'addcache': true() })");
+    query("db:exists('" + NAME + ".0')", false);
+  }
+
+  /** Update expression, context position. */
+  @Test public void gh2002() {
+    query("(<a/>, <b/>) update { insert node position() into . }", "<a>1</a>\n<b>2</b>");
   }
 }

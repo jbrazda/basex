@@ -14,7 +14,7 @@ import org.basex.util.options.*;
 /**
  * Input component for serialization parameters.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class BaseXSerial extends BaseXBack implements ActionListener {
@@ -92,7 +92,7 @@ public final class BaseXSerial extends BaseXBack implements ActionListener {
 
     final Component comp;
     if(option == SerializerOptions.ENCODING) {
-      final BaseXCombo combo = new BaseXCombo(dialog, GUIConstants.ENCODINGS);
+      final BaseXCombo combo = new BaseXCombo(dialog, Strings.encodings());
       combo.setSelectedItem(options.get(option));
       combo.addActionListener(e -> {
         options.set((StringOption) option, combo.getSelectedItem());

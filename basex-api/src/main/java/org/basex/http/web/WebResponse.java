@@ -14,7 +14,7 @@ import org.basex.util.*;
 /**
  * This abstract class defines common methods of Web responses.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public abstract class WebResponse {
@@ -56,7 +56,7 @@ public abstract class WebResponse {
     try {
       qc = module.qc(ctx);
       init(function);
-      final StaticFunc sf = WebModule.find(qc, func);
+      final StaticFunc sf = WebModule.get(func, qc);
       final Expr[] args = new Expr[sf.params.length];
       bind(args, data);
       qc.jc().description(toString(func, args));

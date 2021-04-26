@@ -10,7 +10,7 @@ import org.basex.util.*;
 /**
  * Boolean item ({@code xs:boolean}).
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Bln extends Item {
@@ -20,13 +20,15 @@ public final class Bln extends Item {
   public static final Bln FALSE = new Bln(false);
   /** Data. */
   private final boolean value;
+  /** Score value. */
+  private double score;
 
   /**
    * Constructor, adding a full-text score.
    * @param value boolean value
    */
   private Bln(final boolean value) {
-    super(AtomType.BLN);
+    super(AtomType.BOOLEAN);
     this.value = value;
   }
 
@@ -41,12 +43,11 @@ public final class Bln extends Item {
 
   /**
    * Constructor, adding a full-text score.
-   * @param value boolean value
    * @param score score value
    * @return item
    */
-  public static Bln get(final boolean value, final double score) {
-    return value && score != 0 ? new Bln(score) : get(value);
+  public static Bln get(final double score) {
+    return score != 0 ? new Bln(score) : Bln.FALSE;
   }
 
   /**
@@ -101,6 +102,11 @@ public final class Bln extends Item {
   }
 
   @Override
+  public double score() {
+    return score;
+  }
+
+  @Override
   public Boolean toJava() {
     return value;
   }
@@ -127,7 +133,7 @@ public final class Bln extends Item {
   public static boolean parse(final Item item, final InputInfo ii) throws QueryException {
     final Boolean b = parse(item.string(ii));
     if(b != null) return b;
-    throw AtomType.BLN.castError(item, ii);
+    throw AtomType.BOOLEAN.castError(item, ii);
   }
 
   /**

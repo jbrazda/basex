@@ -8,7 +8,7 @@ import org.basex.util.hash.*;
  * This class provides convenience operations for XML-specific character
  * operations.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class XMLToken {
@@ -153,7 +153,7 @@ public final class XMLToken {
    */
   public static boolean isId(final byte[] name, final boolean idref) {
     final byte[] n = lc(local(name));
-    return idref ? contains(n, IDREF) : contains(n, ID) && !contains(n, IDREF);
+    return idref ? contains(n, REF) : contains(n, ID) && !contains(n, REF);
   }
 
   /**

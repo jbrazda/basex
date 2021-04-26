@@ -17,7 +17,7 @@ import org.basex.util.list.*;
 /**
  * Dynamic invocation of a Java field or method.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 final class DynJavaFunc extends DynJavaCall {
@@ -84,10 +84,10 @@ final class DynJavaFunc extends DynJavaCall {
     if(field != null || !methods.isEmpty()) return true;
     if(!enforce) return false;
 
-    throw noFunction(name, arity, name(), arities, types, info, list -> {
-      for(final Method m : clazz.getMethods()) list.add(m.getName());
-      for(final Field f : clazz.getFields()) list.add(f.getName());
-    });
+    final TokenList names = new TokenList();
+    for(final Method m : clazz.getMethods()) names.add(m.getName());
+    for(final Field f : clazz.getFields()) names.add(f.getName());
+    throw noFunction(name, arity, name(), arities, types, info, names.finish());
   }
 
   @Override

@@ -12,7 +12,7 @@ import org.basex.query.value.type.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class HofScanLeft extends StandardFunc {
@@ -33,7 +33,7 @@ public final class HofScanLeft extends StandardFunc {
           final Item out = outer.next();
           if(out == null) return null;
 
-          acc = func.invokeValue(qc, info, acc, out);
+          acc = func.invoke(qc, info, acc, out);
           inner = acc.iter();
         }
       }

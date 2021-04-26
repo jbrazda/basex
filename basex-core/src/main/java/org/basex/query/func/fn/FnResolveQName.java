@@ -14,7 +14,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class FnResolveQName extends StandardFunc {
@@ -23,7 +23,7 @@ public final class FnResolveQName extends StandardFunc {
     final byte[] name = toTokenOrNull(exprs[0], qc);
     final ANode base = toElem(exprs[1], qc);
     if(name == null) return Empty.VALUE;
-    if(!XMLToken.isQName(name)) throw valueError(AtomType.QNM, name, info);
+    if(!XMLToken.isQName(name)) throw valueError(AtomType.QNAME, name, info);
 
     final QNm qname = new QNm(name);
     final byte[] pref = qname.prefix();

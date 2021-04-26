@@ -10,7 +10,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class InspectType extends StandardFunc {
@@ -24,7 +24,7 @@ public final class InspectType extends StandardFunc {
       final SeqType st2 = item.seqType();
       st = st == null ? st2 : st.union(st2);
     }
-    if(st == null) st = SeqType.EMP;
+    if(st == null) st = SeqType.EMPTY_SEQUENCE_Z;
     st = st.with(value.seqType().occ);
 
     // compare with original type, which may be more specific (in particular for node types)

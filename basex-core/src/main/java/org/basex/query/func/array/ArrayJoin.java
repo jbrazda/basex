@@ -13,7 +13,7 @@ import org.basex.util.*;
 /**
  * Function implementation.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class ArrayJoin extends ArrayFn {
@@ -36,7 +36,9 @@ public final class ArrayJoin extends ArrayFn {
     item = iter.next();
     if(item == null) return fst.concat(snd);
 
-    final ArrayBuilder builder = new ArrayBuilder().append(fst).append(snd);
+    final ArrayBuilder builder = new ArrayBuilder();
+    builder.append(fst);
+    builder.append(snd);
     do {
       builder.append(toArray(item));
     } while((item = qc.next(iter)) != null);
@@ -55,7 +57,7 @@ public final class ArrayJoin extends ArrayFn {
       }
       // return simple arguments
       final SeqType st = exprs[0].seqType();
-      if(st.zeroOrOne()) return exprs[0];
+      if(st.one()) return exprs[0];
 
       exprType.assign(st.type);
     }

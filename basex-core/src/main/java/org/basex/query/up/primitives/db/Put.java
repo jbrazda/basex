@@ -18,7 +18,7 @@ import org.basex.util.list.*;
 /**
  * Fn:put operation primitive.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Lukas Kircher
  */
 public final class Put extends DBUpdate {
@@ -46,6 +46,10 @@ public final class Put extends DBUpdate {
     this.id = id;
     paths.add(path);
     options.add(sopts);
+  }
+
+  @Override
+  public void prepare() {
   }
 
   @Override
@@ -82,7 +86,4 @@ public final class Put extends DBUpdate {
   public String toString() {
     return Util.className(this) + '[' + id + ", " + paths.get(0) + ']';
   }
-
-  @Override
-  public void prepare() { }
 }

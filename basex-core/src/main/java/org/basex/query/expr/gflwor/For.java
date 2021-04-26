@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.basex.query.*;
 import org.basex.query.expr.*;
+import org.basex.query.func.*;
 import org.basex.query.iter.*;
 import org.basex.query.util.*;
 import org.basex.query.value.item.*;
@@ -19,7 +20,7 @@ import org.basex.util.hash.*;
 /**
  * FLWOR {@code for} clause, iterating over a sequence.
  *
- * @author BaseX Team 2005-20, BSD License
+ * @author BaseX Team 2005-21, BSD License
  * @author Leo Woerteler
  */
 public final class For extends ForLet {
@@ -52,6 +53,18 @@ public final class For extends ForLet {
     this.pos = pos;
     this.score = score;
     this.empty = empty;
+  }
+
+  /**
+   * Creates a for expression from a let binding.
+   * @param lt let binding
+   * @param cc compilation context
+   * @return for expression
+   * @throws QueryException query exception
+   */
+  static For fromLet(final Let lt, final CompileContext cc) throws QueryException {
+    final Expr expr = lt.scoring ? cc.function(Function._FT_SCORE, lt.info, lt.expr) : lt.expr;
+    return new For(lt.var, expr).optimize(cc);
   }
 
   @Override
@@ -122,16 +135,16 @@ public final class For extends ForLet {
     // assign type to clause and variable; remove empty flag if expression always yields items
     final SeqType st = expr.seqType();
     if(st.oneOrMore()) empty = false;
-    exprType.assign(st.with(empty ? st.zero() ? Occ.ZERO : Occ.ZERO_ONE : Occ.ONE));
+    exprType.assign(st.with(empty ? st.zero() ? Occ.ZERO : Occ.ZERO_OR_ONE : Occ.EXACTLY_ONE));
 
     var.refineType(seqType(), size(), cc);
     var.expr(expr);
     if(pos != null) {
-      pos.refineType(SeqType.ITR_O, 1, cc);
+      pos.refineType(SeqType.INTEGER_O, 1, cc);
       pos.expr(Int.ZERO);
     }
     if(score != null) {
-      score.refineType(SeqType.DBL_O, 1, cc);
+      score.refineType(SeqType.DOUBLE_O, 1, cc);
       score.expr(Dbl.ZERO);
     }
     return this;
@@ -166,13 +179,17 @@ public final class For extends ForLet {
    * Tries to convert this for loop into a let binding.
    * @param clauses FLWOR clauses
    * @param p position
+   * @param cc compilation context
    * @return {@code true} if the clause was converted, {@code false} otherwise
+   * @throws QueryException query exception
    */
-  boolean asLet(final List<Clause> clauses, final int p) {
+  boolean asLet(final List<Clause> clauses, final int p, final CompileContext cc)
+      throws QueryException {
+
     if(!expr.seqType().one()) return false;
-    clauses.set(p, Let.fromFor(this));
-    if(score != null) clauses.add(p + 1, Let.fromForScore(this));
-    if(pos != null) clauses.add(p + 1, new Let(pos, Int.ONE));
+    clauses.set(p, Let.fromFor(this, cc));
+    if(score != null) clauses.add(p + 1, Let.fromForScore(this, cc));
+    if(pos != null) clauses.add(p + 1, new Let(pos, Int.ONE).optimize(cc));
     return true;
   }
 
