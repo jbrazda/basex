@@ -55,8 +55,6 @@ public final class QueryContext extends Job implements Closeable {
   public final StaticFuncs funcs = new StaticFuncs();
   /** Externally bound variables. */
   private final QNmMap<Value> bindings = new QNmMap<>();
-  /** External query properties. */
-  private final HashMap<String, Object> props;
 
   /** Parent query context. */
   public final QueryContext parent;
@@ -136,7 +134,7 @@ public final class QueryContext extends Job implements Closeable {
    * @param parent parent context
    */
   public QueryContext(final QueryContext parent) {
-    this(parent.context, parent, parent.info, parent.props);
+    this(parent.context, parent, parent.info);
     parent.pushJob(this);
     resources = parent.resources;
     updates = parent.updates;
@@ -147,7 +145,7 @@ public final class QueryContext extends Job implements Closeable {
    * @param context database context
    */
   public QueryContext(final Context context) {
-    this(context, null, null, new HashMap<>());
+    this(context, null, null);
     resources = new QueryResources(this);
   }
 
@@ -156,14 +154,11 @@ public final class QueryContext extends Job implements Closeable {
    * @param context database context
    * @param parent parent context (can be {@code null})
    * @param info query info (can be {@code null})
-   * @param props external properties
    */
-  private QueryContext(final Context context, final QueryContext parent, final QueryInfo info,
-      final HashMap<String, Object> props) {
+  private QueryContext(final Context context, final QueryContext parent, final QueryInfo info) {
     this.context = context;
     this.parent = parent;
     this.info = info != null ? info : new QueryInfo(this);
-    this.props = props;
   }
 
   /**
@@ -377,24 +372,6 @@ public final class QueryContext extends Job implements Closeable {
   }
 
   /**
-   * Assigns an external property.
-   * @param key key
-   * @param value value
-   */
-  public void putProperty(final String key, final Object value) {
-    props.put(key, value);
-  }
-
-  /**
-   * Returns an external property.
-   * @param key key
-   * @return value (can be {@code null})
-   */
-  public Object getProperty(final String key) {
-    return props.get(key);
-  }
-
-  /**
    * Binds the context value, using the same rules as for
    * {@link #bind(String, Object, String, StaticContext) binding variables}.
    * @param value value to be bound
@@ -509,15 +486,15 @@ public final class QueryContext extends Job implements Closeable {
    * @param full include comprehensive information
    * @return query plan
    */
-  public FElem plan(final boolean full) {
+  public FElem toXml(final boolean full) {
     // only show root node if functions or variables exist
     final QueryPlan plan = new QueryPlan(compiled, closed, full);
     if(root != null) {
-      for(final StaticScope ss : QueryCompiler.usedDecls(root)) ss.plan(plan);
-      root.plan(plan);
+      for(final StaticScope ss : QueryCompiler.usedDecls(root)) ss.toXml(plan);
+      root.toXml(plan);
     } else {
-      funcs.plan(plan);
-      vars.plan(plan);
+      funcs.toXml(plan);
+      vars.toXml(plan);
     }
     return plan.root();
   }
@@ -701,7 +678,7 @@ public final class QueryContext extends Job implements Closeable {
       if(context.data() != null) context.invalidate();
       updates.apply(this);
 
-      return vb.value((Type) null);
+      return vb.value(value);
 
     } catch(final StackOverflowError ex) {
       Util.debug(ex);
@@ -748,7 +725,7 @@ public final class QueryContext extends Job implements Closeable {
 
     // no type specified: return original value or convert Java object
     if(type == null || type.isEmpty()) {
-      return object instanceof Value ? (Value) object : JavaCall.toValue(object, this, sc);
+      return object instanceof Value ? (Value) object : JavaCall.toValue(object, this, null);
     }
 
     // convert to json
@@ -794,12 +771,12 @@ public final class QueryContext extends Job implements Closeable {
     if(object instanceof String[]) {
       // cast string array
       final ValueBuilder vb = new ValueBuilder(this);
-      for(final String string : (String[]) object) vb.add(tp.cast(string, this, sc, null));
+      for(final String string : (String[]) object) vb.add(tp.cast(string, this, null));
       return vb.value(tp);
     }
 
     // cast any other object to XDM
-    return tp.cast(object, this, sc, null);
+    return tp.cast(object, this, null);
   }
 
   /**

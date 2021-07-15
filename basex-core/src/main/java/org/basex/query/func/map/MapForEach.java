@@ -21,13 +21,15 @@ public class MapForEach extends StandardFunc {
   public final Value value(final QueryContext qc) throws QueryException {
     final XQMap map = toMap(exprs[0], qc);
     final FItem func = checkArity(exprs[1], 2, this instanceof UpdateMapForEach, qc);
-    return map.forEach(func, qc, info);
+
+    final ValueBuilder vb = map.forEach(func, qc, info);
+    return vb.value(this);
   }
 
   @Override
   protected final Expr opt(final CompileContext cc) throws QueryException {
     final Expr expr1 = exprs[0];
-    if(expr1 == XQMap.EMPTY) return Empty.VALUE;
+    if(expr1 == XQMap.empty()) return Empty.VALUE;
 
     final Type type1 = expr1.seqType().type;
     if(type1 instanceof MapType) {

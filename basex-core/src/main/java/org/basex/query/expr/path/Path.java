@@ -221,7 +221,7 @@ public abstract class Path extends ParseExpr {
     if(Flag.CTX.in(flags) && (root == null || root.has(Flag.CTX))) return true;
     /* Positional access: only check root node (steps will refer to result of root node).
      * Example: position()/a */
-    if(Flag.POS.in(flags) && (root != null && root.has(Flag.POS))) return true;
+    if(Flag.POS.in(flags) && root != null && root.has(Flag.POS)) return true;
     // check remaining flags
     final Flag[] flgs = Flag.POS.remove(Flag.CTX.remove(flags));
     if(flgs.length != 0) {
@@ -1066,7 +1066,7 @@ public abstract class Path extends ParseExpr {
   @Override
   public final VarUsage count(final Var var) {
     // context reference check: only consider root
-    if(var == null) return root == null ? VarUsage.ONCE : root.count(var);
+    if(var == null) return root == null ? VarUsage.ONCE : root.count(null);
 
     final VarUsage inRoot = root == null ? VarUsage.NEVER : root.count(var);
     return VarUsage.sum(var, steps) == VarUsage.NEVER ? inRoot : VarUsage.MORE_THAN_ONCE;
@@ -1142,12 +1142,12 @@ public abstract class Path extends ParseExpr {
   }
 
   @Override
-  public final void plan(final QueryPlan plan) {
+  public final void toXml(final QueryPlan plan) {
     plan.add(plan.create(this), root, steps);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     if(root != null) qs.token(root).token('/');
     qs.tokens(steps, "/");
   }

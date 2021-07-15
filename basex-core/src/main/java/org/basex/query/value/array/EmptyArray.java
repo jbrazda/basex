@@ -5,6 +5,7 @@ import java.util.*;
 import org.basex.query.*;
 import org.basex.query.expr.*;
 import org.basex.query.value.*;
+import org.basex.query.value.type.*;
 import org.basex.util.*;
 
 /**
@@ -15,10 +16,11 @@ import org.basex.util.*;
  */
 final class EmptyArray extends XQArray {
   /** The empty array. */
-  static final EmptyArray INSTANCE = new EmptyArray();
+  static final EmptyArray EMPTY = new EmptyArray();
 
   /** Hidden constructor. */
   private EmptyArray() {
+    super(SeqType.ARRAY);
   }
 
   @Override
@@ -26,13 +28,13 @@ final class EmptyArray extends XQArray {
   }
 
   @Override
-  public XQArray cons(final Value elem) {
-    return new SmallArray(new Value[] { elem });
+  public XQArray cons(final Value head) {
+    return new SmallArray(new Value[] { head }, ArrayType.get(head.seqType()));
   }
 
   @Override
-  public XQArray snoc(final Value elem) {
-    return new SmallArray(new Value[] { elem });
+  public XQArray snoc(final Value last) {
+    return new SmallArray(new Value[] { last }, ArrayType.get(last.seqType()));
   }
 
   @Override
@@ -76,7 +78,7 @@ final class EmptyArray extends XQArray {
   }
 
   @Override
-  public XQArray subArray(final long pos, final long len, final QueryContext qc) {
+  public XQArray subArray(final long pos, final long length, final QueryContext qc) {
     return this;
   }
 
@@ -92,7 +94,7 @@ final class EmptyArray extends XQArray {
 
   @Override
   public XQArray insertBefore(final long pos, final Value value, final QueryContext qc) {
-    return new SmallArray(new Value[] { value });
+    return new SmallArray(new Value[] { value }, ArrayType.get(value.seqType()));
   }
 
   @Override

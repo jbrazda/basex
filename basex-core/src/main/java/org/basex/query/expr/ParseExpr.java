@@ -75,11 +75,7 @@ public abstract class ParseExpr extends Expr {
     // effective boolean value is only defined for node sequences or single items
     if(!(item instanceof ANode)) {
       final Item next = iter.next();
-      if(next != null) {
-        final ValueBuilder vb = new ValueBuilder(qc, item, next);
-        if(iter.next() != null) vb.add(Str.get(QueryText.DOTS));
-        throw EBV_X.get(info, vb.value());
-      }
+      if(next != null) throw EBV_X.get(info, ValueBuilder.concat(item, next, qc));
     }
     return item;
   }
@@ -135,7 +131,7 @@ public abstract class ParseExpr extends Expr {
    * @param exprs expressions
    * @return data reference or {@code null}
    */
-  static final Data data(final Expr... exprs) {
+  static Data data(final Expr... exprs) {
     Data data1 = null;
     for(final Expr expr : exprs) {
       if(expr.seqType().zero()) continue;

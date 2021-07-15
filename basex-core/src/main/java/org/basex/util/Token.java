@@ -173,7 +173,7 @@ public final class Token {
   }
 
   /**
-   * Converts a string to a byte array.
+   * Converts a string to a token.
    * All strings should be converted by this function to guarantee
    * a consistent character conversion.
    * @param string string to be converted
@@ -561,6 +561,7 @@ public final class Token {
     try {
       return Double.parseDouble(string(token, start, end - start));
     } catch(final NumberFormatException ex) {
+      Util.debug(ex);
       return Double.NaN;
     }
   }
@@ -1333,16 +1334,17 @@ public final class Token {
   /**
    * Returns a URI decoded token.
    * @param token token
+   * @param plus decode + character
    * @return decoded token, or {@code null} if input was invalid
    */
-  public static byte[] decodeUri(final byte[] token) {
-    if(!contains(token, '%')) return token;
-
+  public static byte[] decodeUri(final byte[] token, final boolean plus) {
     final int tl = token.length;
     final TokenBuilder tb = new TokenBuilder(tl);
     for(int t = 0; t < tl; t++) {
       byte b = token[t];
-      if(b == '%') {
+      if(plus && b == '+') {
+        b = ' ';
+      } else if(b == '%') {
         final int n = t + 2 < tl ? dec(token[t + 1], token[t + 2]) : -1;
         if(n < 0) return null;
         b = (byte) n;

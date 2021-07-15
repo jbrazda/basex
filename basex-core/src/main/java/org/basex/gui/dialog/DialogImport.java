@@ -194,7 +194,7 @@ final class DialogImport extends BaseXBack {
   private void choose() {
     String path = input.getText();
     final BaseXFileChooser fc = new BaseXFileChooser(dialog, FILE_OR_DIR, path);
-    fc.textFilters().filter(ZIP_ARCHIVES, IO.ZIPSUFFIXES);
+    fc.textFilters().filter(ZIP_ARCHIVES, false, IO.ZIPSUFFIXES);
     final IOFile file = fc.select(Mode.FDOPEN);
     if(file == null) return;
 
@@ -260,7 +260,9 @@ final class DialogImport extends BaseXBack {
       }
       // all characters were of type ascii
       return MainParser.TEXT;
-    } catch(final IOException ignored) { }
+    } catch(final IOException ex) {
+      Util.debug(ex);
+    }
     // could not evaluate type
     return null;
   }

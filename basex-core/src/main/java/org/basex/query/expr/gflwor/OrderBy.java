@@ -26,9 +26,9 @@ import org.basex.util.hash.*;
  */
 public final class OrderBy extends Clause {
   /** References to the variables to be sorted. */
-  VarRef[] refs;
+  private VarRef[] refs;
   /** Sort keys. */
-  final OrderKey[] keys;
+  private final OrderKey[] keys;
 
   /**
    * Constructor.
@@ -245,12 +245,12 @@ public final class OrderBy extends Clause {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this), keys);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token(ORDER).token(BY).tokens(keys, SEP);
   }
 }

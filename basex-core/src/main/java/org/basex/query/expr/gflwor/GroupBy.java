@@ -109,7 +109,7 @@ public final class GroupBy extends Clause {
           }
         }
         final int pl = post.length;
-        for(int i = 0; i < pl; i++) qc.set(post[i], curr.ngv[i].value());
+        for(int i = 0; i < pl; i++) qc.set(post[i], curr.ngv[i].value(preExpr[i]));
         return true;
       }
 
@@ -228,11 +228,7 @@ public final class GroupBy extends Clause {
     for(int p = 0; p < pl; p++) {
       post[p].refineType(preExpr[p].seqType().union(Occ.ONE_OR_MORE), cc);
     }
-    SeqType st = null;
-    for(final GroupSpec spec : specs) {
-      st = st == null ? spec.seqType() : st.union(spec.seqType());
-    }
-    exprType.assign(st);
+    exprType.assign(SeqType.union(specs, true));
     return this;
   }
 
@@ -341,12 +337,12 @@ public final class GroupBy extends Clause {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this), specs);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     final int pl = post.length;
     for(int p = 0; p < pl; p++) {
       qs.token(LET).token("(: post-group :)").token(post[p]).token(ASSIGN).token(preExpr[p]);

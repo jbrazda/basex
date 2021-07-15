@@ -162,7 +162,7 @@ public final class FTWords extends FTExpr {
           final FTLexer lexer = new FTLexer(ftOpt).
               errors(qc.context.options.get(MainOptions.LSERROR));
 
-          // length distinct tokens
+          // length of distinct tokens
           int len = 0;
           // loop through unique tokens
           for(final byte[] input : unique(inputs != null ? inputs : inputs(qc))) {
@@ -242,8 +242,9 @@ public final class FTWords extends FTExpr {
           ftt.matches.reset(ps);
           try {
             if(contains(fttokens, input, ftt) != 0) return true;
-          } catch(final QueryException ignore) {
+          } catch(final QueryException ex) {
             // ignore exceptions
+            Util.debug(ex);
           }
         }
         return false;
@@ -519,12 +520,12 @@ public final class FTWords extends FTExpr {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this), ftOpt, occ, query);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     if(query instanceof AStr) {
       qs.token(query);
     } else {

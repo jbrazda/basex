@@ -8,6 +8,7 @@ import static org.basex.query.value.type.Occ.*;
 import java.util.*;
 
 import org.basex.query.*;
+import org.basex.query.expr.*;
 import org.basex.query.expr.path.*;
 import org.basex.query.iter.*;
 import org.basex.query.util.list.*;
@@ -162,6 +163,8 @@ public final class SeqType {
 
   /** Any function type. */
   public static final FuncType FUNCTION = new FuncType(null, (SeqType[]) null);
+  /** Java function type. */
+  public static final FuncType JAVA = new FuncType(null, new SeqType[0]);
   /** The general map type. */
   public static final MapType MAP = new MapType(ANY_ATOMIC_TYPE, ITEM_ZM);
   /** The general array type. */
@@ -455,6 +458,21 @@ public final class SeqType {
     final Occ oc = occ.union(st.occ);
     final Test ts = st.zero() ? test : zero() ? st.test : Test.get(test, st.test);
     return get(tp, oc, ts);
+  }
+
+  /**
+   * Computes the union of the sequence type of all expressions.
+   * @param exprs expressions
+   * @param zero include expressions that return empty sequence
+   * @return sequence type, or {@code null} if unknown
+   */
+  public static SeqType union(final Expr[] exprs, final boolean zero) {
+    SeqType st = null;
+    for(final Expr expr : exprs) {
+      final SeqType st2 = expr.seqType();
+      if(zero || !st2.zero()) st = st == null ? st2 : st.union(st2);
+    }
+    return st;
   }
 
   /**

@@ -76,7 +76,7 @@ public final class Lookup extends Arr {
    * @return optimized or original expression
    * @throws QueryException query exception
    */
-  public Expr opt(final CompileContext cc) throws QueryException {
+  private Expr opt(final CompileContext cc) throws QueryException {
     final Expr inputs = exprs[0], keys = exprs[1];
     final long ks = keys.seqType().mayBeArray() || keys.has(Flag.NDT) ? -1 : keys.size();
     if(ks == 0) return keys;
@@ -160,7 +160,7 @@ public final class Lookup extends Arr {
   private ValueBuilder add(final Item item, final ValueBuilder vb, final QueryContext qc)
       throws QueryException {
 
-    if(!(item instanceof XQMap || item instanceof XQArray)) throw LOOKUP_X.get(info, item);
+    if(!(item instanceof XQData)) throw LOOKUP_X.get(info, item);
 
     final Expr keys = exprs[1];
     if(keys == WILDCARD) {
@@ -189,7 +189,7 @@ public final class Lookup extends Arr {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token(exprs[0]).token('?');
 
     final Expr keys = exprs[1];

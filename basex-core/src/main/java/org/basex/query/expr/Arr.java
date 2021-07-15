@@ -117,7 +117,7 @@ public abstract class Arr extends ParseExpr {
    */
   protected final boolean allAreValues(final boolean limit) {
     for(final Expr expr : exprs) {
-      if(!(expr instanceof Value) || (limit && expr.size() > CompileContext.MAX_PREEVAL))
+      if(!(expr instanceof Value) || limit && expr.size() > CompileContext.MAX_PREEVAL)
         return false;
     }
     return true;
@@ -223,7 +223,7 @@ public abstract class Arr extends ParseExpr {
     for(int l = 0; l < list.size(); l++) {
       for(int m = l + 1; m < list.size(); m++) {
         final Expr expr1 = list.get(l), expr2 = list.get(m);
-        if(!(positional && expr1.has(Flag.POS))) {
+        if(!expr1.has(Flag.NDT) && !(positional && expr1.has(Flag.POS))) {
           // A or not(A)  ->  true()
           // A[not(B)][B]  ->  ()
           // empty(A) or exists(A)  ->  true()
@@ -265,7 +265,7 @@ public abstract class Arr extends ParseExpr {
    * @param ebv consider ebv checks
    * @return result of check
    */
-  final boolean contradict(final Expr expr1, final Expr expr2, final boolean ebv) {
+  static boolean contradict(final Expr expr1, final Expr expr2, final boolean ebv) {
     // boolean(A), not(A)
     Expr arg = BOOLEAN.is(expr1) ? expr1.arg(0) : expr1;
     if(NOT.is(expr2) && expr2.arg(0).equals(arg)) return true;
@@ -371,7 +371,7 @@ public abstract class Arr extends ParseExpr {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this), exprs);
   }
 }

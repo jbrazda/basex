@@ -6,7 +6,7 @@ import org.basex.query.*;
 import org.basex.query.value.*;
 import org.basex.query.value.item.*;
 import org.basex.query.value.type.*;
-import org.basex.util.*;
+import org.basex.util.list.*;
 
 /**
  * Sequence of items of type {@link Int xs:float}, containing at least two of them.
@@ -71,18 +71,15 @@ public final class FltSeq extends NativeSeq {
    * @throws QueryException query exception
    */
   static Value get(final int size, final Value... values) throws QueryException {
-    final float[] tmp = new float[size];
-    int t = 0;
+    final FloatList tmp = new FloatList(size);
     for(final Value value : values) {
       // speed up construction, depending on input
       if(value instanceof FltSeq) {
-        final int vs = (int) value.size();
-        Array.copyFromStart(((FltSeq) value).values, vs, tmp, t);
-        t += vs;
+        tmp.add(((FltSeq) value).values);
       } else {
-        for(final Item item : value) tmp[t++] = item.flt(null);
+        for(final Item item : value) tmp.add(item.flt(null));
       }
     }
-    return get(tmp);
+    return get(tmp.finish());
   }
 }

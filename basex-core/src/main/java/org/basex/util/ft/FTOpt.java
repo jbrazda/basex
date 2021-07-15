@@ -28,8 +28,8 @@ public final class FTOpt extends ExprInfo {
   public StemDir sd;
   /** Stop words (can be {@code null}). */
   public StopWords sw;
-  /** Thesaurus (can be {@code null}). */
-  public ThesQuery th;
+  /** List of thesaurus accessors (can be {@code null}). */
+  public ThesList th;
   /** Language (can be {@code null}). */
   public Language ln;
   /** Levenshtein error (ignored if {@code -1}). */
@@ -111,7 +111,7 @@ public final class FTOpt extends ExprInfo {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     final FElem elem = plan.create(this,
       WILDCARDS, is(WC) ? TRUE : null, FUZZY, is(FZ) ? TRUE : null,
       ERRORS, errors != -1 ? errors : null, CASE, cs,
@@ -121,7 +121,7 @@ public final class FTOpt extends ExprInfo {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     final StringList list = new StringList();
     if(is(WC)) list.add(WILDCARDS);
     if(is(FZ)) list.add(errors != -1 ? FUZZY + ' ' + errors + ' ' + ERRORS : FUZZY);
@@ -131,7 +131,7 @@ public final class FTOpt extends ExprInfo {
     if(is(DC)) list.add(DIACRITICS + ' ' + SENSITIVE);
     if(is(ST) || sd != null) list.add(STEMMING);
     if(ln != null) list.add(LANGUAGE + " \"" + ln + '"');
-    if(th != null) list.add(THESAURUS);
+    if(th != null) list.add(THESAURUS + " at " + th);
 
     for(final String opt : list) qs.token(USING).token(opt);
   }

@@ -1,33 +1,34 @@
 package org.basex.query.expr.ft;
 
-import static org.basex.query.QueryError.*;
 import static org.basex.util.Token.*;
 
-import java.io.*;
+import java.util.function.*;
 
-import org.basex.core.*;
-import org.basex.io.*;
-import org.basex.query.*;
-import org.basex.query.value.*;
-import org.basex.query.value.item.*;
+import org.basex.query.util.list.*;
 import org.basex.query.value.node.*;
-import org.basex.util.*;
+import org.basex.query.value.type.*;
 import org.basex.util.hash.*;
-import org.basex.util.list.*;
 
 /**
- * Simple Thesaurus for full-text requests.
+ * Thesaurus structure.
  *
  * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
 public final class Thesaurus {
-  /** Thesaurus root references. */
-  private final TokenObjMap<ThesNode> nodes = new TokenObjMap<>();
+  /** Element name: entry. */
+  private static final byte[] ENTRY = token("entry");
+  /** Element name: relationship. */
+  private static final byte[] RELATIONSHIP = token("relationship");
+  /** Element name: synonym. */
+  private static final byte[] SYNONYM = token("synonym");
+  /** Element name: term. */
+  private static final byte[] TERM = token("term");
+
+  /** Map with thesaurus entries. */
+  private final TokenObjMap<ThesEntry> entries = new TokenObjMap<>();
   /** Relationships. */
   private static final TokenMap RSHIPS = new TokenMap();
-  /** Database context. */
-  private final Context ctx;
 
   static {
     RSHIPS.put("NT", "BT");
@@ -41,185 +42,69 @@ public final class Thesaurus {
     RSHIPS.put("RT", "RT");
   }
 
-  /** Input file. */
-  private final IO file;
-  /** Relationship. */
-  private final byte[] rel;
-  /** Minimum level. */
-  private final long min;
-  /** Maximum level. */
-  private final long max;
-
   /**
    * Constructor.
-   * @param file file reference
-   * @param ctx database context
+   * @param root thesaurus root node
    */
-  public Thesaurus(final IO file, final Context ctx) {
-    this(file, EMPTY, 0, Long.MAX_VALUE, ctx);
+  public Thesaurus(final ANode root) {
+    for(final ANode entry : elements(root, ENTRY, true)) build(entry);
   }
 
   /**
-   * Reads a thesaurus file.
-   * @param file file reference
-   * @param res relationship
-   * @param min minimum level
-   * @param max maximum level
-   * @param ctx database context
-   */
-  public Thesaurus(final IO file, final byte[] res, final long min, final long max,
-      final Context ctx) {
-    this.file = file;
-    rel = res;
-    this.min = min;
-    this.max = Math.min(max, min + 100);
-    this.ctx = ctx;
-  }
-
-  /**
-   * Initializes the thesaurus.
-   * @param ii input info
-   * @throws QueryException query exception
-   */
-  private void init(final InputInfo ii) throws QueryException {
-    try {
-      final Value entries = nodes("//*:entry", new DBNode(file));
-      for(final Item entry : entries) build(entry);
-    } catch(final IOException ex) {
-      Util.debug(ex);
-      throw NOTHES_X.get(ii, file);
-    }
-  }
-
-  /**
-   * Builds the thesaurus.
-   * @param value input nodes
-   * @throws QueryException query exception
-   */
-  private void build(final Value value) throws QueryException {
-    final Value synonyms = nodes("*:synonym", value);
-    if(synonyms.isEmpty()) return;
-
-    final ThesNode term = node(text("*:term", value));
-    for(final Item synonym : synonyms) {
-      final ThesNode sterm = node(text("*:term", synonym));
-      final byte[] rs = text("*:relationship", synonym);
-      term.add(sterm, rs);
-
-      final byte[] srs = RSHIPS.get(rs);
-      if(srs != null) sterm.add(term, srs);
-      build(synonyms);
-    }
-  }
-
-  /**
-   * Returns a node for the specified term.
+   * Returns a thesaurus entry for the specified term.
    * @param term term
-   * @return node
+   * @return node or {@code null}
    */
-  private ThesNode node(final byte[] term) {
-    return nodes.computeIfAbsent(term, () -> new ThesNode(term));
+  ThesEntry get(final byte[] term) {
+    return entries.get(term);
   }
 
   /**
-   * Performs a query and returns the result as nodes.
-   * @param query query string
-   * @param value value
-   * @return resulting nodes
-   * @throws QueryException query exception
+   * Populates the thesaurus.
+   * @param entry thesaurus entry
    */
-  private Value nodes(final String query, final Value value) throws QueryException {
-    try(QueryProcessor qp = new QueryProcessor(query, ctx).context(value)) {
-      return qp.value();
-    }
-  }
+  private void build(final ANode entry) {
+    final Function<ANode, ThesEntry> find = node -> {
+      final byte[] term = value(node, TERM);
+      return entries.computeIfAbsent(term, () -> new ThesEntry(term));
+    };
 
-  /**
-   * Performs a query and returns the first result as text.
-   * @param query query string
-   * @param value value
-   * @return resulting text
-   * @throws QueryException query exception
-   */
-  private byte[] text(final String query, final Value value) throws QueryException {
-    try(QueryProcessor qp = new QueryProcessor(query, ctx).context(value)) {
-      return qp.iter().next().string(null);
+    final ThesEntry term = find.apply(entry);
+    for(final ANode synonym : elements(entry, SYNONYM, false)) {
+      final ThesEntry syn = find.apply(synonym);
+      final byte[] value = value(synonym, RELATIONSHIP);
+      term.add(syn, value);
+
+      final byte[] rship = RSHIPS.get(value);
+      if(rship != null) syn.add(term, rship);
+      build(synonym);
     }
   }
 
   /**
-   * Finds a thesaurus term.
-   * @param ii input info
-   * @param list result list
-   * @param token token
-   * @throws QueryException query exception
+   * Returns child/descendant elements with the specified name.
+   * @param node node to start from
+   * @param name name of elements to find
+   * @param desc return children or descendants
+   * @return resulting elements
    */
-  void find(final InputInfo ii, final TokenList list, final byte[] token) throws QueryException {
-    if(nodes.isEmpty()) init(ii);
-
-    final ThesNode tn = nodes.get(token);
-    if(tn != null) find(list, tn, 1);
+  private static ANodeList elements(final ANode node, final byte[] name, final boolean desc) {
+    final ANodeList list = new ANodeList();
+    for(final ANode element : desc ? node.descendantIter() : node.childIter()) {
+      if(element.type == NodeType.ELEMENT && eq(element.qname().local(), name))
+        list.add(element.finish());
+    }
+    return list;
   }
 
   /**
-   * Recursively collects relevant thesaurus terms.
-   * @param list result list
-   * @param node input node
-   * @param level current level
+   * Returns the string value of a child element with the specified name.
+   * @param node node to start from
+   * @param name name of child element
+   * @return value or empty string
    */
-  private void find(final TokenList list, final ThesNode node, final long level) {
-    for(int n = 0; n < node.size; ++n) {
-      if(rel.length == 0 || eq(node.rs[n], rel)) {
-        final ThesNode tn = node.nodes[n];
-        final byte[] term = tn.term;
-        if(!list.contains(term)) {
-          list.add(term);
-          if(level < max) find(list, tn, level + 1);
-        }
-      }
-    }
-  }
-
-  @Override
-  public boolean equals(final Object obj) {
-    if(this == obj) return true;
-    if(!(obj instanceof Thesaurus)) return false;
-    final Thesaurus th = (Thesaurus) obj;
-    return file.eq(th.file) && min == th.min && max == th.max && eq(rel, th.rel);
-  }
-
-  /** Thesaurus node. */
-  private static final class ThesNode {
-    /** Related nodes. */
-    private ThesNode[] nodes = new ThesNode[1];
-    /** Relationships. */
-    private byte[][] rs = new byte[1][];
-    /** Term. */
-    private final byte[] term;
-    /** Entries. */
-    private int size;
-
-    /**
-     * Constructor.
-     * @param term term
-     */
-    private ThesNode(final byte[] term) {
-      this.term = term;
-    }
-
-    /**
-     * Adds a relationship to the node.
-     * @param n target node
-     * @param r relationship
-     */
-    private void add(final ThesNode n, final byte[] r) {
-      if(size == nodes.length) {
-        final int s = Array.newCapacity(size);
-        nodes = Array.copy(nodes, new ThesNode[s]);
-        rs = Array.copyOf(rs, s);
-      }
-      nodes[size] = n;
-      rs[size++] = r;
-    }
+  private static byte[] value(final ANode node, final byte[] name) {
+    final ANodeList elements = elements(node, name, false);
+    return elements.isEmpty() ? EMPTY : elements.peek().string();
   }
 }

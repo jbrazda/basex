@@ -53,10 +53,10 @@ public final class StaticFuncs extends ExprInfo {
       throw FNRESERVED_X.get(ii, qname.string());
 
     final StaticFunc sf = new StaticFunc(anns, qname, params, type, expr, doc, vs, ii);
-    final byte[] sig = sf.id();
-    final FuncCache fc = funcs.get(sig);
+    final byte[] id = sf.id();
+    final FuncCache fc = funcs.get(id);
     if(fc != null) fc.setFunc(sf);
-    else funcs.put(sig, new FuncCache(sf));
+    else funcs.put(id, new FuncCache(sf));
     return sf;
   }
 
@@ -73,7 +73,7 @@ public final class StaticFuncs extends ExprInfo {
       final InputInfo ii) throws QueryException {
 
     // check if function has already been declared
-    final FuncCache fc = funcs.get(signature(qname, args.length));
+    final FuncCache fc = funcs.get(id(qname, args.length));
     return fc == null ? null : fc.newCall(qname, args, sc, ii);
   }
 
@@ -90,8 +90,8 @@ public final class StaticFuncs extends ExprInfo {
       final InputInfo ii) throws QueryException {
 
     if(NSGlobal.reserved(qname.uri())) throw similarError(qname, ii);
-    final byte[] sig = signature(qname, args.length);
-    return funcs.computeIfAbsent(sig, () -> new FuncCache(null)).newCall(qname, args, sc, ii);
+    final byte[] id = id(qname, args.length);
+    return funcs.computeIfAbsent(id, () -> new FuncCache(null)).newCall(qname, args, sc, ii);
   }
 
   /**
@@ -99,8 +99,8 @@ public final class StaticFuncs extends ExprInfo {
    * @param literal the literal
    */
   public void registerFuncLiteral(final Closure literal) {
-    final byte[] sig = signature(literal.funcName(), literal.arity());
-    funcs.computeIfAbsent(sig, () -> new FuncCache(null)).literals.add(literal);
+    final byte[] id = id(literal.funcName(), literal.arity());
+    funcs.computeIfAbsent(id, () -> new FuncCache(null)).literals.add(literal);
   }
 
   /**
@@ -169,7 +169,7 @@ public final class StaticFuncs extends ExprInfo {
    * @return function if found, {@code null} otherwise
    */
   public StaticFunc get(final QNm qname, final long arity) {
-    final FuncCache fc = funcs.get(signature(qname, arity));
+    final FuncCache fc = funcs.get(id(qname, arity));
     return fc != null ? fc.func : null;
   }
 
@@ -178,7 +178,7 @@ public final class StaticFuncs extends ExprInfo {
    * @param func function
    * @return sequence types or {@code null}
    */
-  public SeqType[] seqTypes(final StaticFunc func) {
+  SeqType[] seqTypes(final StaticFunc func) {
     // initialize cache for direct lookups of function calls
     if(calls == null) {
       calls = new IdentityHashMap<>(funcs.size());
@@ -207,7 +207,7 @@ public final class StaticFuncs extends ExprInfo {
    * @param ii input info
    * @return exception
    */
-  public QueryException similarError(final QNm qname, final InputInfo ii) {
+  private QueryException similarError(final QNm qname, final InputInfo ii) {
     // check local functions
     final ArrayList<QNm> list = new ArrayList<>();
     for(final FuncCache fc : funcs.values()) {
@@ -236,7 +236,7 @@ public final class StaticFuncs extends ExprInfo {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     if(funcs.isEmpty()) return;
 
     final ArrayList<ExprInfo> list = new ArrayList<>(funcs.size());
@@ -245,19 +245,19 @@ public final class StaticFuncs extends ExprInfo {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     for(final FuncCache fc : funcs.values()) {
       if(fc.func != null && fc.func.compiled()) qs.token(fc.func).token(Text.NL);
     }
   }
 
   /**
-   * Returns the signature of the function with the given name and arity.
+   * Returns the id of the function with the given name and arity.
    * @param qname function name
    * @param arity function arity
-   * @return the function's signature
+   * @return the function signature
    */
-  static byte[] signature(final QNm qname, final long arity) {
+  static byte[] id(final QNm qname, final long arity) {
     return concat(qname.prefixId(), '#', arity);
   }
 

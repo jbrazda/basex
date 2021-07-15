@@ -24,10 +24,10 @@ public abstract class FItem extends Item implements XQFunction {
 
   /**
    * Constructor.
-   * @param type type
+   * @param type function type
    * @param anns this function item's annotations
    */
-  protected FItem(final FuncType type, final AnnList anns) {
+  protected FItem(final Type type, final AnnList anns) {
     super(type);
     this.anns = anns;
   }
@@ -35,11 +35,6 @@ public abstract class FItem extends Item implements XQFunction {
   @Override
   public final AnnList annotations() {
     return anns;
-  }
-
-  @Override
-  public final byte[] string(final InputInfo ii) throws QueryException {
-    throw FIATOM_X.get(ii, type);
   }
 
   @Override

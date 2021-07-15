@@ -14,6 +14,7 @@ import org.basex.query.value.item.*;
 import org.basex.query.value.map.*;
 import org.basex.query.value.type.*;
 import org.basex.util.*;
+import org.basex.util.list.*;
 
 /**
  * An array storing {@link Value}s.
@@ -35,9 +36,10 @@ public abstract class XQArray extends XQData {
 
   /**
    * Default constructor.
+   * @param type function type
    */
-  XQArray() {
-    super(SeqType.ARRAY);
+  XQArray(final Type type) {
+    super(type);
   }
 
   /**
@@ -46,67 +48,55 @@ public abstract class XQArray extends XQData {
    * @return (unique) instance of an empty array
    */
   public static XQArray empty() {
-    return EmptyArray.INSTANCE;
+    return EmptyArray.EMPTY;
   }
 
   /**
-   * Creates a singleton array containing the given element.
-   * @param elem the contained element
-   * @return the singleton array
+   * Creates an array with a single member.
+   * @param value single member
+   * @return array
    */
-  public static XQArray singleton(final Value elem) {
-    return new SmallArray(new Value[] { elem });
+  public static XQArray member(final Value value) {
+    return new SmallArray(new Value[] { value }, ArrayType.get(value.seqType()));
   }
 
   /**
-   * Creates an array containing the given elements.
-   * @param values elements
-   * @return the resulting array
-   */
-  @SafeVarargs
-  public static XQArray from(final Value... values) {
-    final ArrayBuilder builder = new ArrayBuilder();
-    for(final Value value : values) builder.append(value);
-    return builder.freeze();
-  }
-
-  /**
-   * Prepends an element to the front of this array.
+   * Prepends a member to the front of this array.
    * Running time: <i>O(1)*</i>
-   * @param elem element to prepend
+   * @param head value to prepend
    * @return resulting array
    */
-  public abstract XQArray cons(Value elem);
+  public abstract XQArray cons(Value head);
 
   /**
-   * Appends an element to the back of this array.
+   * Appends a member to the back of this array.
    * Running time: <i>O(1)*</i>
-   * @param elem element to append
+   * @param last value to append
    * @return resulting array
    */
-  public abstract XQArray snoc(Value elem);
+  public abstract XQArray snoc(Value last);
 
   /**
-   * Gets the element at the given position in this array.
+   * Gets the member at the given position in this array.
    * Running time: <i>O(log n)</i>
-   * @param index index of the element to get
-   * @return the corresponding element
+   * @param index index of the member to get
+   * @return the corresponding member
    */
   public abstract Value get(long index);
 
   /**
-   * Returns a copy of this array where the entry at the given position is
+   * Returns a copy of this array where the member at the given position is
    * replaced by the given value.
-   * @param pos position of the entry to replace
+   * @param pos position of the member to replace
    * @param value value to put into this array
    * @return resulting array
    */
   public abstract XQArray put(long pos, Value value);
 
   /**
-   * Returns the number of elements in this array.
+   * Returns the number of members in this array.
    * Running time: <i>O(1)</i>
-   * @return number of elements
+   * @return number of members
    */
   public abstract long arraySize();
 
@@ -119,21 +109,21 @@ public abstract class XQArray extends XQData {
   public abstract XQArray concat(XQArray other);
 
   /**
-   * First element of this array, equivalent to {@code array.get(0)}.
+   * First member of this array, equivalent to {@code array.get(0)}.
    * Running time: <i>O(1)</i>
-   * @return the first element
+   * @return the first member
    */
   public abstract Value head();
 
   /**
-   * Last element of this array, equivalent to {@code array.get(array.arraySize() - 1)}.
+   * Last member of this array, equivalent to {@code array.get(array.arraySize() - 1)}.
    * Running time: <i>O(1)</i>
-   * @return last element
+   * @return last member
    */
   public abstract Value last();
 
   /**
-   * Initial segment of this array, i.e. an array containing all elements of this array (in the
+   * Initial segment of this array, i.e. an array containing all members of this array (in the
    * same order), except for the last one.
    * Running time: <i>O(1)*</i>
    * @return initial segment
@@ -141,7 +131,7 @@ public abstract class XQArray extends XQData {
   public abstract XQArray init();
 
   /**
-   * Tail segment of this array, i.e. an array containing all elements of this array (in the
+   * Tail segment of this array, i.e. an array containing all members of this array (in the
    * same order), except for the first one.
    * Running time: <i>O(1)*</i>
    * @return tail segment
@@ -150,15 +140,15 @@ public abstract class XQArray extends XQData {
 
   /**
    * Extracts a contiguous part of this array.
-   * @param pos position of first element
-   * @param len number of elements
+   * @param pos position of first member
+   * @param length number of member
    * @param qc query context
    * @return the sub-array
    */
-  public abstract XQArray subArray(long pos, long len, QueryContext qc);
+  public abstract XQArray subArray(long pos, long length, QueryContext qc);
 
   /**
-   * Returns an array with the same elements as this one, but their order reversed.
+   * Returns an array with the same members as this one, but their order reversed.
    * Running time: <i>O(n)</i>
    * @param qc query context
    * @return reversed version of this array
@@ -173,17 +163,17 @@ public abstract class XQArray extends XQData {
   public abstract boolean isEmptyArray();
 
   /**
-   * Inserts the given element at the given position into this array.
+   * Inserts the given member at the given position into this array.
    * Running time: <i>O(log n)</i>
    * @param pos insertion position, must be between {@code 0} and {@code arraySize()}
-   * @param value element to insert
+   * @param value member to insert
    * @param qc query context
    * @return resulting array
    */
   public abstract XQArray insertBefore(long pos, Value value, QueryContext qc);
 
   /**
-   * Removes the element at the given position in this array.
+   * Removes the member at the given position in this array.
    * Running time: <i>O(log n)</i>
    * @param pos deletion position, must be between {@code 0} and {@code arraySize() - 1}
    * @param qc query context
@@ -204,7 +194,7 @@ public abstract class XQArray extends XQData {
    */
   public abstract ListIterator<Value> iterator(long start);
 
-  /** Iterable over the elements of this array. */
+  /** Iterable over the members of this array. */
   private Iterable<Value> iterable;
 
   /**
@@ -217,7 +207,7 @@ public abstract class XQArray extends XQData {
   }
 
   /**
-   * Prepends the given sequence to this array.
+   * Prepends the given array to this array.
    * @param array small array
    * @return resulting array
    */
@@ -257,7 +247,17 @@ public abstract class XQArray extends XQData {
   }
 
   /**
-   * Checks that this array's implementation does not violate any invariants.
+   * Creates a new array type.
+   * @param value value to be added
+   * @return union type
+   */
+  final Type union(final Value value) {
+    final SeqType dt = ((ArrayType) type).declType, st = value.seqType();
+    return dt.eq(st) ? type : ArrayType.get(dt.union(st));
+  }
+
+  /**
+   * Checks that this array implementation does not violate any invariants.
    * @throws AssertionError if an invariant was violated
    */
   abstract void checkInvariants();
@@ -374,11 +374,69 @@ public abstract class XQArray extends XQData {
   }
 
   @Override
-  public final Object[] toJava() throws QueryException {
-    final long size = arraySize();
-    final ArrayList<Object> list = new ArrayList<>((int) size);
-    final Iterator<Value> iter = iterator(0);
-    while(iter.hasNext()) list.add(iter.next().toJava());
+  public final Object toJava() throws QueryException {
+    // determine type (static or exact)
+    final int sz = (int) arraySize();
+    SeqType dt = funcType().declType;
+    if(sz > 0 && dt.eq(SeqType.ITEM_ZM)) {
+      dt = null;
+      for(final Value member : members()) {
+        final SeqType st = member.seqType();
+        dt = dt == null ? st : dt.union(st);
+      }
+    }
+    // convert to specific arrays
+    if(dt.one()) {
+      final Type t = dt.type;
+      if(t == AtomType.BOOLEAN) {
+        final BoolList list = new BoolList(sz);
+        for(final Value member : members()) list.add(((Bln) member).bool(null));
+        return list.finish();
+      }
+      if(t == AtomType.STRING) {
+        final StringList list = new StringList(sz);
+        for(final Value member : members()) list.add((String) member.toJava());
+        return list.finish();
+      }
+      if(t == AtomType.BYTE) {
+        final ByteList list = new ByteList(sz);
+        for(final Value member : members()) list.add((byte) ((Int) member).itr());
+        return list.finish();
+      }
+      if(t == AtomType.SHORT || t == AtomType.UNSIGNED_BYTE) {
+        final ShortList list = new ShortList(sz);
+        for(final Value member : members()) list.add((short) ((Int) member).itr());
+        return list.finish();
+      }
+      if(t == AtomType.UNSIGNED_SHORT) {
+        final char[] chars = new char[sz];
+        int c = 0;
+        for(final Value member : members()) chars[c++] = (char) ((Int) member).itr();
+        return chars;
+      }
+      if(t == AtomType.INT) {
+        final IntList list = new IntList(sz);
+        for(final Value member : members()) list.add((int) ((Int) member).itr());
+        return list.finish();
+      }
+      if(t.instanceOf(AtomType.INTEGER) && t != AtomType.UNSIGNED_LONG) {
+        final LongList list = new LongList(sz);
+        for(final Value member : members()) list.add(((Int) member).itr());
+        return list.finish();
+      }
+      if(t == AtomType.FLOAT) {
+        final FloatList list = new FloatList(sz);
+        for(final Value member : members()) list.add(((Flt) member).flt());
+        return list.finish();
+      }
+      if(t == AtomType.DOUBLE) {
+        final DoubleList list = new DoubleList(sz);
+        for(final Value member : members()) list.add(((Dbl) member).dbl());
+        return list.finish();
+      }
+    }
+    final ArrayList<Object> list = new ArrayList<>(sz);
+    for(final Value member : members()) list.add(member.toJava());
     return list.toArray();
   }
 
@@ -388,7 +446,7 @@ public abstract class XQArray extends XQData {
   }
 
   @Override
-  public final void plan(final QueryPlan plan) {
+  public final void toXml(final QueryPlan plan) {
     final ExprList list = new ExprList();
     final long size = arraySize();
     final int max = (int) Math.min(size, 5);
@@ -397,17 +455,15 @@ public abstract class XQArray extends XQData {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     final TokenBuilder tb = new TokenBuilder();
-    final Iterator<Value> iter = iterator(0);
-    for(boolean fst = true; iter.hasNext(); fst = false) {
-      tb.add(fst ? " " : ", ");
-      final Value value = iter.next();
-      final long vs = value.size();
+    for(final Value member : members()) {
+      tb.add(tb.isEmpty() ? " " : ", ");
+      final long vs = member.size();
       if(vs != 1) tb.add('(');
       for(int i = 0; i < vs; i++) {
         if(i != 0) tb.add(", ");
-        tb.add(value.itemAt(i));
+        tb.add(member.itemAt(i));
       }
       if(vs != 1) tb.add(')');
     }

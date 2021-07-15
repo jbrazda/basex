@@ -36,34 +36,31 @@ public abstract class Seq extends Value {
 
   @Override
   public Object toJava() throws QueryException {
-    // Java representation may consume much memory: check again whether sequence is homogeneous
-    Type tp = null;
-    for(final Item item : this) {
-      if(tp == null) {
-        tp = item.type;
-      } else if(tp != item.type) {
-        tp = null;
-        break;
+    // determine type (static or exact)
+    Type tp = type;
+    if(tp == AtomType.ITEM) {
+      tp = null;
+      for(final Item item : this) {
+        final Type st = item.type;
+        tp = tp == null ? st : tp.union(st);
       }
     }
 
+    // shortcut for strings (avoid intermediate token representation)
+    final int sz = (int) size;
+    if(tp == AtomType.STRING) {
+      final StringList list = new StringList(sz);
+      for(final Item item : this) list.add(item.string(null));
+      return list.finish();
+    }
     // try to create custom Java representation
-    if(tp != null) {
-      type = tp;
-      // shortcut for strings (avoid intermediate token representation)
-      if(tp == AtomType.STRING) {
-        final StringList tmp = new StringList(initialCapacity(size));
-        for(final Item item : this) tmp.add(item.string(null));
-        return tmp.finish();
-      }
-      final Value value = get((int) size, tp, this);
-      if(value != null) return value.toJava();
-    }
+    final Value value = get(sz, tp, this);
+    if(value != null) return value.toJava();
 
-    int t = 0;
-    final Object[] tmp = new Object[(int) size];
-    for(final Item item : this) tmp[t++] = item.toJava();
-    return tmp;
+    int a = 0;
+    final Object[] array = new Object[sz];
+    for(final Item item : this) array[a++] = item.toJava();
+    return array;
   }
 
   @Override
@@ -114,14 +111,14 @@ public abstract class Seq extends Value {
 
   /**
    * Returns a sub sequence of this value with the given start and length.
-   * @param offset offset (ge 0)
+   * @param pos position of first item (ge 0)
    * @param length number of items (1 lt length lt size())
    * @param qc query context
    * @return sub sequence
    */
-  protected Seq subSeq(final long offset, final long length, final QueryContext qc) {
+  protected Seq subSeq(final long pos, final long length, final QueryContext qc) {
     qc.checkStop();
-    return new SubSeq(this, offset, length);
+    return new SubSeq(this, pos, length);
   }
 
   /**
@@ -155,7 +152,7 @@ public abstract class Seq extends Value {
    */
   protected Value copyInsert(final long pos, final Value value, final QueryContext qc) {
     final Type tp = type.union(value.type);
-    if(pos == size) return new TreeSeqBuilder().add(this, qc).add(value, qc).seq(tp);
+    if(pos == size) return new TreeSeqBuilder().add(this, qc).add(value, qc).sequence(tp);
 
     final ValueBuilder vb = new ValueBuilder(qc);
     for(long i = 0; i < pos; i++) vb.add(itemAt(i));
@@ -226,7 +223,7 @@ public abstract class Seq extends Value {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     final int max = (int) Math.min(size, 5);
     final ExprList list = new ExprList(max);
     for(long i = 0; i < max; i++) list.add(itemAt(i));
@@ -239,7 +236,7 @@ public abstract class Seq extends Value {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token(build(false).finish());
   }
 
@@ -274,13 +271,28 @@ public abstract class Seq extends Value {
   public static Value get(final int size, final Type type, final Value... values)
       throws QueryException {
 
-    if(type == AtomType.STRING) return StrSeq.get(size, values);
-    if(type == AtomType.BOOLEAN) return BlnSeq.get(size, values);
-    if(type == AtomType.FLOAT) return FltSeq.get(size, values);
-    if(type == AtomType.DOUBLE) return DblSeq.get(size, values);
-    if(type == AtomType.DECIMAL) return DecSeq.get(size, values);
-    if(type == AtomType.BYTE) return BytSeq.get(size, values);
-    if(type != null && type.instanceOf(AtomType.INTEGER)) return IntSeq.get(type, size, values);
+    if(type instanceof AtomType) {
+      switch((AtomType) type) {
+        case BOOLEAN:
+          return BlnSeq.get(size, values);
+        case STRING:
+          return StrSeq.get(size, values);
+        case BYTE:
+          return BytSeq.get(size, values);
+        case SHORT:
+          return ShrSeq.get(size, values);
+        case FLOAT:
+          return FltSeq.get(size, values);
+        case DOUBLE:
+          return DblSeq.get(size, values);
+        case DECIMAL:
+          return DecSeq.get(size, values);
+        case UNSIGNED_LONG:
+          return null;
+        default:
+          if(type.instanceOf(AtomType.INTEGER)) return IntSeq.get(type, size, values);
+      }
+    }
     return null;
   }
 

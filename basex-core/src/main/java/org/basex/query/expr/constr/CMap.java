@@ -63,7 +63,7 @@ public final class CMap extends Arr {
 
   @Override
   public Item item(final QueryContext qc, final InputInfo ii) throws QueryException {
-    XQMap map = XQMap.EMPTY;
+    XQMap map = XQMap.empty();
     final int el = exprs.length;
     for(int e = 0; e < el; e += 2) {
       final Item key = toAtomItem(exprs[e], qc);
@@ -90,7 +90,7 @@ public final class CMap extends Arr {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token(MAP).token(" { ");
     final int el = exprs.length;
     for(int e = 0; e < el; e += 2) {

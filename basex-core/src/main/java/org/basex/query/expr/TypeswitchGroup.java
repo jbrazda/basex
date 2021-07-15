@@ -259,7 +259,7 @@ public final class TypeswitchGroup extends Single {
    * @return {@code true} if expression has changed
    * @throws QueryException query exception
    */
-  public boolean simplify(final Simplify mode, final CompileContext cc) throws QueryException {
+  boolean simplify(final Simplify mode, final CompileContext cc) throws QueryException {
     final Expr ex = expr.simplifyFor(mode, cc);
     if(ex == expr) return false;
     expr = ex;
@@ -280,7 +280,7 @@ public final class TypeswitchGroup extends Single {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     final FElem elem = plan.attachVariable(plan.create(this), var, false);
     if(seqTypes.length == 0) {
       plan.addAttribute(elem, DEFAULT, true);
@@ -296,7 +296,7 @@ public final class TypeswitchGroup extends Single {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     final boolean cases = seqTypes.length > 0;
     qs.token(cases ? CASE : DEFAULT);
     if(var != null) {

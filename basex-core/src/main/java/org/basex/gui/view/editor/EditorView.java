@@ -115,11 +115,11 @@ public final class EditorView extends View {
     final SearchEditor center = new SearchEditor(gui, tabs, null);
     search = center.bar();
 
-    final AbstractButton newB = BaseXButton.command(GUIMenuCmd.C_EDITNEW, gui);
-    final AbstractButton openB = BaseXButton.command(GUIMenuCmd.C_EDITOPEN, gui);
+    final AbstractButton newB = BaseXButton.command(GUIMenuCmd.C_EDIT_NEW, gui);
+    final AbstractButton openB = BaseXButton.command(GUIMenuCmd.C_EDIT_OPEN, gui);
     final AbstractButton saveB = BaseXButton.get("c_save", SAVE, false, gui);
     final AbstractButton find = search.button(FIND_REPLACE);
-    final AbstractButton vars = BaseXButton.command(GUIMenuCmd.C_VARS, gui);
+    final AbstractButton vars = BaseXButton.command(GUIMenuCmd.C_EXTERNAL_VARIABLES, gui);
 
     history = BaseXButton.get("c_history", RECENTLY_OPENED, false, gui);
     stop = BaseXButton.get("c_stop", STOP, false, gui);
@@ -190,10 +190,10 @@ public final class EditorView extends View {
     saveB.addActionListener(e -> {
       final JPopupMenu pop = new JPopupMenu();
       final StringBuilder mnem = new StringBuilder();
-      final JMenuItem sa = GUIMenu.newItem(GUIMenuCmd.C_EDITSAVE, gui, mnem);
-      final JMenuItem sas = GUIMenu.newItem(GUIMenuCmd.C_EDITSAVEAS, gui, mnem);
-      sa.setEnabled(GUIMenuCmd.C_EDITSAVE.enabled(gui));
-      sas.setEnabled(GUIMenuCmd.C_EDITSAVEAS.enabled(gui));
+      final JMenuItem sa = GUIMenu.newItem(GUIMenuCmd.C_EDIT_SAVE, gui, mnem);
+      final JMenuItem sas = GUIMenu.newItem(GUIMenuCmd.C_EDIT_SAVE_AS, gui, mnem);
+      sa.setEnabled(GUIMenuCmd.C_EDIT_SAVE.enabled(gui));
+      sas.setEnabled(GUIMenuCmd.C_EDIT_SAVE_AS.enabled(gui));
       pop.add(sa);
       pop.add(sas);
       pop.show(saveB, 0, saveB.getHeight());
@@ -298,23 +298,28 @@ public final class EditorView extends View {
   }
 
   /**
-   * Sets an editor context document.
-   * @param node document
+   * Sets an XML document as context.
+   * @param file file
    */
-  public void setContext(final DBNode node) {
-    doc = node;
-    // close database
-    if(Close.close(gui.context)) gui.notify.init();
-    // remove context item binding
-    final Map<String, String> map = gui.context.options.toMap(MainOptions.BINDINGS);
-    map.remove("");
-    DialogBindings.assign(map, gui);
-    // remove context label
-    refreshContextLabel();
+  public void setContext(final IOFile file) {
+    try {
+      doc = new DBNode(file);
+      // close database
+      if(Close.close(gui.context)) gui.notify.init();
+      // remove context item binding
+      final Map<String, String> map = gui.context.options.toMap(MainOptions.BINDINGS);
+      map.remove("");
+      DialogBindings.assign(map, gui);
+      // remove context label
+      refreshContextLabel();
+    } catch(final IOException ex) {
+      Util.debug(ex);
+      BaseXDialog.error(gui, Util.info(ex));
+    }
   }
 
   /**
-   * Returns the current context string.
+   * Returns a string describing the current context.
    * @return context string (can be empty)
    */
   public String context() {
@@ -331,7 +336,7 @@ public final class EditorView extends View {
     }
     // check if main-memory document exists
     if(value == null) {
-      if(doc != null) value = Function.DOC.args(doc.data().meta.original).trim();
+      if(doc != null) value = Function.DOC.args(new IOFile(doc.data().meta.original).name()).trim();
     } else {
       doc = null;
     }
@@ -428,8 +433,8 @@ public final class EditorView extends View {
   public void open() {
     // open file chooser for XML creation
     final BaseXFileChooser fc = new BaseXFileChooser(gui, OPEN, gui.gopts.get(GUIOptions.WORKPATH));
-    fc.filter(XQUERY_FILES, IO.XQSUFFIXES);
-    fc.filter(BXS_FILES, IO.BXSSUFFIX);
+    fc.filter(XQUERY_FILES, false, IO.XQSUFFIXES);
+    fc.filter(BXS_FILES, false, IO.BXSSUFFIX);
     fc.textFilters();
     for(final IOFile f : fc.multi().selectAll(Mode.FOPEN)) open(f);
   }
@@ -452,8 +457,8 @@ public final class EditorView extends View {
     final EditorArea edit = getEditor();
     final String path = edit.opened() ? edit.file().path() : gui.gopts.get(GUIOptions.WORKPATH);
     final BaseXFileChooser fc = new BaseXFileChooser(gui, SAVE_AS, path);
-    fc.filter(XQUERY_FILES, IO.XQSUFFIXES);
-    fc.filter(BXS_FILES, IO.BXSSUFFIX);
+    fc.filter(XQUERY_FILES, false, IO.XQSUFFIXES);
+    fc.filter(BXS_FILES, false, IO.BXSSUFFIX);
     fc.textFilters();
     fc.suffix(IO.XQSUFFIX);
 
@@ -471,7 +476,7 @@ public final class EditorView extends View {
    * Creates a new file.
    */
   public void newFile() {
-    if(!visible()) GUIMenuCmd.C_SHOWEDITOR.execute(gui);
+    if(!visible()) GUIMenuCmd.C_SHOW_EDITOR.execute(gui);
     refreshControls(addTab(), true);
   }
 
@@ -503,7 +508,7 @@ public final class EditorView extends View {
    * @return opened editor, or {@code null} if file could not be opened
    */
   private EditorArea open(final IOFile file, final boolean parse, final boolean error) {
-    if(!visible()) GUIMenuCmd.C_SHOWEDITOR.execute(gui);
+    if(!visible()) GUIMenuCmd.C_SHOW_EDITOR.execute(gui);
 
     EditorArea edit = find(file);
     if(edit != null) {

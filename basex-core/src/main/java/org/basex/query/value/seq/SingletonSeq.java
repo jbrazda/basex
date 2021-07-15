@@ -54,8 +54,8 @@ public final class SingletonSeq extends Seq {
   }
 
   @Override
-  protected Seq subSeq(final long offset, final long length, final QueryContext qc) {
-    return value.size() == 1 ? new SingletonSeq(length, value) : super.subSeq(offset, length, qc);
+  protected Seq subSeq(final long pos, final long length, final QueryContext qc) {
+    return value.size() == 1 ? new SingletonSeq(length, value) : super.subSeq(pos, length, qc);
   }
 
   @Override
@@ -89,12 +89,12 @@ public final class SingletonSeq extends Seq {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this), value);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.function(_UTIL_REPLICATE, value, size / value.size());
   }
 

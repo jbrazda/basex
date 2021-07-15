@@ -99,14 +99,12 @@ public class FuncType implements Type {
   }
 
   @Override
-  public final Item cast(final Object value, final QueryContext qc, final StaticContext sc,
-      final InputInfo ii) {
+  public final Item cast(final Object value, final QueryContext qc, final InputInfo ii) {
     throw Util.notExpected(value);
   }
 
   @Override
-  public final Item castString(final String string, final QueryContext qc, final StaticContext sc,
-      final InputInfo ii) {
+  public final Item castString(final String string, final QueryContext qc, final InputInfo ii) {
     throw Util.notExpected(string);
   }
 
@@ -128,7 +126,7 @@ public class FuncType implements Type {
 
   @Override
   public boolean instanceOf(final Type type) {
-    if(type.oneOf(this, SeqType.FUNCTION, AtomType.ITEM)) return true;
+    if(this == type || type.oneOf(this, SeqType.FUNCTION, AtomType.ITEM)) return true;
     if(this == SeqType.FUNCTION || !(type instanceof FuncType) || type instanceof MapType ||
         type instanceof ArrayType) return false;
 

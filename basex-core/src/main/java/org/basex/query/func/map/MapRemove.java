@@ -20,14 +20,17 @@ public final class MapRemove extends StandardFunc {
   public Item item(final QueryContext qc, final InputInfo ii) throws QueryException {
     XQMap map = toMap(exprs[0], qc);
     final Iter keys = exprs[1].iter(qc);
-    for(Item item; (item = qc.next(keys)) != null;) map = map.delete(toAtomItem(item, qc), info);
+
+    for(Item item; (item = qc.next(keys)) != null;) {
+      map = map.delete(toAtomItem(item, qc), info);
+    }
     return map;
   }
 
   @Override
   protected Expr opt(final CompileContext cc) {
     final Expr expr1 = exprs[0];
-    if(expr1 == XQMap.EMPTY) return expr1;
+    if(expr1 == XQMap.empty()) return expr1;
 
     final Type type = expr1.seqType().type;
     if(type instanceof MapType) exprType.assign(type);

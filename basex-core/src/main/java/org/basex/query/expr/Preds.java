@@ -191,7 +191,12 @@ public abstract class Preds extends Arr {
     // inline root item (ignore nodes)
     // 1[. = 1]  ->  1[1 = 1]
     if(root instanceof Item && !(rst.type instanceof NodeType)) {
-      expr = new InlineContext(null, root, cc).inline(expr);
+      try {
+        expr = new InlineContext(null, root, cc).inline(expr);
+      } catch(final QueryException ex) {
+        // replace original expression with error
+        expr = cc.error(ex, expr);
+      }
     }
 
     // E[exists(nodes)]  ->  E[nodes]
@@ -355,7 +360,7 @@ public abstract class Preds extends Arr {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     for(final Expr expr : exprs) qs.bracket(expr);
   }
 }

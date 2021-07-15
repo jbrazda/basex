@@ -5,12 +5,13 @@ import static org.basex.query.QueryError.*;
 import java.util.*;
 
 import org.basex.build.json.*;
-import org.basex.build.json.JsonParserOptions.JsonDuplicates;
+import org.basex.build.json.JsonParserOptions.*;
 import org.basex.query.*;
 import org.basex.query.util.list.*;
 import org.basex.query.value.*;
+import org.basex.query.value.array.*;
 import org.basex.query.value.item.*;
-import org.basex.query.value.map.XQMap;
+import org.basex.query.value.map.*;
 import org.basex.query.value.seq.*;
 import org.basex.util.*;
 
@@ -65,7 +66,7 @@ public final class JsonXQueryConverter extends JsonConverter {
 
   @Override
   void openObject() {
-    maps.push(XQMap.EMPTY);
+    maps.push(XQMap.empty());
   }
 
   @Override
@@ -107,7 +108,9 @@ public final class JsonXQueryConverter extends JsonConverter {
 
   @Override
   void closeArray() {
-    stack.push(arrays.pop().array());
+    final ArrayBuilder builder = new ArrayBuilder();
+    for(final Value value : arrays.pop()) builder.append(value);
+    stack.push(builder.array());
   }
 
   @Override

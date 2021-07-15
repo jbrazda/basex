@@ -16,7 +16,6 @@ import java.util.Map.*;
 import org.basex.core.*;
 import org.basex.core.cmd.*;
 import org.basex.io.*;
-import org.basex.io.in.*;
 import org.basex.io.serial.*;
 import org.basex.query.*;
 import org.basex.query.QueryError.*;
@@ -169,15 +168,6 @@ public class FnHttpTest extends HTTPTest {
     try(QueryProcessor qp = new QueryProcessor(_HTTP_SEND_REQUEST.args(
         " <http:request method='delete'/>", RESTURL, " ()") + "[1]/@status/data()", ctx)) {
       assertEquals("404", qp.value().serialize().toString());
-    }
-
-    // DELETE (same resource, illegal body)
-    try {
-      new XQuery(_HTTP_SEND_REQUEST.args(" <http:request method='delete'/>", RESTURL, 123)).
-        execute(ctx);
-      fail("Error expected");
-    } catch(final BaseXException ex) {
-      assertTrue(ex.getMessage().contains(ErrType.HC.toString()));
     }
   }
 
@@ -381,12 +371,6 @@ public class FnHttpTest extends HTTPTest {
     queries.put("Request with schema different from http",
         "<http:request xmlns:http='http://expath.org/ns/http-client' "
         + "href='ftp://basex.org'/>");
-
-    queries.put("Request with content and method which must be empty",
-        "<http:request xmlns:http='http://expath.org/ns/http-client' "
-        + "method='DELETE' href='" + REST_ROOT + "'>"
-        + "<http:body media-type='text/plain'>" + "</http:body>"
-        + "</http:request>");
 
     final StringBuilder error = new StringBuilder();
     for(final Entry<String, String> entry : queries.entrySet()) {
@@ -643,7 +627,9 @@ public class FnHttpTest extends HTTPTest {
       conn.contentType = "text/plain; CHARSET=\\C\\P\\1\\2\\5\\2";
       new HttpResponse(null, ctx.options).getResponse(conn, true, null);
       fail("Encoding exception expected");
-    } catch(final DecodingException expected) { }
+    } catch(final QueryException ex) {
+      Util.debug(ex);
+    }
   }
 
   /**

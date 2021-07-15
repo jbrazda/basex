@@ -290,13 +290,13 @@ public final class BaseXLayout {
       // browse back/forward
       if(gui.context.data() != null) {
         if(GOBACK.is(e)) {
-          GUIMenuCmd.C_GOBACK.execute(gui);
+          GUIMenuCmd.C_GO_BACK.execute(gui);
         } else if(GOFORWARD.is(e)) {
-          GUIMenuCmd.C_GOFORWARD.execute(gui);
+          GUIMenuCmd.C_GO_FORWARD.execute(gui);
         } else if(GOUP.is(e)) {
-          GUIMenuCmd.C_GOUP.execute(gui);
+          GUIMenuCmd.C_GO_UP.execute(gui);
         } else if(GOHOME.is(e)) {
-          GUIMenuCmd.C_GOHOME.execute(gui);
+          GUIMenuCmd.C_GO_HOME.execute(gui);
         }
       }
 
@@ -307,16 +307,16 @@ public final class BaseXLayout {
 
       // change font size
       final int fs = gui.gopts.get(GUIOptions.FONTSIZE);
-      int nfs = fs;
+      long nfs = fs;
       if(INCFONT1.is(e) || INCFONT2.is(e)) {
-        nfs = fs + 1;
+        nfs = Math.max(fs + 1, Math.round(fs * 1.05));
       } else if(DECFONT.is(e)) {
-        nfs = Math.max(1, fs - 1);
+        nfs = Math.min(fs - 1, Math.round(fs / 1.05));
       } else if(NORMFONT.is(e)) {
-        nfs = (int) (fontSize() * 1.5);
+        nfs = (long) (fontSize() * 1.5);
       }
       if(fs != nfs) {
-        gui.gopts.set(GUIOptions.FONTSIZE, nfs);
+        gui.gopts.set(GUIOptions.FONTSIZE, (int) Math.max(1, Math.min(128, nfs)));
         gui.updateLayout();
       }
     };

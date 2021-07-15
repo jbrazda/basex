@@ -401,7 +401,7 @@ public class QueryParser extends InputParser {
     while(true) {
       final Ann ann;
       if(updating && wsConsumeWs(UPDATING)) {
-        ann = new Ann(info(), Annotation.UPDATING);
+        ann = new Ann(info(), Annotation.UPDATING, Empty.VALUE);
       } else if(consume('%')) {
         skipWs();
         final InputInfo ii = info();
@@ -421,38 +421,38 @@ public class QueryParser extends InputParser {
         }
         skipWs();
 
-        final Annotation sig = Annotation.get(name);
+        final Annotation def = Annotation.get(name);
         // check if annotation is a pre-defined one
-        if(sig == null) {
+        if(def == null) {
           // reject unknown annotations with pre-defined namespaces, ignore others
           final byte[] uri = name.uri();
           if(NSGlobal.prefix(uri).length != 0 && !eq(uri, LOCAL_URI, ERROR_URI)) {
             throw (NSGlobal.reserved(uri) ? ANNWHICH_X_X : BASEX_ANNOTATION1_X_X).get(
                 ii, '%', name.string());
           }
-          ann = new Ann(ii, name, items.finish());
+          ann = new Ann(ii, name, items.value());
 
         } else {
           // check if annotation is specified more than once
-          if(sig.single && anns.contains(sig)) throw BASEX_ANNOTATION3_X_X.get(ii, '%', sig.id());
+          if(def.single && anns.contains(def)) throw BASEX_ANNOTATION3_X_X.get(ii, '%', def.id());
 
           final long arity = items.size();
-          if(arity < sig.minMax[0] || arity > sig.minMax[1])
-            throw BASEX_ANNOTATION2_X_X.get(ii, sig, arguments(arity));
-          final int al = sig.args.length;
+          if(arity < def.minMax[0] || arity > def.minMax[1])
+            throw BASEX_ANNOTATION2_X_X.get(ii, def, arguments(arity));
+          final int al = def.params.length;
           for(int a = 0; a < arity; a++) {
-            final SeqType st = sig.args[Math.min(al - 1, a)];
+            final SeqType st = def.params[Math.min(al - 1, a)];
             final Item item = items.get(a);
-            if(!st.instance(item)) throw BASEX_ANNOTATION_X_X_X.get(ii, sig, st, item.seqType());
+            if(!st.instance(item)) throw BASEX_ANNOTATION_X_X_X.get(ii, def, st, item.seqType());
           }
-          ann = new Ann(ii, sig, items.finish());
+          ann = new Ann(ii, def, items.value());
         }
       } else {
         break;
       }
 
       anns.add(ann);
-      if(ann.sig == Annotation.UPDATING) qc.updating();
+      if(ann.definition == Annotation.UPDATING) qc.updating();
     }
     skipWs();
     return anns;
@@ -1592,7 +1592,7 @@ public class QueryParser extends InputParser {
     while(true) {
       final boolean is = wsConsumeWs(INTERSECT);
       if(!is && !wsConsumeWs(EXCEPT)) break;
-      if((is != lastIs) && el != null) {
+      if(is != lastIs && el != null) {
         ex = intersectExcept(lastIs, el);
         el = null;
       }
@@ -3569,12 +3569,11 @@ public class QueryParser extends InputParser {
         opt.set(ST, using);
       } else if(wsConsumeWs(THESAURUS)) {
         if(opt.th != null) throw error(FTDUP_X, THESAURUS);
-        opt.th = new ThesQuery();
+        opt.th = new ThesList();
         if(using) {
           final boolean par = wsConsume(PAREN1);
           if(!wsConsumeWs(DEFAULT)) ftThesaurusID(opt.th);
-          while(par && wsConsume(COMMA))
-            ftThesaurusID(opt.th);
+          while(par && wsConsume(COMMA)) ftThesaurusID(opt.th);
           if(par) wsCheck(PAREN2);
         }
       } else if(wsConsumeWs(STOP)) {
@@ -3635,10 +3634,10 @@ public class QueryParser extends InputParser {
 
   /**
    * Parses the "FTThesaurusID" rule.
-   * @param thes link to thesaurus
+   * @param queries thesaurus queries
    * @throws QueryException query exception
    */
-  private void ftThesaurusID(final ThesQuery thes) throws QueryException {
+  private void ftThesaurusID(final ThesList queries) throws QueryException {
     wsCheck(AT);
 
     final String fn = string(stringLiteral());
@@ -3653,7 +3652,7 @@ public class QueryParser extends InputParser {
       min = ((ANum) range[0]).itr();
       max = ((ANum) range[1]).itr();
     }
-    thes.add(new Thesaurus(fl, rel, min, max, qc.context));
+    queries.add(new ThesAccessor(fl, rel, min, max, info()));
   }
 
   /**

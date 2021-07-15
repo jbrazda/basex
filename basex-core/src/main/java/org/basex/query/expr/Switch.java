@@ -70,11 +70,7 @@ public final class Switch extends ParseExpr {
     if(expr != this) return cc.replaceWith(this, expr);
 
     // combine types of return expressions
-    final int gl = groups.length;
-    SeqType st = groups[0].seqType();
-    for(int g = 1; g < gl; g++) st = st.union(groups[g].seqType());
-    exprType.assign(st);
-
+    exprType.assign(SeqType.union(groups, true));
     return this;
   }
 
@@ -320,12 +316,12 @@ public final class Switch extends ParseExpr {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this), cond, groups);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token(SWITCH).paren(cond).tokens(groups);
   }
 }

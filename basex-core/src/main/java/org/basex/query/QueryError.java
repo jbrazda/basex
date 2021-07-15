@@ -496,7 +496,7 @@ public enum QueryError {
   // Web Module
 
   /** Error code. */
-  WEB_INVALID1_X(WEB, "invalid", "URL contains invalid characters: %"),
+  WEB_INVALID1_X(WEB, "invalid", "URL contains invalid character: &#%;"),
   /** Error code. */
   WEB_INVALID2_X(WEB, "invalid", "%."),
   /** Error code. */
@@ -547,7 +547,7 @@ public enum QueryError {
   // W3 Functions
 
   /** Error code. */
-  APPLY_X_X(FOAP, 1, "Arity differs from number of array members: % vs. %"),
+  APPLY_X_X(FOAP, 1, "% supplied to %: %."),
 
   /** Error code. */
   DIVZERO_X(FOAR, 1, "% cannot be divided by zero."),
@@ -775,7 +775,7 @@ public enum QueryError {
   /** Error code. */
   FTNOTOK_X(FTST, 9, "No tokenizer available for language '%'."),
   /** Error code. */
-  NOTHES_X(FTST, 18, "Thesaurus not found: '%'."),
+  NOTHES_X(FTST, 18, "Thesaurus not found: %."),
   /** Error code. */
   FTDUP_X(FTST, 19, "Match option '%' is declared twice."),
 
@@ -1016,14 +1016,15 @@ public enum QueryError {
   FUNCNOIMPL_X(XPST, 17, "External function not implemented: %."),
   /** Error code. */
   WHICHCLASS_X(XPST, 17, "Unknown class: %."),
+
   /** Error code. */
   JAVACONSTR_X_X(XPST, 17, "Unknown constructor: %#%."),
-  /** Error code. */
-  JAVAMULTIFUNC_X_X(XPST, 17, "%: Multiple functions with %."),
   /** Error code. */
   JAVAARGS_X_X(XPST, 17, "% cannot be called with (%)."),
   /** Error code. */
   JAVAINIT_X_X(XPST, 17, "%: %."),
+  /** Error code. */
+  JAVAARGS_X_X_X(XPST, 17, "%(%) expected, (%) found."),
 
   /** Error code. */
   TYPEUNKNOWN_X(XPST, 51, "Unknown type: %."),
@@ -1035,20 +1036,24 @@ public enum QueryError {
   NSMISS_X(XPST, 81, "QName '%' has no namespace."),
 
   /** Error code. */
-  DYNARGS_X_X(XPTY, 4, "% cannot be called with (%)."),
-  /** Error code. */
-  DYNMULTIFUNC_X_X(XPTY, 4, "%: Multiple functions with %."),
-  /** Error code. */
-  DYNMULTICONS_X_X(XPTY, 4, "%: Multiple constructors with %."),
-  /** Error code. */
-  JAVAARGS_X_X_X(XPTY, 4, "%(%) expected, (%) found."),
-  /** Error code. */
   JAVAINVOKE_X_X(XPTY, 4, "% instance expected as first argument, % found."),
   /** Error code. */
   JAVAEVAL_X_X_X(XPTY, 4, "%. Caused by: %(%)."),
+  /** Error code. */
+  JAVANULL(XPTY, 17, "Java array contains null values."),
+  /** Error code. */
+  JAVAMULTICONS_X_X_X(XPTY, 4, "%: % constructors with % found."),
+  /** Error code. */
+  JAVAMULTIMETH_X_X_X(XPTY, 4, "%: % methods with % found."),
+  /** Error code. */
+  JAVACONS_X_X_X(XPTY, 4, "None of the % % constructors can be called with (%)."),
+  /** Error code. */
+  JAVAMETH_X_X_X(XPTY, 4, "None of the % % methods can be called with (%)."),
+  /** Error code. */
+  JAVACONVERT_X_X(CONVERT, "java", "Java class % cannot be converted: %."),
 
   /** Error code. */
-  ZEROFUNCS_X_X(XPTY, 4, "Zero-arity functions expected, % found: %."),
+  ZEROFUNCS_X_X(XPTY, 4, "Function with 0 arguments expected, % found: %."),
   /** Error code. */
   NONAME_X(XPTY, 4, "Name expected, '%' found."),
   /** Error code. */
@@ -1247,17 +1252,17 @@ public enum QueryError {
   /** Error code. */
   NSEMPTYURI(XQST, 85, "Namespace URI cannot be empty."),
   /** Error code. */
-  XQUERYENC2_X(XQST, 87, "Unknown encoding '%'."),
+  XQUERYENC2_X(XQST, 87, "Unknown encoding: %."),
   /** Error code. */
   NSMODURI(XQST, 88, "Module namespace cannot be empty."),
   /** Error code. */
   DUPLVAR_X(XQST, 89, "Duplicate declaration of %."),
   /** Error code. */
-  INVCHARREF_X(XQST, 90, "Invalid character reference '%'."),
+  INVCHARREF_X(XQST, 90, "Invalid XML 1.0 character: %."),
   /** Error code. */
   CIRCMODULE(XQST, 93, "Circular module declaration."),
   /** Error code. */
-  GVARNOTDEFINED_X(XQST, 94, "Undeclared grouping variable '%'."),
+  GVARNOTDEFINED_X(XQST, 94, "Undeclared grouping variable: %."),
   /** Error code. */
   INVDECFORM_X_X(XQST, 97, "Invalid decimal-format property: %='%'."),
   /** Error code. */

@@ -19,7 +19,7 @@ import org.basex.util.*;
  * @author Christian Gruen
  */
 public final class Empty extends Item {
-  /** Single instance. */
+  /** Singleton instance. */
   public static final Empty VALUE = new Empty();
   /** Empty iterator. */
   public static final BasicIter<Item> ITER = new BasicIter<Item>(0) {
@@ -60,7 +60,7 @@ public final class Empty extends Item {
 
   @Override
   public Object toJava() {
-    return new Object[0];
+    return null;
   }
 
   @Override
@@ -131,12 +131,12 @@ public final class Empty extends Item {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this));
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.paren("");
   }
 }

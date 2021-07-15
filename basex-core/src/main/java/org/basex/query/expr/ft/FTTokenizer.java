@@ -27,8 +27,6 @@ public final class FTTokenizer {
   private final TokenObjMap<FTWildcard> wcCache = new TokenObjMap<>();
   /** Token cache. */
   private final TokenObjMap<FTTokens> cache = new TokenObjMap<>();
-  /** Input info. */
-  private final InputInfo info;
   /** Full-text options. */
   private final FTOpt opt;
 
@@ -47,7 +45,6 @@ public final class FTTokenizer {
    */
   FTTokenizer(final FTOpt opt, final int errors, final InputInfo info) {
     this.opt = opt;
-    this.info = info;
 
     cmp = (in, qu) -> {
       final Levenshtein ls = opt.is(FZ) ? new Levenshtein(
@@ -97,7 +94,7 @@ public final class FTTokenizer {
 
       // if thesaurus is required, add the terms which extend the query:
       if(opt.th != null) {
-        for(final byte[] thes : opt.th.find(info, input)) {
+        for(final byte[] thes : opt.th.find(input)) {
           // parse each extension term to a set of tokens:
           final TokenList tl = new TokenList(1);
           lexer.init(thes);

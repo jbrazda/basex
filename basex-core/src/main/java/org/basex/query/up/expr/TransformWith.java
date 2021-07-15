@@ -110,7 +110,7 @@ public final class TransformWith extends Arr {
   @Override
   public VarUsage count(final Var var) {
     // context reference check: only consider source expression
-    return var == null ? exprs[0].count(var) : super.count(var);
+    return var == null ? exprs[0].count(null) : super.count(var);
   }
 
   @Override
@@ -147,7 +147,7 @@ public final class TransformWith extends Arr {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token(exprs[0]).token(UPDATE).brace(exprs[1]);
   }
 }

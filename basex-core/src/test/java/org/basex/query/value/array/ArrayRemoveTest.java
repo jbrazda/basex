@@ -18,7 +18,7 @@ import org.junit.jupiter.api.*;
 public final class ArrayRemoveTest extends ArrayTest {
   /** Remove one element from singleton array. */
   @Test public void singletonTest() {
-    final XQArray singleton = XQArray.singleton(Int.get(42));
+    final XQArray singleton = XQArray.member(Int.get(42));
     assertSame(XQArray.empty(), singleton.remove(0, qc));
   }
 
@@ -196,7 +196,9 @@ public final class ArrayRemoveTest extends ArrayTest {
     final ArrayList<Value> list = new ArrayList<>(n);
     for(int i = 0; i < n; i++) list.add(Int.get(i));
 
-    XQArray arr = XQArray.from(list.toArray(new Value[0]));
+    final ArrayBuilder builder = new ArrayBuilder();
+    for(final Value value : list) builder.append(value);
+    XQArray arr = builder.array();
 
     final Random rng = new Random(42);
     for(int i = 0; i < n; i++) {
@@ -248,7 +250,7 @@ public final class ArrayRemoveTest extends ArrayTest {
   private static XQArray from(final int... vals) {
     final ArrayBuilder builder = new ArrayBuilder();
     for(final int v : vals) builder.append(Int.get(v));
-    return builder.freeze();
+    return builder.array();
   }
 
   /**

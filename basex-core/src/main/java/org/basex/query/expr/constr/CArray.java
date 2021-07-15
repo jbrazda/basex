@@ -35,10 +35,13 @@ public final class CArray extends Arr {
   @Override
   public Expr optimize(final CompileContext cc) throws QueryException {
     SeqType dt = null;
-    for(final Expr expr : exprs) {
-      SeqType st = expr.seqType();
-      if(!seq) st = st.with(Occ.EXACTLY_ONE);
-      dt = dt == null ? st : dt.union(st);
+    if(seq) {
+      dt = SeqType.union(exprs, true);
+    } else {
+      for(final Expr expr : exprs) {
+        final SeqType st = expr.seqType().with(Occ.EXACTLY_ONE);
+        dt = dt == null ? st : dt.union(st);
+      }
     }
     if(dt != null) exprType.assign(ArrayType.get(dt));
 
@@ -47,18 +50,21 @@ public final class CArray extends Arr {
 
   @Override
   public XQArray item(final QueryContext qc, final InputInfo ii) throws QueryException {
+    // create array with single member
+    if(exprs.length == 1 && (seq || exprs[0].size() == 1)) {
+      return XQArray.member(exprs[0].value(qc));
+    }
+
     final ArrayBuilder builder = new ArrayBuilder();
-    if(seq) {
-      for(final Expr expr : exprs) {
+    for(final Expr expr : exprs) {
+      if(seq) {
         builder.append(expr.value(qc));
-      }
-    } else {
-      for(final Expr expr : exprs) {
+      } else {
         final Iter iter = expr.iter(qc);
         for(Item item; (item = qc.next(iter)) != null;) builder.append(item);
       }
     }
-    return builder.freeze();
+    return builder.array(this);
   }
 
   @Override
@@ -77,7 +83,7 @@ public final class CArray extends Arr {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token(seq ? "[ " : ARRAY + " { ").tokens(exprs, SEP).token(seq ? " ]" : " }");
   }
 }

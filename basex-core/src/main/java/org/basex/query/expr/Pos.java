@@ -21,7 +21,7 @@ import org.basex.util.hash.*;
  * @author BaseX Team 2005-21, BSD License
  * @author Christian Gruen
  */
-public final class Pos extends Arr implements CmpPos {
+final class Pos extends Arr implements CmpPos {
   /**
    * Constructor.
    * @param info input info
@@ -184,12 +184,12 @@ public final class Pos extends Arr implements CmpPos {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this), exprs);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.function(Function.POSITION).token("=").token(exprs[0]);
     if(!exact()) qs.token(TO).token(exprs[1]);
   }

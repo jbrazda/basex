@@ -27,9 +27,9 @@ import org.basex.util.hash.*;
  */
 public final class GFLWOR extends ParseExpr {
   /** FLWOR clauses. */
-  public final LinkedList<Clause> clauses;
+  private final LinkedList<Clause> clauses;
   /** Return expression. */
-  public Expr rtrn;
+  private Expr rtrn;
 
   /**
    * Constructor.
@@ -1099,12 +1099,12 @@ public final class GFLWOR extends ParseExpr {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this), clauses.toArray(new Clause[0]), rtrn);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token("(").tokens(clauses.toArray()).token(QueryText.RETURN).token(rtrn).token(')');
   }
 

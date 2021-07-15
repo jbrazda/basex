@@ -83,15 +83,13 @@ public final class List extends Arr {
     if(e == el) return el == 1 ? exprs[0] : cc.replicate(exprs[0], Int.get(el), info);
 
     // determine result type, compute number of results, set expression type
-    SeqType st = null;
+    final SeqType st = SeqType.union(exprs, false);
     Occ occ = Occ.ZERO;
     long size = 0;
     for(final Expr expr : exprs) {
-      final SeqType st2 = expr.seqType();
-      if(!st2.zero()) st = st == null ? st2 : st.union(st2);
       final long sz = expr.size();
       if(size != -1) size = sz == -1 ? -1 : size + sz;
-      occ = occ.add(st2.occ);
+      occ = occ.add(expr.seqType().occ);
     }
     exprType.assign(st != null ? st : SeqType.EMPTY_SEQUENCE_Z, occ, size);
 
@@ -206,9 +204,8 @@ public final class List extends Arr {
   @Override
   public Value value(final QueryContext qc) throws QueryException {
     // special case: concatenate two sequences
-    if(exprs.length == 2) {
-      return ValueBuilder.concat(exprs[0].value(qc), exprs[1].value(qc), qc);
-    }
+    if(exprs.length == 2) return ValueBuilder.concat(exprs[0].value(qc), exprs[1].value(qc), qc);
+
     // general case: concatenate all sequences
     final ValueBuilder vb = new ValueBuilder(qc);
     for(final Expr expr : exprs) vb.add(expr.value(qc));
@@ -257,7 +254,7 @@ public final class List extends Arr {
    * If possible, rewrites the list to a distinct range expression.
    * @return range or original expression
    */
-  public Expr toDistinctRange() {
+  private Expr toDistinctRange() {
     long start = 0, end = 0;
     final LongList list = new LongList(2);
     for(final Expr ex : exprs) {
@@ -308,7 +305,7 @@ public final class List extends Arr {
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.params(exprs);
   }
 }

@@ -129,7 +129,7 @@ public final class Window extends Clause {
             }
 
             start.bind(qc, st[0], ps, st[1], st[2]);
-            qc.set(var, vb.value());
+            qc.set(var, vb.value(Window.this));
             return true;
           }
 
@@ -165,7 +165,7 @@ public final class Window extends Clause {
 
             // don't return dangling items if the {@code only} flag was specified
             if(found || !only) {
-              qc.set(var, vb.value());
+              qc.set(var, vb.value(Window.this));
               return true;
             }
           }
@@ -222,7 +222,7 @@ public final class Window extends Clause {
             if(!(it == null && only)) {
               start.bind(qc, curr, pos, prev, next);
               prev = curr;
-              qc.set(var, vb.value());
+              qc.set(var, vb.value(Window.this));
               return true;
             }
           }
@@ -336,13 +336,13 @@ public final class Window extends Clause {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     final FElem elem = plan.attachVariable(plan.create(this, SLIDING, sliding), var, false);
     plan.add(elem, start, end, expr);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token(FOR).token(sliding ? SLIDING : TUMBLING).token(WINDOW).token(var).token(IN).
       token(expr).token(start);
     if(end != null) {

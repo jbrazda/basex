@@ -157,19 +157,15 @@ public final class CmpIR extends Single {
 
   @Override
   public Expr mergeEbv(final Expr ex, final boolean or, final CompileContext cc) {
-    if(!(ex instanceof CmpIR)) return null;
-
-    // do not merge if expressions to be compared are different
-    final CmpIR cmp = (CmpIR) ex;
-    if(!expr.equals(cmp.expr)) return null;
-
-    // do not merge if ranges are exclusive
-    if(or && (max < cmp.min || cmp.max < min)) return null;
-
-    // merge min and max values
-    final long mn = or ? Math.min(min, cmp.min) : Math.max(min, cmp.min);
-    final long mx = or ? Math.max(max, cmp.max) : Math.min(max, cmp.max);
-    return get(expr, mn, mx, info);
+    if(ex instanceof CmpIR) {
+      final CmpIR cmp = (CmpIR) ex;
+      if(expr.equals(cmp.expr) && (!or || max >= cmp.min && min <= cmp.max)) {
+        final long mn = or ? Math.min(min, cmp.min) : Math.max(min, cmp.min);
+        final long mx = or ? Math.max(max, cmp.max) : Math.min(max, cmp.max);
+        return get(expr, mn, mx, info);
+      }
+    }
+    return null;
   }
 
   @Override
@@ -193,12 +189,12 @@ public final class CmpIR extends Single {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this, MIN, min, MAX, max, SINGLE, single), expr);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     qs.token(expr);
     if(min == max) {
       qs.token("=").token(min);

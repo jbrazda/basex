@@ -1,3 +1,4 @@
+
 package org.basex.query.func;
 
 import static org.basex.query.QueryError.*;
@@ -10,9 +11,7 @@ import org.basex.query.expr.*;
 import org.basex.query.util.*;
 import org.basex.query.util.list.*;
 import org.basex.query.value.*;
-import org.basex.query.value.array.XQArray;
 import org.basex.query.value.item.*;
-import org.basex.query.value.map.XQMap;
 import org.basex.query.value.type.*;
 import org.basex.query.var.*;
 import org.basex.util.*;
@@ -86,9 +85,7 @@ public final class DynFuncCall extends FuncCall {
     }
 
     // maps and arrays can only contain evaluated values, so this is safe
-    if((func instanceof XQMap || func instanceof XQArray) && allAreValues(false)) {
-      return cc.preEval(this);
-    }
+    if(func instanceof XQData && allAreValues(false)) return cc.preEval(this);
 
     if(func instanceof XQFunctionExpr) {
       // try to inline the function
@@ -141,7 +138,7 @@ public final class DynFuncCall extends FuncCall {
    * Returns the function body expression.
    * @return body
    */
-  public Expr body() {
+  private Expr body() {
     return exprs[exprs.length - 1];
   }
 
@@ -201,12 +198,12 @@ public final class DynFuncCall extends FuncCall {
   }
 
   @Override
-  public void plan(final QueryPlan plan) {
+  public void toXml(final QueryPlan plan) {
     plan.add(plan.create(this, TAILCALL, tco), exprs);
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     final int el = exprs.length - 1;
     qs.token(exprs[el]).token('(');
     for(int e = 0; e < el; e++) {

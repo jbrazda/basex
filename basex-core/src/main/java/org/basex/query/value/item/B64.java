@@ -113,6 +113,7 @@ public class B64 extends Bin {
     try {
       return Base64.decode(item.string(ii));
     } catch(final IllegalArgumentException ex) {
+      Util.debug(ex);
       throw AtomType.BASE64_BINARY.castError(item, ii);
     }
   }
@@ -128,12 +129,13 @@ public class B64 extends Bin {
     try {
       return Base64.decode(value);
     } catch(final IllegalArgumentException ex) {
+      Util.debug(ex);
       throw AtomType.BASE64_BINARY.castError(value, ii);
     }
   }
 
   @Override
-  public void plan(final QueryString qs) {
+  public void toString(final QueryString qs) {
     final TokenBuilder tb = new TokenBuilder().add('"');
     if(data.length > 128) {
       tb.add(Base64.encode(Arrays.copyOf(data, 128))).add(Text.DOTS);

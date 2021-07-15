@@ -405,8 +405,9 @@ public abstract class StandardFunc extends Arr {
     try {
       final String enc = string(toToken(exprs[i], qc));
       if(Charset.isSupported(enc)) return Strings.normEncoding(enc);
-    } catch(final IllegalArgumentException ignored) {
-      /* character set is invalid or unknown (e.g. empty string) */
+    } catch(final IllegalArgumentException ex) {
+      // character set is invalid or unknown (e.g. empty string)
+      Util.debug(ex);
     }
     throw err.get(info, QueryError.similar(encoding,
         Levenshtein.similar(encoding, Strings.encodings())));
@@ -453,7 +454,7 @@ public abstract class StandardFunc extends Arr {
     final int el = exprs.length;
     if(i < el) {
       final Item item = exprs[i].item(qc, info);
-      final XQMap map = item == Empty.VALUE ? XQMap.EMPTY : toMap(item);
+      final XQMap map = item == Empty.VALUE ? XQMap.empty() : toMap(item);
       for(final Item it : map.keys()) {
         final byte[] key;
         if(it.type.isStringOrUntyped()) {
@@ -581,12 +582,12 @@ public abstract class StandardFunc extends Arr {
   }
 
   @Override
-  public final void plan(final QueryPlan plan) {
+  public final void toXml(final QueryPlan plan) {
     plan.add(plan.create(this, NAME, definition.id()), exprs);
   }
 
   @Override
-  public final void plan(final QueryString qs) {
+  public final void toString(final QueryString qs) {
     qs.token(definition.id()).params(exprs);
   }
 }

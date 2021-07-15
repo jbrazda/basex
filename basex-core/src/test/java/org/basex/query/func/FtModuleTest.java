@@ -137,6 +137,8 @@ public final class FtModuleTest extends SandboxTest {
 
     query("ft:normalize('&#778;', map { 'stemming': true(), 'language': 'de' })", "");
     query("'/' ! " + func.args(" ."), "/");
+
+    query("ft:normalize('a*', map { 'stemming': true(), 'language': 'de' })", "a*");
   }
 
   /** Test method. */
@@ -189,6 +191,18 @@ public final class FtModuleTest extends SandboxTest {
     error(func.args(NAME, "x", " map { 'x': 'y' }"), INVALIDOPT_X);
     error(func.args(NAME, "x", " map { 'mode': '' }"), INVALIDOPT_X);
     error(func.args(NAME, "x", " 1"), MAP_X_X);
+  }
+
+  /** Test method. */
+  @Test public void thesaurus() {
+    final Function func = _FT_THESAURUS;
+    final String doc = " doc('src/test/resources/thesaurus.xml')";
+
+    query(func.args(doc, "happy"), "lucky\nhappy");
+    query(func.args(doc, "happy", " map { 'levels': 0 }"), "");
+    query(func.args(doc, "happy", " map { 'levels': 5 }"), "lucky\nhappy");
+    query(func.args(doc, "happy", " map { 'relationship': 'RT' }"), "lucky\nhappy");
+    query(func.args(doc, "happy", " map { 'relationship': 'XYZ' }"), "");
   }
 
   /** Test method. */
